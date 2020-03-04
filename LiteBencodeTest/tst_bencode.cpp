@@ -30,7 +30,17 @@ bencode::~bencode() {
 }
 
 void bencode::initTestCase() {
-
+	QFile listReadTest("testListRead");
+	listReadTest.open(QFile::WriteOnly | QFile::Truncate);
+	listReadTest.write("li8e3:123li6e3:321ee");
+	listReadTest.close();
+	QFile listWriteTest("testListRead");
+	listWriteTest.open(QFile::NewOnly | QFile::WriteOnly);
+	listWriteTest.close();
+	QFile liteTest("testLiteBencode");
+	liteTest.open(QFile::WriteOnly | QFile::Truncate);
+	liteTest.write("timchukli8e3:123li6e3:321ee");
+	liteTest.close();
 }
 
 void bencode::test_bString() {
@@ -79,6 +89,55 @@ void bencode::test_bInteger() {
 }
 
 void bencode::test_bReadableList() {
+	BListReadable readable;
+	QFile listReadTest("testListRead");
+	listReadTest.open(QFile::ReadOnly);
+	// "li8e3:123li6e3:321ee"
+	readable.setFileReadable(&listReadTest, 0);
+	//
+	QVERIFY(readable.hasNextToken());
+	BElement *el = readable.nextToken();
+	QCOMPARE(el->getType(), BElementType::bInteger);
+	BInteger *integ = dynamic_cast<BInteger*>(el);
+	QCOMPARE(integ->getValue(), 8);
+	el->deleteLater();
+	//
+	QVERIFY(readable.hasNextToken());
+	el = readable.nextToken();
+	QCOMPARE(el->getType(), BElementType::bString);
+	BString *str = dynamic_cast<BString*>(el);
+	QCOMPARE(str->getValue(), QByteArray().append("123"));
+	el->deleteLater();
+	// li6e3:321e
+	QVERIFY(readable.hasNextToken());
+	el = readable.nextToken();
+	QCOMPARE(el->getType(), BElementType::bList);
+	BListReadable *ls = dynamic_cast<BListReadable*>(el);
+	//
+	QVERIFY(ls->hasNextToken());
+	el = ls->nextToken();
+	QCOMPARE(el->getType(), BElementType::bInteger);
+	integ = dynamic_cast<BInteger*>(el);
+	QCOMPARE(integ->getValue(), 6);
+	el->deleteLater();
+	//
+	QVERIFY(ls->hasNextToken());
+	el = ls->nextToken();
+	QCOMPARE(el->getType(), BElementType::bString);
+	str = dynamic_cast<BString*>(el);
+	QCOMPARE(str->getValue(), QByteArray().append("321"));
+	el->deleteLater();
+	//
+	QVERIFY(!ls->nextToken());
+	ls->toFirstToken();
+	QVERIFY(ls->nextToken());
+	el = ls->nextToken();
+	QCOMPARE(el->getType(), BElementType::bInteger);
+	integ = dynamic_cast<BInteger*>(el);
+	QCOMPARE(integ->getValue(), 6);
+	listReadTest.close();
+	el->deleteLater();
+	ls->deleteLater();
 }
 
 void bencode::test_bWritableList() {
@@ -88,7 +147,12 @@ void bencode::test_liteBencode() {
 }
 
 void bencode::cleanupTestCase() {
-
+	QFile listReadTest("testListRead");
+	listReadTest.remove();
+	QFile listWriteTest("testListRead");
+	listWriteTest.remove();
+	QFile liteTest("testLiteBencode");
+	liteTest.remove();
 }
 
 

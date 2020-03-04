@@ -2,6 +2,7 @@
 #define BELEMENT_H
 
 #include <qfile.h>
+#include <QDebug>
 
 #include "LiteBencode_global.h"
 #include <QObject>

@@ -13,10 +13,8 @@ Q_OBJECT
 	bool baseFile;
 public:
 	LiteBencode(QFile *file, QObject *parent = nullptr);
-
+	~LiteBencode();
 	bool isBaseFile() const;
-
-	static bool validateFile();
 
 	BListReadable* getReadableRoot();
 	BListWritable* getWritableRoot();

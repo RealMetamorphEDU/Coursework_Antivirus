@@ -115,6 +115,7 @@ BElement* BListReadable::nextToken() {
 					file->read(&start, 1);
 					data.append(start);
 				}
+				;
 				BInteger *integer;
 				integer = new BInteger(this);
 				integer->setValue(data.toInt());
@@ -148,7 +149,7 @@ bool BListReadable::hasNextToken() {
 			closed = true;
 		}
 	}
-	return closed;
+	return !closed;
 }
 
 void BListReadable::toFirstToken() {

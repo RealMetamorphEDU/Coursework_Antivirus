@@ -20,12 +20,14 @@ LiteBencode::LiteBencode(QFile *file, QObject *parent) : QObject(parent) {
 		baseFile = false;
 }
 
-bool LiteBencode::isBaseFile() const {
-	return baseFile;
+LiteBencode::~LiteBencode() {
+	if (file->isOpen()) {
+		file->close();
+	}
 }
 
-bool LiteBencode::validateFile() {
-	return false;
+bool LiteBencode::isBaseFile() const {
+	return baseFile;
 }
 
 BListReadable* LiteBencode::getReadableRoot() {
