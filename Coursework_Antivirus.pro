@@ -2,9 +2,11 @@ TEMPLATE = subdirs
 
 
 SUBDIRS += \
+    ABRecordTokenizer \
+    ABRecordTokenizerTest \
     LiteBencodeTest \
     LiteBencode\
-    AB_Editor
+    ABEditor
 
 HEADERS +=
 
