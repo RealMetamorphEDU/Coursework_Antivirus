@@ -2,13 +2,11 @@
 #define BELEMENT_H
 
 #include <qfile.h>
-#include <QDebug>
-
 #include "LiteBencode_global.h"
 #include <QObject>
 
 enum class BElementType {
-	bList,
+	bList = 0,
 	bListWritable,
 	bString,
 	bInteger
@@ -55,6 +53,7 @@ public:
 
 	void setFileReadable(QFile *file, int offset);
 
+	qint64 getOffset();
 };
 
 class LITEBENCODE_EXPORT BString: public BElement {

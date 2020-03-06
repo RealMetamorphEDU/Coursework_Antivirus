@@ -34,9 +34,6 @@ void bencode::initTestCase() {
 	listReadTest.open(QFile::WriteOnly | QFile::Truncate);
 	listReadTest.write("li8e3:123li6e3:321ee");
 	listReadTest.close();
-	QFile listWriteTest("testListRead");
-	listWriteTest.open(QFile::NewOnly | QFile::WriteOnly);
-	listWriteTest.close();
 	QFile liteTest("testLiteBencode");
 	liteTest.open(QFile::WriteOnly | QFile::Truncate);
 	liteTest.write("timchukli8e3:123li6e3:321ee");
@@ -128,9 +125,9 @@ void bencode::test_bReadableList() {
 	QCOMPARE(str->getValue(), QByteArray().append("321"));
 	el->deleteLater();
 	//
-	QVERIFY(!ls->nextToken());
+	QVERIFY(!ls->hasNextToken());
 	ls->toFirstToken();
-	QVERIFY(ls->nextToken());
+	QVERIFY(ls->hasNextToken());
 	el = ls->nextToken();
 	QCOMPARE(el->getType(), BElementType::bInteger);
 	integ = dynamic_cast<BInteger*>(el);
@@ -141,9 +138,62 @@ void bencode::test_bReadableList() {
 }
 
 void bencode::test_bWritableList() {
+	QFile listWriteTest("testListRead");
+	listWriteTest.open(QFile::ReadWrite | QFile::Truncate);
+	BListWritable writable(this);
+	QVERIFY(!writable.closeList());
+	writable.setFileWritable(&listWriteTest);
+	BInteger integ;
+	integ.setValue(63279);
+	QVERIFY(writable.writeElement(&integ));
+	BListWritable wr2;
+	QVERIFY(!wr2.writeElement(&integ));
+	QVERIFY(writable.writeElement(&wr2));
+	integ.setValue(2332);
+	QVERIFY(wr2.writeElement(&integ));
+	BString str;
+	str.setValue(QByteArray().append("43255123"));
+	QVERIFY(!writable.writeElement(&str));
+	QVERIFY(wr2.writeElement(&str));
+	QVERIFY(wr2.closeList());
+	QVERIFY(!wr2.closeList());
+	str.setValue(QByteArray().append("22413"));
+	QVERIFY(writable.writeElement(&str));
+	QVERIFY(writable.closeList());
+	listWriteTest.seek(0);
+	QCOMPARE(listWriteTest.readAll(), QByteArray().append("li63279eli2332e8:43255123e5:22413e"));
+	listWriteTest.close();
 }
 
 void bencode::test_liteBencode() {
+	QFile liteTest("testLiteBencode");
+	LiteBencode *lc = new LiteBencode(&liteTest, &liteTest);
+	QVERIFY(lc->isBaseFile());
+	BListReadable *readable = lc->getReadableRoot();
+	QCOMPARE(readable->getType(), BElementType::bList);
+	BListWritable *writable = lc->getWritableRoot();
+	QCOMPARE(writable->getType(), BElementType::bListWritable);
+	liteTest.close();
+	liteTest.open(QFile::Truncate | QFile::ReadWrite);
+	liteTest.close();
+	lc = new LiteBencode(&liteTest, &liteTest);
+	QVERIFY(lc->isBaseFile());
+	liteTest.seek(0);
+	liteTest.write("iugyuitfyrugdrutdgybnukuy");
+	liteTest.close();
+	lc = new LiteBencode(&liteTest, &liteTest);
+	QVERIFY(!lc->isBaseFile());
+	readable = lc->getReadableRoot();
+	QCOMPARE(readable, nullptr);
+	writable = lc->getWritableRoot();
+	QVERIFY(writable);
+	QVERIFY(lc->isBaseFile());
+	writable->closeList();
+	liteTest.close();
+	readable = lc->getReadableRoot();
+	QCOMPARE(readable, nullptr);
+	writable = lc->getWritableRoot();
+	QCOMPARE(writable, nullptr);
 }
 
 void bencode::cleanupTestCase() {

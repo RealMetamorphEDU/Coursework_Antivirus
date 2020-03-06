@@ -29,11 +29,18 @@ bool BListWritable::writeElement(BElement *element) {
 	if (opened && !closed) {
 		switch (element->getType()) {
 			case BElementType::bListWritable:
-				BListWritable *list;
-				list = dynamic_cast<BListWritable*>(element);
-				list->setFileWritable(file);
-				inheritOpen = true;
-				inheritList = list;
+				if (inheritOpen && inheritList->closed) {
+					inheritOpen = false;
+					inheritList = nullptr;
+				}
+				if (!inheritOpen) {
+					BListWritable *list;
+					list = dynamic_cast<BListWritable*>(element);
+					list->setFileWritable(file);
+					inheritOpen = true;
+					inheritList = list;
+					return true;
+				}
 				break;
 			case BElementType::bInteger:
 				if (inheritOpen && inheritList->closed) {
@@ -44,6 +51,7 @@ bool BListWritable::writeElement(BElement *element) {
 					BInteger *integer;
 					integer = dynamic_cast<BInteger*>(element);
 					file->write(integer->toBencode());
+					return true;
 				}
 				break;
 			case BElementType::bString:
@@ -55,12 +63,12 @@ bool BListWritable::writeElement(BElement *element) {
 					BString *string;
 					string = dynamic_cast<BString*>(element);
 					file->write(string->toBencode());
+					return true;
 				}
 				break;
 			default:
 				return false;
 		}
-		return true;
 	}
 	return false;
 }
@@ -89,6 +97,10 @@ void BListReadable::setFileReadable(QFile *file, int offset) {
 		opened = false;
 }
 
+qint64 BListReadable::getOffset() {
+	return offset;
+}
+
 BListReadable::BListReadable(QObject *parent) : BElement(parent) {
 	closed = false;
 	opened = false;
@@ -111,11 +123,11 @@ BElement* BListReadable::nextToken() {
 				return nullptr;
 			case 'i':
 				file->read(&start, 1);
+				file->read(&start, 1);
 				while (start != 'e') {
-					file->read(&start, 1);
 					data.append(start);
+					file->read(&start, 1);
 				}
-				;
 				BInteger *integer;
 				integer = new BInteger(this);
 				integer->setValue(data.toInt());
@@ -126,9 +138,10 @@ BElement* BListReadable::nextToken() {
 				list->setFileReadable(file, file->pos());
 				return list;
 			default:
+				file->read(&start, 1);
 				while (start != ':') {
-					file->read(&start, 1);
 					data.append(start);
+					file->read(&start, 1);
 				}
 				int len = data.toInt();
 				data.clear();

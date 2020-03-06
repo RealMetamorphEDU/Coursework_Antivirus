@@ -2,7 +2,6 @@
 
 LiteBencode::LiteBencode(QFile *file, QObject *parent) : QObject(parent) {
 	this->file = file;
-	file->setParent(this);
 	file->open(QFile::ReadWrite | QFile::Unbuffered);
 	if (file->isOpen()) {
 		if (file->size() == 0) {
@@ -10,9 +9,11 @@ LiteBencode::LiteBencode(QFile *file, QObject *parent) : QObject(parent) {
 			file->write("li0ee", 5);
 			file->seek(0);
 		}
-		char data[7]{0};
+		char data[8]{0};
+		char dataL;
 		file->read(data, 7);
-		if (!strcmp(this->token, data))
+		file->read(&dataL, 1);
+		if (strcmp(this->token, data) || dataL != 'l')
 			baseFile = false;
 		else
 			baseFile = true;
@@ -31,7 +32,7 @@ bool LiteBencode::isBaseFile() const {
 }
 
 BListReadable* LiteBencode::getReadableRoot() {
-	if (baseFile) {
+	if (baseFile && file->isOpen()) {
 		BListReadable *list = new BListReadable(this);
 		list->setFileReadable(file, 7);
 		return list;
@@ -45,6 +46,7 @@ BListWritable* LiteBencode::getWritableRoot() {
 		file->write(this->token);
 		BListWritable *list = new BListWritable(this);
 		list->setFileWritable(file);
+		baseFile = true;
 		return list;
 	}
 	return nullptr;
