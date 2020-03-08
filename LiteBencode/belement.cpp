@@ -117,7 +117,7 @@ BElement* BListReadable::nextToken() {
         QByteArray data;
         switch (start) {
             case 'e':
-                closed = true;
+                hasNextToken();
                 return nullptr;
             case 'i':
                 file->read(&start, 1);
@@ -129,6 +129,7 @@ BElement* BListReadable::nextToken() {
                 BInteger *integer;
                 integer = new BInteger(this);
                 integer->setValue(data.toInt());
+                hasNextToken();
                 return integer;
             case 'l':
                 BListReadable *list;
@@ -143,9 +144,13 @@ BElement* BListReadable::nextToken() {
                 }
                 int len = data.toInt();
                 data.clear();
-                data = file->read(len);
+                for (int i = 0; i < len; ++i) {
+                    file->read(&start, 1);
+                    data.append(start);
+                }
                 BString *string = new BString(this);
                 string->setValue(data);
+                hasNextToken();
                 return string;
         }
     }
@@ -157,7 +162,13 @@ bool BListReadable::hasNextToken() {
         char start;
         file->peek(&start, 1);
         if (start == 'e') {
+            file->read(&start, 1);
             closed = true;
+            QObject *p = parent();
+            BListReadable *pList = qobject_cast<BListReadable*>(p);
+            if (pList != nullptr) {
+                pList->hasNextToken();
+            }
         }
     }
     return !closed;

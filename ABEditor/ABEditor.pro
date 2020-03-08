@@ -36,3 +36,5 @@ else:win32:CONFIG(debug, debug|release): LIBS += -L$$OUT_PWD/../ABRecordTokenize
 
 INCLUDEPATH += $$PWD/../ABRecordTokenizer
 DEPENDPATH += $$PWD/../ABRecordTokenizer
+INCLUDEPATH += $$PWD/../LiteBencode
+DEPENDPATH += $$PWD/../LiteBencode
