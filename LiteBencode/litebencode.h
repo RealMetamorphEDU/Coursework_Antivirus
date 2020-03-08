@@ -15,7 +15,7 @@ private:
 	const char token[8] = {'t', 'i', 'm', 'c', 'h', 'u', 'k', 0};
 	bool baseFile;
 public:
-	LiteBencode(QFile *file, QObject *parent = nullptr);
+	explicit LiteBencode(QFile *file, QObject *parent = nullptr);
 
 	~LiteBencode();
 

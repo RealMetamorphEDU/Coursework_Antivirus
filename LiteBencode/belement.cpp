@@ -184,7 +184,7 @@ QByteArray BString::getValue() const {
 	return value;
 }
 
-void BString::setValue(QByteArray &value) {
+void BString::setValue(const QByteArray &value) {
 	this->value.clear();
 	this->value.push_back(value);
 }

@@ -65,7 +65,7 @@ public:
 
 	QByteArray getValue() const;
 
-	void setValue(QByteArray &value);
+	void setValue(const QByteArray &value);
 
 	QByteArray toBencode() const;
 };
