@@ -11,7 +11,8 @@ ABRecordTokenizer::ABRecordTokenizer(QObject *parent) : QObject(parent) {
 }
 
 ABRecordTokenizer::~ABRecordTokenizer() {
-    currentFile->close();
+    if (currentFile != nullptr)
+        currentFile->close();
 }
 
 void ABRecordTokenizer::setBaseFile(const QString &filename) {
@@ -56,7 +57,7 @@ bool ABRecordTokenizer::isWriting() {
 }
 
 int ABRecordTokenizer::readAll() {
-    if (!reading && writing && currentFile != nullptr) {
+    if (!reading && !writing && currentFile != nullptr) {
         if (!liteBencode->isBaseFile())
             return -1;
         reading = true;
