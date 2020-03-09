@@ -4,7 +4,6 @@ greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 
 CONFIG += c++11
 
-
 # The following define makes your compiler emit warnings if you use
 # any Qt feature that has been marked deprecated (the exact warnings
 # depend on your compiler). Please consult the documentation of the
@@ -36,5 +35,12 @@ else:win32:CONFIG(debug, debug|release): LIBS += -L$$OUT_PWD/../ABRecordTokenize
 
 INCLUDEPATH += $$PWD/../ABRecordTokenizer
 DEPENDPATH += $$PWD/../ABRecordTokenizer
+
+win32:CONFIG(release, debug|release): LIBS += -L$$OUT_PWD/../QHexEdit/release/ -lQHexEdit
+else:win32:CONFIG(debug, debug|release): LIBS += -L$$OUT_PWD/../QHexEdit/debug/ -lQHexEdit
+
+INCLUDEPATH += $$PWD/../QHexEdit
+DEPENDPATH += $$PWD/../QHexEdit
+
 INCLUDEPATH += $$PWD/../LiteBencode
 DEPENDPATH += $$PWD/../LiteBencode

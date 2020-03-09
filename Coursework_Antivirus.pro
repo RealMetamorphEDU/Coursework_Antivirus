@@ -2,11 +2,13 @@ TEMPLATE = subdirs
 
 
 SUBDIRS += \
+    ABEditor \
     ABRecordTokenizer \
     ABRecordTokenizerTest \
     LiteBencodeTest \
     LiteBencode\
-    ABEditor
+    QHexEdit \
+    QHexEdit/QHexEditPlugin.pro
 
 HEADERS +=
 

@@ -157,7 +157,7 @@ int ABRecordTokenizer::readAll() {
             record->setBeginOffset(bBeginOffset->getValue());
             record->setEndOffset(bEndOffset->getValue());
             //
-            emit nextRecord(record, currentCount);
+            emit nextRecord(record, currentCount, count - 1);
             delete recordList;
             currentCount++;
         }
