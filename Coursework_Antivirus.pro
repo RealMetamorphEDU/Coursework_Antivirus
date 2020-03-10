@@ -7,8 +7,7 @@ SUBDIRS += \
     ABRecordTokenizerTest \
     LiteBencodeTest \
     LiteBencode\
-    QHexEdit \
-    QHexEdit/QHexEditPlugin.pro
+    QHexEdit
 
 HEADERS +=
 
