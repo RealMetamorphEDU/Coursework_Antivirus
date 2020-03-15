@@ -37,6 +37,7 @@ private slots:
     void saveBase();
     void showSaveDialog();
     void exit();
+    bool confirmSave();
     void takeNextRecord(SignatureRecord *record, int number, int maxNumber);
 private:
     Ui::MainWindow *ui;

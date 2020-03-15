@@ -6,6 +6,7 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent)
                                           , ui(new Ui::MainWindow) {
     ui->setupUi(this);
     saved = true;
+    newBase = false;
     statusOpenLabel = new QLabel("Файл базы данных не открыт", ui->statusbar);
     statusSaveLabel = new QLabel(ui->statusbar);
     statusProgressBar = new QProgressBar(ui->statusbar);
@@ -41,7 +42,13 @@ void MainWindow::showDelDialog() {
 }
 
 void MainWindow::newBaseOpen() {
-    qDebug() << "New";
+    // Если файл не сохранили, спросить, надо ли сохранить. Если да, но не сохранился, отмена операции
+    if (!saved && confirmSave() && !saved)
+        return;
+    newBase = true;
+    saved = true;
+    tokenizer.close();
+    
 }
 
 void MainWindow::showOpenDialog() {
@@ -60,6 +67,10 @@ void MainWindow::exit() {
     if (saved) {
         QApplication::exit(0);
     }
+}
+
+bool MainWindow::confirmSave() {
+
 }
 
 void MainWindow::takeNextRecord(SignatureRecord *record, int number, int maxNumber) {
