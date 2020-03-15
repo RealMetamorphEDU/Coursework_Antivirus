@@ -14,12 +14,13 @@
 #include <QtWidgets/QApplication>
 #include <QtWidgets/QGridLayout>
 #include <QtWidgets/QHBoxLayout>
-#include <QtWidgets/QListView>
+#include <QtWidgets/QHeaderView>
 #include <QtWidgets/QMainWindow>
 #include <QtWidgets/QMenu>
 #include <QtWidgets/QMenuBar>
 #include <QtWidgets/QPushButton>
 #include <QtWidgets/QStatusBar>
+#include <QtWidgets/QTableView>
 #include <QtWidgets/QWidget>
 
 QT_BEGIN_NAMESPACE
@@ -38,7 +39,7 @@ public:
     QPushButton *addButton;
     QPushButton *editButton;
     QPushButton *delButton;
-    QListView *listView;
+    QTableView *tableView;
     QStatusBar *statusbar;
     QMenuBar *menubar;
     QMenu *menuFile;
@@ -47,7 +48,7 @@ public:
     {
         if (MainWindow->objectName().isEmpty())
             MainWindow->setObjectName(QString::fromUtf8("MainWindow"));
-        MainWindow->resize(595, 444);
+        MainWindow->resize(568, 444);
         QFont font;
         font.setFamily(QString::fromUtf8("Consolas"));
         MainWindow->setFont(font);
@@ -91,25 +92,35 @@ public:
 
         gridLayout->addLayout(horizontalLayout, 1, 0, 1, 1);
 
-        listView = new QListView(centralwidget);
-        listView->setObjectName(QString::fromUtf8("listView"));
+        tableView = new QTableView(centralwidget);
+        tableView->setObjectName(QString::fromUtf8("tableView"));
+        QSizePolicy sizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
+        sizePolicy.setHorizontalStretch(0);
+        sizePolicy.setVerticalStretch(0);
+        sizePolicy.setHeightForWidth(tableView->sizePolicy().hasHeightForWidth());
+        tableView->setSizePolicy(sizePolicy);
+        tableView->horizontalHeader()->setCascadingSectionResizes(true);
+        tableView->horizontalHeader()->setMinimumSectionSize(50);
+        tableView->horizontalHeader()->setDefaultSectionSize(100);
+        tableView->horizontalHeader()->setHighlightSections(false);
+        tableView->verticalHeader()->setVisible(false);
 
-        gridLayout->addWidget(listView, 0, 0, 1, 1);
+        gridLayout->addWidget(tableView, 0, 0, 1, 1);
 
         MainWindow->setCentralWidget(centralwidget);
         statusbar = new QStatusBar(MainWindow);
         statusbar->setObjectName(QString::fromUtf8("statusbar"));
-        QSizePolicy sizePolicy(QSizePolicy::Preferred, QSizePolicy::Preferred);
-        sizePolicy.setHorizontalStretch(0);
-        sizePolicy.setVerticalStretch(0);
-        sizePolicy.setHeightForWidth(statusbar->sizePolicy().hasHeightForWidth());
-        statusbar->setSizePolicy(sizePolicy);
+        QSizePolicy sizePolicy1(QSizePolicy::Preferred, QSizePolicy::Preferred);
+        sizePolicy1.setHorizontalStretch(0);
+        sizePolicy1.setVerticalStretch(0);
+        sizePolicy1.setHeightForWidth(statusbar->sizePolicy().hasHeightForWidth());
+        statusbar->setSizePolicy(sizePolicy1);
         statusbar->setFont(font);
         statusbar->setSizeGripEnabled(true);
         MainWindow->setStatusBar(statusbar);
         menubar = new QMenuBar(MainWindow);
         menubar->setObjectName(QString::fromUtf8("menubar"));
-        menubar->setGeometry(QRect(0, 0, 595, 21));
+        menubar->setGeometry(QRect(0, 0, 568, 21));
         menuFile = new QMenu(menubar);
         menuFile->setObjectName(QString::fromUtf8("menuFile"));
         menuFile->setFont(font);

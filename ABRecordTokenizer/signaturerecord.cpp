@@ -53,3 +53,8 @@ int SignatureRecord::getEndOffset() const {
 void SignatureRecord::setEndOffset(int endOffset) {
     this->endOffset = endOffset;
 }
+
+bool SignatureRecord::operator==(const SignatureRecord &other) const {
+    return name == other.name && sigLength == other.sigLength && sigPrefix == other.sigPrefix && sigHash == other.
+           sigHash && beginOffset == other.beginOffset && endOffset == other.endOffset;
+}

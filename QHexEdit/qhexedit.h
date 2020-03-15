@@ -239,7 +239,7 @@ public:
 
     /*! Return the selected content of QHexEdit as QByteArray
     */
-    QString selectedData();
+    QByteArray selectedData();
 
     /*! Set Font of QHexEdit
      * \param font

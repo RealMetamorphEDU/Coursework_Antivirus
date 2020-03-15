@@ -86,14 +86,12 @@ void tokenizer::test_write() {
 void tokenizer::test_read() {
     ABRecordTokenizer tokenizer;
     tokenizer.setBaseFile("tokenizerTest");
-    QSignalSpy spy(&tokenizer, SIGNAL(nextRecord(SignatureRecord*, int, int)));
+    QSignalSpy spy(&tokenizer, SIGNAL(nextRecord(SignatureRecord*, int)));
     QCOMPARE(tokenizer.readAll(), 5);
     for (int i = 0, m = spy.count(); i < m; ++i) {
         QList<QVariant> list = spy.takeFirst();
         SignatureRecord * record = qvariant_cast<SignatureRecord*>(list.at(0));
         int number = list.at(1).toInt();
-        int maxN = list.at(2).toInt();
-        QCOMPARE(maxN, 4);
         switch (number) {
             case 0:
                 QCOMPARE(record->getName(), "Hello");
