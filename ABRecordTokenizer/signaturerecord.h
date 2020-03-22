@@ -4,6 +4,7 @@
 #include <QObject>
 #include "ABRecordTokenizer_global.h"
 
+
 class ABRECORDTOKENIZER_EXPORT SignatureRecord final: public QObject {
 Q_OBJECT
     QString name;
@@ -32,9 +33,6 @@ public:
 
     int getEndOffset() const;
     void setEndOffset(int endOffset);
-
-    bool operator==(const SignatureRecord &other) const;
 };
-
 
 #endif // SIGNATURERECORD_H

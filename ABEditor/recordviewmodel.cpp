@@ -1,106 +1,64 @@
 #include "recordviewmodel.h"
 
-
-RecordViewModel::RecordViewModel(QObject *parent) : QAbstractTableModel(parent) {
-}
-
-RecordViewModel::~RecordViewModel() {
-}
-
 int RecordViewModel::rowCount(const QModelIndex &parent) const {
-    return parent.isValid() ? 0 : records.size();
-}
-
-int RecordViewModel::columnCount(const QModelIndex &parent) const {
-    return parent.isValid() ? 0 : 6;
+    return records.count();
 }
 
 QVariant RecordViewModel::data(const QModelIndex &index, int role) const {
-    if (!index.isValid())
+    if (index.row() < 0 || index.row() > records.count())
         return QVariant();
-
-    if (index.row() >= records.size() || index.row() < 0)
-        return QVariant();
-
-    if (role == Qt::DisplayRole) {
-        SignatureRecord *record = records[index.row()];
-
-        switch (index.column()) {
-            case 0:
-                return record->getName();
-            case 1:
-                return record->getSigLength();
-            case 2:
-                return record->getSigPrefix().toHex();
-            case 3:
-                return record->getSigHash().toHex();
-            case 4:
-                return record->getBeginOffset();
-            case 5:
-                return record->getEndOffset();
-            default:
-                break;
-        }
+    SignatureRecord *record = records[index.row()];
+    switch (role) {
+        case name:
+            return QVariant(record->getName());
+        case len:
+            return QVariant(record->getSigLength());
+        case prefix:
+            return QVariant(record->getSigPrefix());
+        case hash:
+            return QVariant(record->getSigHash());
+        case offsetB:
+            return QVariant(record->getBeginOffset());
+        case offsetE:
+            return QVariant(record->getEndOffset());
+        default:
+            return QVariant();
     }
-    return QVariant();
 }
 
 QVariant RecordViewModel::headerData(int section, Qt::Orientation orientation, int role) const {
-    if (role != Qt::DisplayRole)
-        return QVariant();
-
-    if (orientation == Qt::Horizontal) {
-        switch (section) {
-            case 0:
-                return "ÐÐ°Ð·Ð²Ð°Ð½Ð¸Ðµ";
-            case 1:
-                return "Ð”Ð»Ð¸Ð½Ð°";
-            case 2:
-                return "ÐŸÑ€ÐµÑ„Ð¸ÐºÑ";
-            case 3:
-                return "Ð¥ÑÑˆ";
-            case 4:
-                return "ÐÐ°Ñ‡Ð°Ð»ÑŒÐ½Ð¾Ðµ ÑÐ¼ÐµÑ‰ÐµÐ½Ð¸Ðµ";
-            case 5:
-                return "ÐšÐ¾Ð½ÐµÑ‡Ð½Ð¾Ðµ ÑÐ¼ÐµÑ‰ÐµÐ½Ð¸Ðµ";
-            default:
-                break;
-        }
+    switch (role) {
+        case name:
+            return QVariant("Íàçâàíèå");
+        case len:
+            return QVariant("Äëèíà");
+        case prefix:
+            return QVariant("Ïðåôèêñ");
+        case hash:
+            return QVariant("Õýø");
+        case offsetB:
+            return QVariant("Íà÷àëüíûé îòñòóï");
+        case offsetE:
+            return QVariant("Êîíå÷íûé îòñòóï");
+        default:
+            return QVariant();
     }
-    return QVariant();
 }
 
-void RecordViewModel::updateRow(int row) {
-    const QModelIndex start = QAbstractTableModel::index(row, 0);
-    const QModelIndex end = QAbstractTableModel::index(row, 5);
-    emit dataChanged(start, end);
+bool RecordViewModel::insertRows(int row, int count, const QModelIndex &parent) {
+    beginInsertRows(parent, row, row + count);
+    endInsertRows(
 }
 
-void RecordViewModel::removeRow(int row) {
-    beginRemoveRows(QModelIndex(), row, row);
-    records.remove(row);
-    endRemoveRows();
+bool RecordViewModel::removeRows(int row, int count, const QModelIndex &parent) {
+    beginRemoveRows(parent, 0, records.count());
 }
 
-void RecordViewModel::clear() {
-    if (records.isEmpty())
-        return;
-    beginRemoveRows(QModelIndex(), 0, records.size() - 1);
-    while (!records.isEmpty()) {
-        SignatureRecord *record = records.takeLast();
-        record->deleteLater();
-    }
-    endRemoveRows();
+QHash<int, QByteArray> RecordViewModel::roleNames() const {
 }
 
-
-void RecordViewModel::addRecord(SignatureRecord *record) {
-    beginInsertRows(QModelIndex(), records.size(), records.size());
-    record->setParent(this);
-    records.append(record);
-    endInsertRows();
+RecordViewModel::RecordViewModel(QObject *parent) : QAbstractListModel(parent) {
 }
 
-QVector<SignatureRecord*>& RecordViewModel::getRecords() {
-    return records;
+RecordViewModel::~RecordViewModel() {
 }

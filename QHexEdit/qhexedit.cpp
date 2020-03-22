@@ -423,9 +423,9 @@ QString QHexEdit::selectionToReadableString()
     return toReadable(ba);
 }
 
-QByteArray QHexEdit::selectedData()
+QString QHexEdit::selectedData()
 {
-    QByteArray ba = _chunks->data(getSelectionBegin(), getSelectionEnd() - getSelectionBegin());
+    QByteArray ba = _chunks->data(getSelectionBegin(), getSelectionEnd() - getSelectionBegin()).toHex();
     return ba;
 }
 

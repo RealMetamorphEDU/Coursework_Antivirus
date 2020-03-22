@@ -1,14 +1,4 @@
 #include "abrecordtokenizer.h"
-#include <qthread.h>
-
-
-void ABRecordTokenizer::stopRead() {
-    readable->deleteLater();
-    readable = nullptr;
-    reading = false;
-    disconnect(thread, SIGNAL(started()), this, SLOT(readStart()));
-    emit readFinished();
-}
 
 ABRecordTokenizer::ABRecordTokenizer(QObject *parent) : QObject(parent) {
     currentFile = nullptr;
@@ -18,31 +8,20 @@ ABRecordTokenizer::ABRecordTokenizer(QObject *parent) : QObject(parent) {
     writing = false;
     prepareCount = 0;
     currentCount = 0;
-    thread = new QThread(parent);
-    moveToThread(thread);
-    connect(this, SIGNAL(readFinished()), thread, SLOT(quit()));
-    connect(this, SIGNAL(writeFinished()), thread, SLOT(quit()));
 }
 
 ABRecordTokenizer::~ABRecordTokenizer() {
-    thread->quit();
     if (currentFile != nullptr)
         currentFile->close();
 }
 
 void ABRecordTokenizer::setBaseFile(const QString &filename) {
-    if (reading || writing)
-        return;
     if (currentFile != nullptr) {
         currentFile->close();
         currentFile->deleteLater();
     }
-    currentFile = new QFile(filename);
-    liteBencode = new LiteBencode(currentFile);
-    currentFile->moveToThread(thread);
-    liteBencode->moveToThread(thread);
-    currentFile->setParent(this);
-    liteBencode->setParent(currentFile);
+    currentFile = new QFile(filename, this);
+    liteBencode = new LiteBencode(currentFile, currentFile);
     reading = false;
     writing = false;
     writable = nullptr;
@@ -54,7 +33,6 @@ bool ABRecordTokenizer::prepareForWrite(const int count) {
         prepareCount = count;
         currentFile->resize(0);
         writable = liteBencode->getWritableRoot();
-
         BInteger bCount;
         bCount.setValue(prepareCount);
         writable->writeElement(&bCount);
@@ -65,36 +43,9 @@ bool ABRecordTokenizer::prepareForWrite(const int count) {
             delete writable;
             writable = nullptr;
         }
-        writable->moveToThread(thread);
-        writable->setParent(liteBencode);
-        thread->start();
         return true;
     }
     return false;
-}
-
-int ABRecordTokenizer::prepareForRead() {
-    if (!reading && !writing && currentFile != nullptr) {
-        if (!liteBencode->isBaseFile())
-            return -1;
-        reading = true;
-        readable = liteBencode->getReadableRoot();
-        BElement *element = readable->nextToken();
-        if (element->getType() != BElementType::bInteger) {
-            readable->deleteLater();
-            readable = nullptr;
-            reading = false;
-            return -1;
-        }
-        auto *bCount = qobject_cast<BInteger*>(element);
-        const int count = bCount->getValue();
-        connect(thread, SIGNAL(started()), this, SLOT(readStart()));
-        readable->moveToThread(thread);
-        readable->setParent(liteBencode);
-        thread->start();
-        return count;
-    }
-    return -1;
 }
 
 bool ABRecordTokenizer::isReading() {
@@ -105,8 +56,119 @@ bool ABRecordTokenizer::isWriting() {
     return writing;
 }
 
+int ABRecordTokenizer::readAll() {
+    if (!reading && !writing && currentFile != nullptr) {
+        if (!liteBencode->isBaseFile())
+            return -1;
+        reading = true;
+        BListReadable *readable = liteBencode->getReadableRoot();
+        BElement *element = readable->nextToken();
+        if (element->getType() != BElementType::bInteger) {
+            readable->deleteLater();
+            readable = nullptr;
+            reading = false;
+            return -1;
+        }
+        auto *bCount = qobject_cast<BInteger*>(element);
+        const int count = bCount->getValue();
+        currentCount = 0;
+        while (readable->hasNextToken()) {
+            //
+            if ((element = readable->nextToken())->getType() != BElementType::bList) {
+                readable->deleteLater();
+                readable = nullptr;
+                reading = false;
+                return -1;
+            }
+            BListReadable *recordList = qobject_cast<BListReadable*>(element);
+            //
+            if (!recordList->hasNextToken() || (element = recordList->nextToken())->getType() != BElementType::bString
+            ) {
+                readable->deleteLater();
+                readable = nullptr;
+                reading = false;
+                return -1;
+            }
+            BString *bName = qobject_cast<BString*>(element);
+            //
+            if (!recordList->hasNextToken() || (element = recordList->nextToken())->getType() != BElementType::bList) {
+                readable->deleteLater();
+                readable = nullptr;
+                reading = false;
+                return -1;
+            }
+            BListReadable *sigList = qobject_cast<BListReadable*>(element);
+            //
+            if (!sigList->hasNextToken() || (element = sigList->nextToken())->getType() != BElementType::bInteger) {
+                readable->deleteLater();
+                readable = nullptr;
+                reading = false;
+                return -1;
+            }
+            BInteger *bLen = qobject_cast<BInteger*>(element);
+            //
+            if (!sigList->hasNextToken() || (element = sigList->nextToken())->getType() != BElementType::bString) {
+                readable->deleteLater();
+                readable = nullptr;
+                reading = false;
+                return -1;
+            }
+            BString *bPrefix = qobject_cast<BString*>(element);
+            //
+            if (!sigList->hasNextToken() || (element = sigList->nextToken())->getType() != BElementType::bString) {
+                readable->deleteLater();
+                readable = nullptr;
+                reading = false;
+                return -1;
+            }
+            BString *bHash = qobject_cast<BString*>(element);
+            //
+            if (!recordList->hasNextToken() || (element = recordList->nextToken())->getType() != BElementType::bList) {
+                readable->deleteLater();
+                readable = nullptr;
+                reading = false;
+                return -1;
+            }
+            BListReadable *offsetList = qobject_cast<BListReadable*>(element);
+            //
+            if (!offsetList->hasNextToken() || (element = offsetList->nextToken())->getType() != BElementType::bInteger
+            ) {
+                readable->deleteLater();
+                readable = nullptr;
+                reading = false;
+                return -1;
+            }
+            BInteger *bBeginOffset = qobject_cast<BInteger*>(element);
+            //
+            if (!offsetList->hasNextToken() || (element = offsetList->nextToken())->getType() != BElementType::bInteger
+            ) {
+                readable->deleteLater();
+                readable = nullptr;
+                reading = false;
+                return -1;
+            }
+            BInteger *bEndOffset = qobject_cast<BInteger*>(element);
+            //
+            SignatureRecord *record = new SignatureRecord(liteBencode);
+            record->setName(QString(bName->getValue()));
+            record->setSigLength(bLen->getValue());
+            record->setSigPrefix(bPrefix->getValue());
+            record->setSigHash(bHash->getValue());
+            record->setBeginOffset(bBeginOffset->getValue());
+            record->setEndOffset(bEndOffset->getValue());
+            //
+            emit nextRecord(record, currentCount, count - 1);
+            delete recordList;
+            currentCount++;
+        }
+        delete readable;
+        reading = false;
+        return count;
+    }
+    return -1;
+}
 
-void ABRecordTokenizer::writeRecord(SignatureRecord *record) {
+int ABRecordTokenizer::writeRecord(SignatureRecord &record) {
     if (writing) {
         BListWritable *recordList;
         BString bName;
@@ -117,12 +179,12 @@ void ABRecordTokenizer::writeRecord(SignatureRecord *record) {
         BListWritable *offsetList;
         BInteger bBeginOffset;
         BInteger bEndOffset;
-        bName.setValue(record->getName().toUtf8());
-        bLen.setValue(record->getSigLength());
-        bPrefix.setValue(record->getSigPrefix());
-        bHash.setValue(record->getSigHash());
-        bBeginOffset.setValue(record->getBeginOffset());
-        bEndOffset.setValue(record->getEndOffset());
+        bName.setValue(record.getName().toUtf8());
+        bLen.setValue(record.getSigLength());
+        bPrefix.setValue(record.getSigPrefix());
+        bHash.setValue(record.getSigHash());
+        bBeginOffset.setValue(record.getBeginOffset());
+        bEndOffset.setValue(record.getEndOffset());
         recordList = writable->openList();
         recordList->writeElement(&bName);
         sigList = recordList->openList();
@@ -141,98 +203,17 @@ void ABRecordTokenizer::writeRecord(SignatureRecord *record) {
             writing = false;
             writable->closeList();
             delete writable;
-            thread->quit();
-            emit writeFinished();
         }
+        return currentCount - 1;
     }
+    return -1;
 }
 
 void ABRecordTokenizer::close() {
-    if (currentFile != nullptr && !writing && !reading) {
-        currentFile->close();
-        delete currentFile;
-        currentFile = nullptr;
-        liteBencode = nullptr;
-        reading = false;
-        writing = false;
-    }
-}
-
-void ABRecordTokenizer::readStart() {
-    if (!reading)
-        return;
-    BElement *element;
-    currentCount = 0;
-    while (readable->hasNextToken()) {
-        //
-        if ((element = readable->nextToken())->getType() != BElementType::bList) {
-            stopRead();
-            return;
-        }
-        BListReadable *recordList = qobject_cast<BListReadable*>(element);
-        //
-        if (!recordList->hasNextToken() || (element = recordList->nextToken())->getType() != BElementType::bString
-        ) {
-            stopRead();
-            return;
-        }
-        BString *bName = qobject_cast<BString*>(element);
-        //
-        if (!recordList->hasNextToken() || (element = recordList->nextToken())->getType() != BElementType::bList) {
-            stopRead();
-            return;
-        }
-        BListReadable *sigList = qobject_cast<BListReadable*>(element);
-        //
-        if (!sigList->hasNextToken() || (element = sigList->nextToken())->getType() != BElementType::bInteger) {
-            stopRead();
-            return;
-        }
-        BInteger *bLen = qobject_cast<BInteger*>(element);
-        //
-        if (!sigList->hasNextToken() || (element = sigList->nextToken())->getType() != BElementType::bString) {
-            stopRead();
-            return;
-        }
-        BString *bPrefix = qobject_cast<BString*>(element);
-        //
-        if (!sigList->hasNextToken() || (element = sigList->nextToken())->getType() != BElementType::bString) {
-            stopRead();
-            return;
-        }
-        BString *bHash = qobject_cast<BString*>(element);
-        //
-        if (!recordList->hasNextToken() || (element = recordList->nextToken())->getType() != BElementType::bList) {
-            stopRead();
-            return;
-        }
-        BListReadable *offsetList = qobject_cast<BListReadable*>(element);
-        //
-        if (!offsetList->hasNextToken() || (element = offsetList->nextToken())->getType() != BElementType::bInteger
-        ) {
-            stopRead();
-            return;
-        }
-        BInteger *bBeginOffset = qobject_cast<BInteger*>(element);
-        //
-        if (!offsetList->hasNextToken() || (element = offsetList->nextToken())->getType() != BElementType::bInteger
-        ) {
-            stopRead();
-            return;
-        }
-        BInteger *bEndOffset = qobject_cast<BInteger*>(element);
-        //
-        SignatureRecord *record = new SignatureRecord(liteBencode);
-        record->setName(QString(bName->getValue()));
-        record->setSigLength(bLen->getValue());
-        record->setSigPrefix(bPrefix->getValue());
-        record->setSigHash(bHash->getValue());
-        record->setBeginOffset(bBeginOffset->getValue());
-        record->setEndOffset(bEndOffset->getValue());
-        //
-        emit nextRecord(record, currentCount);
-        delete recordList;
-        currentCount++;
-    }
-    stopRead();
+    currentFile->close();
+    delete currentFile;
+    currentFile = nullptr;
+    liteBencode = nullptr;
+    reading = false;
+    writing = false;
 }
