@@ -210,8 +210,10 @@ int ABRecordTokenizer::writeRecord(SignatureRecord &record) {
 }
 
 void ABRecordTokenizer::close() {
-    currentFile->close();
-    delete currentFile;
+    if (currentFile != nullptr) {
+        currentFile->close();
+        delete currentFile;
+    }
     currentFile = nullptr;
     liteBencode = nullptr;
     reading = false;

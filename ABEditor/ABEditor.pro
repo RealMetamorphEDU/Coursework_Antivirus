@@ -17,13 +17,18 @@ DEFINES += QT_DEPRECATED_WARNINGS
 
 SOURCES += \
     main.cpp \
-    mainwindow.cpp
+    mainwindow.cpp \
+	recordviewmodel.cpp \
+	editrecorddialog.cpp
 
 HEADERS += \
-    mainwindow.h
+    mainwindow.h \
+	recordviewmodel.h \
+	editrecorddialog.h
 
 FORMS += \
-    mainwindow.ui
+    mainwindow.ui \
+	editrecorddialog.ui
 
 # Default rules for deployment.
 qnx: target.path = /tmp/$${TARGET}/bin
