@@ -32,10 +32,10 @@ void tokenizer::initTestCase() {
 void tokenizer::test_write() {
     ABRecordTokenizer tokenizer;
     tokenizer.setBaseFile("tokenizerTest");
-    QVERIFY(tokenizer.prepareForWrite(5));
+    QVERIFY(tokenizer.startWrite(5));
     QVERIFY(tokenizer.isWriting());
     QVERIFY(!tokenizer.isReading());
-    QCOMPARE(tokenizer.readAll(), -1);
+    QCOMPARE(tokenizer.startRead(), -1);
     SignatureRecord record;
     //0
     record.setName("Hello");
@@ -87,7 +87,7 @@ void tokenizer::test_read() {
     ABRecordTokenizer tokenizer;
     tokenizer.setBaseFile("tokenizerTest");
     QSignalSpy spy(&tokenizer, SIGNAL(nextRecord(SignatureRecord*, int, int)));
-    QCOMPARE(tokenizer.readAll(), 5);
+    QCOMPARE(tokenizer.startRead(), 5);
     for (int i = 0, m = spy.count(); i < m; ++i) {
         QList<QVariant> list = spy.takeFirst();
         SignatureRecord * record = qvariant_cast<SignatureRecord*>(list.at(0));

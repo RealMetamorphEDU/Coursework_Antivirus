@@ -2,13 +2,15 @@
 #define MAINWINDOW_H
 
 #include <QMainWindow>
-#include <QLabel>
-#include <QProgressBar>
 #include "abrecordtokenizer.h"
-#include "recordviewmodel.h"
-#include "editrecorddialog.h"
+
+class RecordViewModel;
 
 QT_BEGIN_NAMESPACE
+
+class QLabel;
+class QProgressBar;
+
 
 namespace Ui {
     class MainWindow;
@@ -23,7 +25,6 @@ Q_OBJECT
     bool operating;
 
     ABRecordTokenizer tokenizer;
-
     RecordViewModel *recordView;
 
     QLabel *statusOpenLabel;
@@ -44,11 +45,6 @@ private slots:
     void showSaveDialog();
     void exit();
     bool confirmSave();
-    void takeNextRecord(SignatureRecord *record, int number);
-    void readFinished();
-    void writeFinished();
-signals:
-    void writeRecord(SignatureRecord* record);
 private:
     Ui::MainWindow *ui;
 };

@@ -45,6 +45,8 @@ Q_OBJECT
     bool opened;
     bool closed;
     qint64 offset;
+
+    void closing();
 public:
     explicit BListReadable(QObject *parent = nullptr);
 
@@ -52,6 +54,7 @@ public:
 
     BElement* nextToken();
     bool hasNextToken();
+
     void toFirstToken();
 
     void setFileReadable(QFile *file, int offset);

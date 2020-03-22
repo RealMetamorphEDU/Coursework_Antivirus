@@ -46,6 +46,3 @@ else:win32:CONFIG(debug, debug|release): LIBS += -L$$OUT_PWD/../QHexEdit/debug/ 
 
 INCLUDEPATH += $$PWD/../QHexEdit
 DEPENDPATH += $$PWD/../QHexEdit
-
-INCLUDEPATH += $$PWD/../LiteBencode
-DEPENDPATH += $$PWD/../LiteBencode

@@ -159,19 +159,44 @@ BElement* BListReadable::nextToken() {
 
 bool BListReadable::hasNextToken() {
     if (opened && !closed) {
+        if (file->atEnd()) {
+            closing();
+            return false;
+        }
         char start;
         file->peek(&start, 1);
         if (start == 'e') {
             file->read(&start, 1);
-            closed = true;
-            QObject *p = parent();
-            BListReadable *pList = qobject_cast<BListReadable*>(p);
-            if (pList != nullptr) {
-                pList->hasNextToken();
+            closing();
+        } else
+            switch (start) {
+                case 'i':
+                case 'l':
+                case '0':
+                case '1':
+                case '2':
+                case '3':
+                case '4':
+                case '5':
+                case '6':
+                case '7':
+                case '8':
+                case '9':
+                    break;
+                default:
+                    closing();
             }
-        }
     }
     return !closed;
+}
+
+void BListReadable::closing() {
+    closed = true;
+    QObject *p = parent();
+    BListReadable *pList = qobject_cast<BListReadable*>(p);
+    if (pList != nullptr) {
+        pList->hasNextToken();
+    }
 }
 
 void BListReadable::toFirstToken() {

@@ -1,6 +1,12 @@
 #include "mainwindow.h"
+#include <QLabel>
+#include <QMessageBox>
+#include <QProgressBar>
+#include "abrecordtokenizer.h"
+#include "recordviewmodel.h"
+#include "editrecorddialog.h"
 #include "ui_mainwindow.h"
-#include "QThread"
+#include <QtConcurrent/QtConcurrent>
 
 void MainWindow::disableButtons(bool yes) {
     ui->addButton->setDisabled(yes);
@@ -17,6 +23,8 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
     statusOpenLabel = new QLabel("Файл базы данных не открыт", ui->statusbar);
     statusSaveLabel = new QLabel(ui->statusbar);
     statusProgressBar = new QProgressBar(ui->statusbar);
+    statusProgressBar->setRange(0, 1);
+    statusProgressBar->setValue(0);
     ui->statusbar->addWidget(statusOpenLabel);
     ui->statusbar->addWidget(statusSaveLabel);
     ui->statusbar->addPermanentWidget(statusProgressBar);
@@ -86,7 +94,8 @@ void MainWindow::newBaseOpen() {
     tokenizer.close();
     disableButtons(false);
     statusOpenLabel->setText("Новый файл");
-    statusProgressBar->setValue(0);
+    statusProgressBar->setMaximum(1);
+    statusProgressBar->setValue(1);
 }
 
 void MainWindow::showOpenDialog() {
@@ -106,21 +115,29 @@ void MainWindow::showOpenDialog() {
             return;
         recordView->clear();
         tokenizer.close();
+        disableButtons(true);
         tokenizer.setBaseFile(list.at(0));
+        int count = tokenizer.startRead();
+        if (count == -1) {
+            statusSaveLabel->setText("Файл повреждён");
+        } else {
+            statusProgressBar->setMaximum(count - 1);
+            operating = true;
+            int number;
+            SignatureRecord *record;
+            while ((record = tokenizer.nextRecord(number)) != nullptr) {
+                recordView->addRecord(record);
+                statusProgressBar->setValue(number);
+                if (number % 10 == 0)
+                    QApplication::processEvents(QEventLoop::AllEvents, 500);
+            }
+            ui->tableView->resizeColumnsToContents();
+            operating = false;
+        }
+        disableButtons(false);
+        statusOpenLabel->setText(list.at(0).right(list.at(0).size() - list.at(0).lastIndexOf("/") - 1));
         newBase = false;
         saved = true;
-        ui->addButton->setDisabled(false);
-        ui->editButton->setDisabled(false);
-        ui->delButton->setDisabled(false);
-        statusOpenLabel->setText(list.at(0));
-        statusProgressBar->setValue(0);
-        int status = -1;//tokenizer.prepareForRead();
-        if (status == -1) {
-            statusSaveLabel->setText("Файл повреждён");
-            operating = true;
-            disableButtons(true);
-        } else
-            statusProgressBar->setRange(0, status);
     }
 }
 
@@ -132,13 +149,17 @@ void MainWindow::saveBase() {
     else {
         operating = true;
         disableButtons(true);
-        tokenizer.prepareForWrite(recordView->getRecords().size());
-        statusProgressBar->setRange(0, recordView->getRecords().size());
+        tokenizer.startWrite(recordView->getRecords().size());
+        statusProgressBar->setRange(0, recordView->getRecords().size() - 1);
         for (int i = 0; i < recordView->getRecords().size(); ++i) {
-            statusProgressBar->setValue(i + 1);
-            emit writeRecord(recordView->getRecords().at(i));
+            statusProgressBar->setValue(i);
+            tokenizer.writeRecord(*recordView->getRecords().at(i));
+            if (i % 10 == 0)
+                QApplication::processEvents(QEventLoop::AllEvents, 500);
         }
         saved = true;
+        operating = false;
+        disableButtons(false);
         statusSaveLabel->setText("Сохранено");
     }
 }
@@ -160,7 +181,7 @@ void MainWindow::showSaveDialog() {
         tokenizer.setBaseFile(list.at(0));
         newBase = false;
         saved = true;
-        statusOpenLabel->setText(list.at(0));
+        statusOpenLabel->setText(list.at(0).right(list.at(0).size() - list.at(0).lastIndexOf("/") - 1));
         statusProgressBar->setValue(0);
         newBase = false;
         saveBase();
@@ -176,23 +197,9 @@ void MainWindow::exit() {
 }
 
 bool MainWindow::confirmSave() {
-    //TODO
+    if (!QMessageBox::question(this, "Файл не сохранён", "Файл не был сохранён. Сохранить?", "Да", "Нет")) {
+        saveBase();
+        return true;
+    };
     return false;
-}
-
-void MainWindow::takeNextRecord(SignatureRecord *record, int number) {
-    statusProgressBar->setValue(number);
-    record->moveToThread(QThread::currentThread());
-    recordView->addRecord(record);
-}
-
-void MainWindow::readFinished() {
-    operating = false;
-    ui->tableView->resizeColumnsToContents();
-    disableButtons(false);
-}
-
-void MainWindow::writeFinished() {
-    operating = false;
-    disableButtons(false);
 }

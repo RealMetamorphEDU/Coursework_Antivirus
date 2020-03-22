@@ -1,5 +1,7 @@
 #include "abrecordtokenizer.h"
 
+#include "litebencode.h"
+
 ABRecordTokenizer::ABRecordTokenizer(QObject *parent) : QObject(parent) {
     currentFile = nullptr;
     liteBencode = nullptr;
@@ -27,7 +29,7 @@ void ABRecordTokenizer::setBaseFile(const QString &filename) {
     writable = nullptr;
 }
 
-bool ABRecordTokenizer::prepareForWrite(const int count) {
+bool ABRecordTokenizer::startWrite(const int count) {
     if (!reading && !writing && currentFile != nullptr) {
         writing = true;
         prepareCount = count;
@@ -56,12 +58,12 @@ bool ABRecordTokenizer::isWriting() {
     return writing;
 }
 
-int ABRecordTokenizer::readAll() {
+int ABRecordTokenizer::startRead() {
     if (!reading && !writing && currentFile != nullptr) {
         if (!liteBencode->isBaseFile())
             return -1;
         reading = true;
-        BListReadable *readable = liteBencode->getReadableRoot();
+        readable = liteBencode->getReadableRoot();
         BElement *element = readable->nextToken();
         if (element->getType() != BElementType::bInteger) {
             readable->deleteLater();
@@ -72,97 +74,6 @@ int ABRecordTokenizer::readAll() {
         auto *bCount = qobject_cast<BInteger*>(element);
         const int count = bCount->getValue();
         currentCount = 0;
-        while (readable->hasNextToken()) {
-            //
-            if ((element = readable->nextToken())->getType() != BElementType::bList) {
-                readable->deleteLater();
-                readable = nullptr;
-                reading = false;
-                return -1;
-            }
-            BListReadable *recordList = qobject_cast<BListReadable*>(element);
-            //
-            if (!recordList->hasNextToken() || (element = recordList->nextToken())->getType() != BElementType::bString
-            ) {
-                readable->deleteLater();
-                readable = nullptr;
-                reading = false;
-                return -1;
-            }
-            BString *bName = qobject_cast<BString*>(element);
-            //
-            if (!recordList->hasNextToken() || (element = recordList->nextToken())->getType() != BElementType::bList) {
-                readable->deleteLater();
-                readable = nullptr;
-                reading = false;
-                return -1;
-            }
-            BListReadable *sigList = qobject_cast<BListReadable*>(element);
-            //
-            if (!sigList->hasNextToken() || (element = sigList->nextToken())->getType() != BElementType::bInteger) {
-                readable->deleteLater();
-                readable = nullptr;
-                reading = false;
-                return -1;
-            }
-            BInteger *bLen = qobject_cast<BInteger*>(element);
-            //
-            if (!sigList->hasNextToken() || (element = sigList->nextToken())->getType() != BElementType::bString) {
-                readable->deleteLater();
-                readable = nullptr;
-                reading = false;
-                return -1;
-            }
-            BString *bPrefix = qobject_cast<BString*>(element);
-            //
-            if (!sigList->hasNextToken() || (element = sigList->nextToken())->getType() != BElementType::bString) {
-                readable->deleteLater();
-                readable = nullptr;
-                reading = false;
-                return -1;
-            }
-            BString *bHash = qobject_cast<BString*>(element);
-            //
-            if (!recordList->hasNextToken() || (element = recordList->nextToken())->getType() != BElementType::bList) {
-                readable->deleteLater();
-                readable = nullptr;
-                reading = false;
-                return -1;
-            }
-            BListReadable *offsetList = qobject_cast<BListReadable*>(element);
-            //
-            if (!offsetList->hasNextToken() || (element = offsetList->nextToken())->getType() != BElementType::bInteger
-            ) {
-                readable->deleteLater();
-                readable = nullptr;
-                reading = false;
-                return -1;
-            }
-            BInteger *bBeginOffset = qobject_cast<BInteger*>(element);
-            //
-            if (!offsetList->hasNextToken() || (element = offsetList->nextToken())->getType() != BElementType::bInteger
-            ) {
-                readable->deleteLater();
-                readable = nullptr;
-                reading = false;
-                return -1;
-            }
-            BInteger *bEndOffset = qobject_cast<BInteger*>(element);
-            //
-            SignatureRecord *record = new SignatureRecord(liteBencode);
-            record->setName(QString(bName->getValue()));
-            record->setSigLength(bLen->getValue());
-            record->setSigPrefix(bPrefix->getValue());
-            record->setSigHash(bHash->getValue());
-            record->setBeginOffset(bBeginOffset->getValue());
-            record->setEndOffset(bEndOffset->getValue());
-            //
-            emit nextRecord(record, currentCount, count - 1);
-            delete recordList;
-            currentCount++;
-        }
-        delete readable;
-        reading = false;
         return count;
     }
     return -1;
@@ -207,6 +118,106 @@ int ABRecordTokenizer::writeRecord(SignatureRecord &record) {
         return currentCount - 1;
     }
     return -1;
+}
+
+SignatureRecord* ABRecordTokenizer::nextRecord(int &number) {
+    if (reading) {
+        BElement *element;
+        if (readable->hasNextToken()) {
+            //
+            if ((element = readable->nextToken())->getType() != BElementType::bList) {
+                readable->deleteLater();
+                readable = nullptr;
+                reading = false;
+                return nullptr;
+            }
+            BListReadable *recordList = qobject_cast<BListReadable*>(element);
+            //
+            if (!recordList->hasNextToken() || (element = recordList->nextToken())->getType() != BElementType::bString
+            ) {
+                readable->deleteLater();
+                readable = nullptr;
+                reading = false;
+                return nullptr;
+            }
+            BString *bName = qobject_cast<BString*>(element);
+            //
+            if (!recordList->hasNextToken() || (element = recordList->nextToken())->getType() != BElementType::bList) {
+                readable->deleteLater();
+                readable = nullptr;
+                reading = false;
+                return nullptr;
+            }
+            BListReadable *sigList = qobject_cast<BListReadable*>(element);
+            //
+            if (!sigList->hasNextToken() || (element = sigList->nextToken())->getType() != BElementType::bInteger) {
+                readable->deleteLater();
+                readable = nullptr;
+                reading = false;
+                return nullptr;
+            }
+            BInteger *bLen = qobject_cast<BInteger*>(element);
+            //
+            if (!sigList->hasNextToken() || (element = sigList->nextToken())->getType() != BElementType::bString) {
+                readable->deleteLater();
+                readable = nullptr;
+                reading = false;
+                return nullptr;
+            }
+            BString *bPrefix = qobject_cast<BString*>(element);
+            //
+            if (!sigList->hasNextToken() || (element = sigList->nextToken())->getType() != BElementType::bString) {
+                readable->deleteLater();
+                readable = nullptr;
+                reading = false;
+                return nullptr;
+            }
+            BString *bHash = qobject_cast<BString*>(element);
+            //
+            if (!recordList->hasNextToken() || (element = recordList->nextToken())->getType() != BElementType::bList) {
+                readable->deleteLater();
+                readable = nullptr;
+                reading = false;
+                return nullptr;
+            }
+            BListReadable *offsetList = qobject_cast<BListReadable*>(element);
+            //
+            if (!offsetList->hasNextToken() || (element = offsetList->nextToken())->getType() != BElementType::bInteger
+            ) {
+                readable->deleteLater();
+                readable = nullptr;
+                reading = false;
+                return nullptr;
+            }
+            BInteger *bBeginOffset = qobject_cast<BInteger*>(element);
+            //
+            if (!offsetList->hasNextToken() || (element = offsetList->nextToken())->getType() != BElementType::bInteger
+            ) {
+                readable->deleteLater();
+                readable = nullptr;
+                reading = false;
+                return nullptr;
+            }
+            BInteger *bEndOffset = qobject_cast<BInteger*>(element);
+            //
+            SignatureRecord *record = new SignatureRecord(liteBencode);
+            record->setName(QString(bName->getValue()));
+            record->setSigLength(bLen->getValue());
+            record->setSigPrefix(bPrefix->getValue());
+            record->setSigHash(bHash->getValue());
+            record->setBeginOffset(bBeginOffset->getValue());
+            record->setEndOffset(bEndOffset->getValue());
+            //
+            delete recordList;
+            number = currentCount++;
+            return record;
+        }
+        readable->deleteLater();
+        readable = nullptr;
+        reading = false;
+        return nullptr;
+    }
+    return nullptr;
 }
 
 void ABRecordTokenizer::close() {

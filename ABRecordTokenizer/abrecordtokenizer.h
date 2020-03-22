@@ -4,15 +4,18 @@
 #include "ABRecordTokenizer_global.h"
 #include <qfile.h>
 #include <QObject>
-
-#include "litebencode.h"
 #include "signaturerecord.h"
+
+class LiteBencode;
+class BListWritable;
+class BListReadable;
 
 class ABRECORDTOKENIZER_EXPORT ABRecordTokenizer: public QObject {
 Q_OBJECT
     QFile *currentFile;
     LiteBencode *liteBencode;
     BListWritable *writable;
+    BListReadable *readable;
     bool reading;
     bool writing;
     int prepareCount;
@@ -26,7 +29,7 @@ public:
     void setBaseFile(const QString &filename);
 
     // Подготовить для записи
-    bool prepareForWrite(int count);
+    bool startWrite(int count);
 
     // Идёт процесс чтения, переключение в режим записи невозможно
     bool isReading();
@@ -35,15 +38,14 @@ public:
     bool isWriting();
 
     // Начать чтение записей, вернёт общее число записей.
-    int readAll();
+    int startRead();
 
     // Записать следующую запись, возвращает номер записи
     int writeRecord(SignatureRecord &record);
+    SignatureRecord* nextRecord(int &number);
 
     // Закрывает открытый файл
     void close();
-signals:
-    void nextRecord(SignatureRecord *record, int number, int maxNumber);
 };
 
 #endif // ABRECORDTOKENIZER_H
