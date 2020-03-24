@@ -1,5 +1,5 @@
-#pragma once
-
+#ifndef EDITRECORDDIALOG_H
+#define EDITRECORDDIALOG_H
 #include <QDialog>
 #include <QFileDialog>
 #include "signaturerecord.h"
@@ -16,8 +16,8 @@ Q_OBJECT
     QByteArray selectedData;
     bool checkFields();
 public:
-    EditRecordDialog(QWidget *parent = Q_NULLPTR);
-    EditRecordDialog(SignatureRecord *record, QWidget *parent = Q_NULLPTR);
+    explicit EditRecordDialog(QWidget *parent = Q_NULLPTR);
+    explicit EditRecordDialog(SignatureRecord *record, QWidget *parent = Q_NULLPTR);
     ~EditRecordDialog();
     SignatureRecord* getRecord();
 private slots:
@@ -28,3 +28,5 @@ private slots:
 private:
     Ui::EditRecordDialog *ui;
 };
+
+#endif

@@ -1,4 +1,5 @@
-#pragma once
+#ifndef RECORDVIEWMODEL_H
+#define RECORDVIEWMODEL_H
 
 #include <QAbstractListModel>
 #include "signaturerecord.h"
@@ -7,7 +8,7 @@ class RecordViewModel: public QAbstractTableModel {
 Q_OBJECT
     QVector<SignatureRecord*> records;
 public:
-    RecordViewModel(QObject *parent);
+    explicit RecordViewModel(QObject *parent);
     ~RecordViewModel();
 
     int rowCount(const QModelIndex &parent) const override;
@@ -21,3 +22,4 @@ public:
     void addRecord(SignatureRecord *record);
     QVector<SignatureRecord*>& getRecords();
 };
+#endif

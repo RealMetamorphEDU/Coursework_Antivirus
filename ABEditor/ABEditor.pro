@@ -1,4 +1,4 @@
-QT       += core gui
+QT += core gui
 
 greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 
@@ -19,12 +19,14 @@ SOURCES += \
     main.cpp \
     mainwindow.cpp \
 	recordviewmodel.cpp \
-	editrecorddialog.cpp
+	editrecorddialog.cpp \
+	choosesigdialog.cpp
 
 HEADERS += \
     mainwindow.h \
 	recordviewmodel.h \
-	editrecorddialog.h
+	editrecorddialog.h \
+	choosesigdialog.cpp
 
 FORMS += \
     mainwindow.ui \

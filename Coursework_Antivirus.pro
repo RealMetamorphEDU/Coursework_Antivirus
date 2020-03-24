@@ -5,8 +5,9 @@ SUBDIRS += \
     ABEditor \
     ABRecordTokenizer \
     ABRecordTokenizerTest \
+    FileWatchDog \
     LiteBencodeTest \
-    LiteBencode\
+    LiteBencode \
     QHexEdit
 
 HEADERS +=

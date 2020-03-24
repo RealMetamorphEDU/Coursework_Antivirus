@@ -96,7 +96,6 @@ void RecordViewModel::clear() {
 
 void RecordViewModel::addRecord(SignatureRecord *record) {
     beginInsertRows(QModelIndex(), records.size(), records.size());
-    record->setParent(this);
     records.append(record);
     endInsertRows();
 }

@@ -1,4 +1,5 @@
-#pragma once
+#ifndef CHOOSESIGDIALOG_H
+#define CHOOSESIGDIALOG_H
 
 #include <QDialog>
 
@@ -10,9 +11,11 @@ Q_OBJECT
     QByteArray selected;
     QHexEdit *sigEdit;
 public:
-    ChooseSigDialog(QFile* file, QWidget *parent = nullptr);
+    explicit ChooseSigDialog(QFile* file, QWidget *parent = nullptr);
     ~ChooseSigDialog();
     const QByteArray& getSelectedData();
 private slots:
     void preAccepted();
 };
+
+#endif

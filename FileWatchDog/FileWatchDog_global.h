@@ -1,0 +1,12 @@
+#ifndef FILEWATCHDOG_GLOBAL_H
+#define FILEWATCHDOG_GLOBAL_H
+
+#include <QtCore/qglobal.h>
+
+#if defined(FILEWATCHDOG_LIBRARY)
+#  define FILEWATCHDOG_EXPORT Q_DECL_EXPORT
+#else
+#  define FILEWATCHDOG_EXPORT Q_DECL_IMPORT
+#endif
+
+#endif // FILEWATCHDOG_GLOBAL_H

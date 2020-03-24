@@ -33,7 +33,7 @@ Q_OBJECT
 
     void disableButtons(bool yes);
 public:
-    MainWindow(QWidget *parent = nullptr);
+    explicit MainWindow(QWidget *parent = nullptr);
     ~MainWindow();
 private slots:
     void showAddDialog();
