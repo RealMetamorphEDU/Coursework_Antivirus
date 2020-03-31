@@ -17,11 +17,15 @@ DEFINES += QT_DEPRECATED_WARNINGS
 #DEFINES += QT_DISABLE_DEPRECATED_BEFORE=0x060000    # disables all the APIs deprecated before Qt 6.0.0
 
 SOURCES += \
-    filewatchdog.cpp
+    filewatchdog.cpp \
+	watcher.cpp \
+	changenotificator.cpp
 
 HEADERS += \
     FileWatchDog_global.h \
-    filewatchdog.h
+    filewatchdog.h \
+	watcher.h \
+	changenotificator.h
 
 # Default rules for deployment.
 unix {

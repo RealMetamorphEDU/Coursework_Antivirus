@@ -4,22 +4,26 @@
 #include <QEvent>
 #include <QVector>
 #include <QFileInfo>
-
-typedef void *HANDLE;
+#include <Windows.h>
+#include "changenotificator.h"
 
 enum class Status { succAdd, succRemove, failAdd, failRemove, def };
 
-class Watcher: public QObject {
+class FILEWATCHDOG_EXPORT Watcher: public QObject {
 Q_OBJECT
     bool working;
     bool onEvents;
     bool alreadyWatching;
+    HANDLE completeEvent;
     QFileInfo fileInfo;
-    QVector<HANDLE> handles;
+    QVector<HANDLE> dirs;
+    QVector<OVERLAPPED*> overs;
+    QVector<HANDLE> eventHandles;
     QVector<QString> paths;
+    QVector<DWORD*> buffers;
     Status status;
 public:
-    explicit Watcher(HANDLE updateEvent, QObject *parent = nullptr);
+    explicit Watcher(HANDLE updateEvent, HANDLE completeEvent, QObject *parent = nullptr);
     ~Watcher();
     const QVector<QString>& getPaths();
     bool event(QEvent *event) override;
@@ -27,7 +31,7 @@ public:
 private slots:
     void watching();
 signals:
-    void changeNotify();
+    void changeNotify(ChangeNotificator* notificator);
 };
 
 enum events {
@@ -37,7 +41,6 @@ enum events {
 };
 
 class AddEvent: public QEvent {
-Q_OBJECT
     QString path;
 public:
     explicit AddEvent(QString path);
@@ -46,7 +49,6 @@ public:
 };
 
 class RemoveEvent: public QEvent {
-Q_OBJECT
     QString path;
 public:
     explicit RemoveEvent(QString path);

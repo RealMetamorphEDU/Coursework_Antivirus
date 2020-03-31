@@ -1,22 +1,32 @@
 #include "watcher.h"
 #include <QTimerEvent>
 #include <QCoreApplication>
-#include <Windows.h>
 
-Watcher::Watcher(HANDLE updateEvent, QObject *parent) : QObject(parent) {
-    working = true;
+
+Watcher::Watcher(HANDLE updateEvent, HANDLE completeEvent, QObject *parent) : QObject(parent) {
+    working = false;
     onEvents = false;
     alreadyWatching = false;
     status = Status::def;
-    handles.push_back(updateEvent);
+    eventHandles.push_back(updateEvent);
+    this->completeEvent = completeEvent;
 }
 
 Watcher::~Watcher() {
-    paths.clear();
-    for (int i = 1; i < handles.size(); ++i) {
-        FindCloseChangeNotification(handles.at(0));
+    for (int i = 0; i < paths.size(); ++i) {
+        OVERLAPPED *overlapped = overs.at(i);
+        DWORD *buffer = buffers.at(i);
+        HANDLE dir = dirs.at(i);
+        CloseHandle(dir);
+        CloseHandle(overlapped->hEvent);
+        delete overlapped;
+        delete[] buffer;
     }
-    handles.clear();
+    eventHandles.clear();
+    dirs.clear();
+    buffers.clear();
+    overs.clear();
+    paths.clear();
 }
 
 const QVector<QString>& Watcher::getPaths() {
@@ -27,7 +37,8 @@ bool Watcher::event(QEvent *event) {
     if (onEvents) {
         switch ((events) event->type()) {
             case addPathType:
-                AddEvent *add = dynamic_cast<AddEvent*>(event);
+                AddEvent *add;
+                add = dynamic_cast<AddEvent*>(event);
                 status = Status::failAdd;
                 fileInfo.setFile(add->getPath());
                 if (fileInfo.exists()) {
@@ -36,26 +47,65 @@ bool Watcher::event(QEvent *event) {
                         path = fileInfo.canonicalPath();
                     else
                         path = fileInfo.canonicalFilePath();
-                    HANDLE handle = FindFirstChangeNotificationA(path.toStdString().c_str(), TRUE,
-                                                                 FILE_NOTIFY_CHANGE_FILE_NAME | FILE_NOTIFY_CHANGE_SIZE
-                                                                 |
-                                                                 FILE_NOTIFY_CHANGE_LAST_WRITE);
-                    if (handle != INVALID_HANDLE_VALUE && handle != NULL) {
+                    if (!paths.contains(path)) {
+                        HANDLE dir = CreateFileA(path.toStdString().c_str(), GENERIC_READ,
+                                                 FILE_SHARE_READ | FILE_SHARE_WRITE | FILE_SHARE_DELETE, NULL,
+                                                 OPEN_EXISTING, FILE_FLAG_BACKUP_SEMANTICS | FILE_FLAG_OVERLAPPED,
+                                                 NULL);
+                        if (dir == INVALID_HANDLE_VALUE)
+                            return true;
+                        OVERLAPPED *overlapped = new OVERLAPPED;
+                        overlapped->Offset = 0;
+                        overlapped->OffsetHigh = 0;
+                        overlapped->hEvent = CreateEventA(NULL, FALSE, FALSE, NULL);
+                        if (overlapped->hEvent == INVALID_HANDLE_VALUE) {
+                            delete overlapped;
+                            CloseHandle(dir);
+                            return true;
+                        }
+                        DWORD *buffer = new DWORD[1024];
+                        dirs.push_back(dir);
+                        overs.push_back(overlapped);
+                        eventHandles.push_back(overlapped->hEvent);
+                        buffers.push_back(buffer);
                         paths.push_back(path);
-                        handles.push_back(handle);
+                        if (!ReadDirectoryChangesW(dir, buffer, 1024 * sizeof(DWORD),TRUE,
+                                                   FILE_NOTIFY_CHANGE_FILE_NAME | FILE_NOTIFY_CHANGE_SIZE,
+                                                   NULL, overlapped, NULL)) {
+                            dirs.pop_back();
+                            CloseHandle(dir);
+                            overs.pop_back();
+                            CloseHandle(overlapped->hEvent);
+                            delete overlapped;
+                            eventHandles.pop_back();
+                            buffers.pop_back();
+                            delete[] buffer;
+                            paths.pop_back();
+                            return true;
+                        }
                         status = Status::succAdd;
                     }
                 }
                 return true;
             case removePathType:
-                RemoveEvent *remove = dynamic_cast<RemoveEvent*>(event);
+                RemoveEvent *remove;
+                remove = dynamic_cast<RemoveEvent*>(event);
                 status = Status::failRemove;
                 if (paths.contains(remove->getPath())) {
                     int index = paths.indexOf(remove->getPath(), 0);
-                    HANDLE handle = handles.at(index + 1);
-                    FindCloseChangeNotification(handle);
+                    OVERLAPPED *overlapped = overs.at(index);
+                    DWORD *buffer = buffers.at(index);
+                    HANDLE dir = dirs.at(index);
+                    CloseHandle(dir);
+                    CloseHandle(overlapped->hEvent);
+                    delete overlapped;
+                    delete[] buffer;
                     paths.remove(index);
-                    handles.remove(index + 1);
+                    overs.remove(index);
+                    dirs.remove(index);
+                    buffers.remove(index);
+                    eventHandles.remove(index + 1);
+                    status = Status::succRemove;
                 }
                 return true;
             case stopType:
@@ -75,16 +125,54 @@ Status Watcher::getLastStatus() {
 void Watcher::watching() {
     if (!alreadyWatching) {
         alreadyWatching = true;
+        working = true;
         while (working) {
-            DWORD selected = WaitForMultipleObjects(handles.size(), handles.data(), FALSE, INFINITE) - WAIT_OBJECT_0;
+            DWORD selected = WaitForMultipleObjects(eventHandles.size(), eventHandles.data(), FALSE, INFINITE) -
+                             WAIT_OBJECT_0;
             if (selected == 0) {
                 onEvents = true;
-                QCoreApplication::processEvents();
+                QCoreApplication::processEvents(QEventLoop::AllEvents | QEventLoop::WaitForMoreEvents, 100);
                 onEvents = false;
-                SetEvent(handles.at(0));
+                SetEvent(completeEvent);
             } else {
-                HANDLE handle = handles.at(selected);
-                //TODO: Обработать изменение директории по пути.
+                OVERLAPPED *overlapped = overs.at(selected - 1);
+                DWORD *buffer = buffers.at(selected - 1);
+                HANDLE dir = dirs.at(selected - 1);
+                QString path = paths.at(selected - 1);
+                int offset = 0;
+                do {
+                    FILE_NOTIFY_INFORMATION *info = (FILE_NOTIFY_INFORMATION*) (((char*) buffer) + offset);
+                    offset = info->NextEntryOffset;
+                    QString filepath = QString::fromWCharArray(info->FileName, info->FileNameLength / 2);
+                    ChangeNotificator *notificator = nullptr;
+                    switch (info->Action) {
+                        case FILE_ACTION_ADDED:
+                            notificator = new ChangeNotificator(path.append("/").append(filepath), fileCreated, this);
+                            break;
+                        case FILE_ACTION_MODIFIED:
+                            notificator = new ChangeNotificator(path.append("/").append(filepath), fileModified, this);
+                            break;
+                    }
+                    if (notificator != nullptr) {
+                        emit changeNotify(notificator);
+                    }
+                } while (offset);
+                //Возобновляем наблюдение
+                if (!ReadDirectoryChangesW(dir, buffer, 1024 * sizeof(DWORD),TRUE,
+                                           FILE_NOTIFY_CHANGE_FILE_NAME | FILE_NOTIFY_CHANGE_SIZE,
+                                           NULL, overlapped, NULL)) {
+                    dirs.remove(selected - 1);
+                    CloseHandle(dir);
+                    overs.remove(selected - 1);
+                    CloseHandle(overlapped->hEvent);
+                    delete overlapped;
+                    eventHandles.remove(selected);
+                    buffers.remove(selected - 1);
+                    delete[] buffer;
+                    paths.remove(selected - 1);
+                    ChangeNotificator *notificator = new ChangeNotificator(path, dirCantWatch, this);
+                    emit changeNotify(notificator);
+                }
             }
         }
         alreadyWatching = false;

@@ -3,6 +3,7 @@
 
 #include "FileWatchDog_global.h"
 #include <QObject>
+#include "changenotificator.h"
 
 QT_BEGIN_NAMESPACE
 
@@ -14,9 +15,11 @@ class Watcher;
 typedef void *HANDLE;
 
 class FILEWATCHDOG_EXPORT FileWatchDog: public QObject {
+Q_OBJECT
     QThread *thread;
     Watcher *watcher;
-    HANDLE winEvent;
+    HANDLE requestEvent;
+    HANDLE completeEvent;
 public:
     explicit FileWatchDog(QObject *parent = nullptr);
     ~FileWatchDog();
@@ -25,7 +28,7 @@ public:
     bool removePath(QString &path);
     bool removeAllPaths();
 signals:
-    void changeNotify();
+    void changeNotify(ChangeNotificator *notificator);
 };
 
 #endif // FILEWATCHDOG_H
