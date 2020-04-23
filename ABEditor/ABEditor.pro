@@ -26,7 +26,7 @@ HEADERS += \
     mainwindow.h \
 	recordviewmodel.h \
 	editrecorddialog.h \
-	choosesigdialog.cpp
+	choosesigdialog.h
 
 FORMS += \
     mainwindow.ui \
@@ -43,8 +43,15 @@ else:win32:CONFIG(debug, debug|release): LIBS += -L$$OUT_PWD/../ABRecordTokenize
 INCLUDEPATH += $$PWD/../ABRecordTokenizer
 DEPENDPATH += $$PWD/../ABRecordTokenizer
 
+
+
 win32:CONFIG(release, debug|release): LIBS += -L$$OUT_PWD/../QHexEdit/release/ -lQHexEdit
 else:win32:CONFIG(debug, debug|release): LIBS += -L$$OUT_PWD/../QHexEdit/debug/ -lQHexEdit
 
 INCLUDEPATH += $$PWD/../QHexEdit
 DEPENDPATH += $$PWD/../QHexEdit
+
+win32-g++:CONFIG(release, debug|release): PRE_TARGETDEPS += $$OUT_PWD/../QHexEdit/release/libQHexEdit.a
+else:win32-g++:CONFIG(debug, debug|release): PRE_TARGETDEPS += $$OUT_PWD/../QHexEdit/debug/libQHexEdit.a
+else:win32:!win32-g++:CONFIG(release, debug|release): PRE_TARGETDEPS += $$OUT_PWD/../QHexEdit/release/QHexEdit.lib
+else:win32:!win32-g++:CONFIG(debug, debug|release): PRE_TARGETDEPS += $$OUT_PWD/../QHexEdit/debug/QHexEdit.lib

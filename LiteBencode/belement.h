@@ -2,7 +2,6 @@
 #define BELEMENT_H
 
 #include <qfile.h>
-#include "LiteBencode_global.h"
 #include <QObject>
 
 enum class BElementType {
@@ -12,7 +11,7 @@ enum class BElementType {
     bInteger
 };
 
-class LITEBENCODE_EXPORT BElement: public QObject {
+class BElement: public QObject {
 Q_OBJECT
 public:
     explicit BElement(QObject *parent);
@@ -20,7 +19,7 @@ public:
     virtual BElementType getType() = 0;
 };
 
-class LITEBENCODE_EXPORT BListWritable: public BElement {
+class BListWritable: public BElement {
 Q_OBJECT
     bool closed;
     QFile *file;
@@ -39,7 +38,7 @@ public:
     void setFileWritable(QFile *file);
 };
 
-class LITEBENCODE_EXPORT BListReadable: public BElement {
+class BListReadable: public BElement {
 Q_OBJECT
     QFile *file;
     bool opened;
@@ -62,7 +61,7 @@ public:
     qint64 getOffset();
 };
 
-class LITEBENCODE_EXPORT BString: public BElement {
+class BString: public BElement {
 Q_OBJECT
     QByteArray value;
 public:
@@ -77,7 +76,7 @@ public:
     QByteArray toBencode() const;
 };
 
-class LITEBENCODE_EXPORT BInteger: public BElement {
+class BInteger: public BElement {
 Q_OBJECT
     int value;
 public:

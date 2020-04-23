@@ -3,7 +3,7 @@ QT += core gui
 greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 
 TEMPLATE = lib
-DEFINES += QHEXEDIT_LIBRARY
+CONFIG += staticlib
 
 CONFIG += c++11
 
@@ -21,8 +21,7 @@ DEFINES += QT_DEPRECATED_WARNINGS
 HEADERS = \
     qhexedit.h \
     chunks.h \
-    commands.h \
-    QHexEdit_global.h
+    commands.h
 
 
 SOURCES = \

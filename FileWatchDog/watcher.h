@@ -9,7 +9,7 @@
 
 enum class Status { succAdd, succRemove, failAdd, failRemove, def };
 
-class FILEWATCHDOG_EXPORT Watcher: public QObject {
+class Watcher: public QObject {
 Q_OBJECT
     bool working;
     bool onEvents;

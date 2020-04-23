@@ -19,8 +19,8 @@ FileWatchDog::FileWatchDog(QObject *parent): QObject(parent) {
 
 FileWatchDog::~FileWatchDog() {
     QCoreApplication::postEvent(watcher, new StopEvent());
-    SetEvent(requestEvent);
     ResetEvent(completeEvent);
+    SetEvent(requestEvent);
     WaitForSingleObject(completeEvent, INFINITE);
     thread->quit();
     thread->wait();
@@ -30,8 +30,8 @@ FileWatchDog::~FileWatchDog() {
 
 bool FileWatchDog::addPath(QString &path) {
     QCoreApplication::postEvent(watcher, new AddEvent(path));
-    SetEvent(requestEvent);
     ResetEvent(completeEvent);
+    SetEvent(requestEvent);
     WaitForSingleObject(completeEvent, INFINITE);
     return watcher->getLastStatus() == Status::succAdd;
 }
@@ -42,8 +42,8 @@ const QVector<QString>& FileWatchDog::getPaths() {
 
 bool FileWatchDog::removePath(QString &path) {
     QCoreApplication::postEvent(watcher, new RemoveEvent(path));
-    SetEvent(requestEvent);
     ResetEvent(completeEvent);
+    SetEvent(requestEvent);
     WaitForSingleObject(completeEvent, INFINITE);
     return watcher->getLastStatus() == Status::succAdd;
 }
@@ -52,8 +52,8 @@ bool FileWatchDog::removeAllPaths() {
     for (int i = 0; i < watcher->getPaths().size(); ++i) {
         QCoreApplication::postEvent(watcher, new RemoveEvent(watcher->getPaths().at(i)));
     }
-    SetEvent(requestEvent);
     ResetEvent(completeEvent);
+    SetEvent(requestEvent);
     WaitForSingleObject(completeEvent, INFINITE);
     return watcher->getLastStatus() == Status::succAdd;
 }

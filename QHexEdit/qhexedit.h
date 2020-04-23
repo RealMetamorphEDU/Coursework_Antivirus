@@ -1,8 +1,6 @@
 #ifndef QHEXEDIT_H
 #define QHEXEDIT_H
 
-#include "QHexEdit_global.h"
-
 #include <QAbstractScrollArea>
 #include <QPen>
 #include <QBrush>
@@ -50,7 +48,7 @@ QHexEdit is based on QIODevice, that's why QHexEdit can handle big amounts of
 data. The size of edited data can be more then two gigabytes without any
 restrictions.
 */
-class QHEXEDIT_EXPORT QHexEdit : public QAbstractScrollArea
+class QHexEdit : public QAbstractScrollArea
 {
     Q_OBJECT
 

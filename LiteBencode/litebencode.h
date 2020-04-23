@@ -3,12 +3,11 @@
 
 
 #include <QObject>
-#include "LiteBencode_global.h"
 #include <QtCore\qfile.h>
 #include "belement.h"
 
 
-class LITEBENCODE_EXPORT LiteBencode: public QObject {
+class LiteBencode: public QObject {
 Q_OBJECT
 private:
 	QFile *file;

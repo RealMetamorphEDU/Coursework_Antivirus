@@ -1,6 +1,5 @@
 #pragma once
 
-#include "FileWatchDog_global.h"
 #include <QObject>
 
 enum changeType {
@@ -9,7 +8,7 @@ enum changeType {
     dirCantWatch
 };
 
-class FILEWATCHDOG_EXPORT ChangeNotificator: public QObject {
+class ChangeNotificator: public QObject {
 Q_OBJECT
     QString path;
     changeType change;

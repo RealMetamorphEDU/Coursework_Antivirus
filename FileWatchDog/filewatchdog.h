@@ -1,7 +1,6 @@
 #ifndef FILEWATCHDOG_H
 #define FILEWATCHDOG_H
 
-#include "FileWatchDog_global.h"
 #include <QObject>
 #include "changenotificator.h"
 
@@ -14,7 +13,7 @@ QT_END_NAMESPACE
 class Watcher;
 typedef void *HANDLE;
 
-class FILEWATCHDOG_EXPORT FileWatchDog: public QObject {
+class FileWatchDog: public QObject {
 Q_OBJECT
     QThread *thread;
     Watcher *watcher;

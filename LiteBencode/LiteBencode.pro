@@ -1,7 +1,7 @@
 QT -= gui
 
 TEMPLATE = lib
-DEFINES += LITEBENCODE_LIBRARY
+CONFIG += staticlib
 
 CONFIG += c++11
 # The following define makes your compiler emit warnings if you use
@@ -20,7 +20,6 @@ SOURCES += \
     litebencode.cpp
 
 HEADERS += \
-    LiteBencode_global.h \
     belement.h \
     litebencode.h
 

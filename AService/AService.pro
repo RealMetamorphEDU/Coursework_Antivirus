@@ -1,12 +1,17 @@
-QT += testlib
-QT -= gui
-
-CONFIG += qt console warn_on depend_includepath testcase
-CONFIG -= app_bundle
-
 TEMPLATE = app
+CONFIG += console c++11
+CONFIG -= app_bundle
+CONFIG -= qt
 
-SOURCES +=  tst_watcher.cpp
+SOURCES += \
+        main.cpp
+
+win32:CONFIG(release, debug|release): LIBS += -L$$OUT_PWD/../ABRecordTokenizer/release/ -lABRecordTokenizer
+else:win32:CONFIG(debug, debug|release): LIBS += -L$$OUT_PWD/../ABRecordTokenizer/debug/ -lABRecordTokenizer
+
+INCLUDEPATH += $$PWD/../ABRecordTokenizer
+DEPENDPATH += $$PWD/../ABRecordTokenizer
+
 
 
 win32:CONFIG(release, debug|release): LIBS += -L$$OUT_PWD/../FileWatchDog/release/ -lFileWatchDog

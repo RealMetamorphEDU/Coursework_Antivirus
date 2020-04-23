@@ -1,7 +1,7 @@
 QT -= gui
 
 TEMPLATE = lib
-DEFINES += FILEWATCHDOG_LIBRARY
+CONFIG += staticlib
 
 CONFIG += c++11
 
@@ -22,7 +22,6 @@ SOURCES += \
 	changenotificator.cpp
 
 HEADERS += \
-    FileWatchDog_global.h \
     filewatchdog.h \
 	watcher.h \
 	changenotificator.h
