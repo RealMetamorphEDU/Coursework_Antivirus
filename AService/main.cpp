@@ -34,7 +34,7 @@ void main(int argc, char *argv[]) {
 }
 
 
-void WINAPI serviceMain(DWORD argc, char *argv[]) {
+void WINAPI serviceMain(int argc, char *argv[]) {
     // Register control event handler
     statusHandle = RegisterServiceCtrlHandlerA(SERVICE_NAME, controlHandler);
 
@@ -50,31 +50,4 @@ void srvInstall() {
 
 void srvUninstall() {
 
-}
-
-VOID SvcReportEvent(LPTSTR szFunction) 
-{ 
-    HANDLE hEventSource;
-
-    hEventSource = RegisterEventSourceA(NULL, SERVICE_NAME);
-
-    if( NULL != hEventSource )
-    {
-        StringCchPrintf(Buffer, 80, TEXT("%s failed with %d"), szFunction, GetLastError());
-
-        lpszStrings[0] = SVCNAME;
-        lpszStrings[1] = Buffer;
-
-        ReportEventA(hEventSource,        // event log handle
-                    EVENTLOG_ERROR_TYPE, // event type
-                    0,                   // event category
-                    SVC_ERROR,           // event identifier
-                    NULL,                // no security identifier
-                    2,                   // size of lpszStrings array
-                    0,                   // no binary data
-                    lpszStrings,         // array of strings
-                    NULL);               // no binary data
-
-        DeregisterEventSource(hEventSource);
-    }
 }
