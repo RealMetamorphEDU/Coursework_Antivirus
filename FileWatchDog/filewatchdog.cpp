@@ -45,7 +45,7 @@ bool FileWatchDog::removePath(QString &path) {
     ResetEvent(completeEvent);
     SetEvent(requestEvent);
     WaitForSingleObject(completeEvent, INFINITE);
-    return watcher->getLastStatus() == Status::succAdd;
+    return watcher->getLastStatus() == Status::succRemove;
 }
 
 bool FileWatchDog::removeAllPaths() {
@@ -55,5 +55,5 @@ bool FileWatchDog::removeAllPaths() {
     ResetEvent(completeEvent);
     SetEvent(requestEvent);
     WaitForSingleObject(completeEvent, INFINITE);
-    return watcher->getLastStatus() == Status::succAdd;
+    return watcher->getLastStatus() == Status::succRemove;
 }

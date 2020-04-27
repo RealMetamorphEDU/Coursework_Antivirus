@@ -72,9 +72,9 @@ int ABRecordTokenizer::startRead() {
             return -1;
         }
         auto *bCount = qobject_cast<BInteger*>(element);
-        const int count = bCount->getValue();
+        prepareCount = bCount->getValue();
         currentCount = 0;
-        return count;
+        return prepareCount;
     }
     return -1;
 }
@@ -113,7 +113,7 @@ int ABRecordTokenizer::writeRecord(SignatureRecord &record) {
         if (currentCount == prepareCount) {
             writing = false;
             writable->closeList();
-            delete writable;
+            writable->deleteLater();
         }
         return currentCount - 1;
     }
@@ -210,6 +210,10 @@ SignatureRecord* ABRecordTokenizer::nextRecord(int &number) {
             //
             delete recordList;
             number = currentCount++;
+            if (currentCount == prepareCount) {
+                reading = false;
+                readable->deleteLater();
+            }
             return record;
         }
         readable->deleteLater();

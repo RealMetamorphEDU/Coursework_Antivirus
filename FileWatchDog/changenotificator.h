@@ -2,8 +2,8 @@
 
 #include <QObject>
 
-enum changeType {
-    fileCreated,
+enum class changeType {
+    fileCreated = 0,
     fileModified,
     dirCantWatch
 };
@@ -16,6 +16,6 @@ public:
     ChangeNotificator(QString path, changeType type, QObject *parent = nullptr);
     ~ChangeNotificator();
 
-    const QString& getPath();
+    const QString getPath();
     changeType getChange();
 };

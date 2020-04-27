@@ -9,7 +9,7 @@ ChangeNotificator::~ChangeNotificator() {
 
 }
 
-const QString& ChangeNotificator::getPath() {
+const QString ChangeNotificator::getPath() {
     return path;
 }
 

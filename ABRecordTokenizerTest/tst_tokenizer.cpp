@@ -86,62 +86,68 @@ void tokenizer::test_write() {
 void tokenizer::test_read() {
     ABRecordTokenizer tokenizer;
     tokenizer.setBaseFile("tokenizerTest");
-    QSignalSpy spy(&tokenizer, SIGNAL(nextRecord(SignatureRecord*, int, int)));
+    SignatureRecord *record;
     QCOMPARE(tokenizer.startRead(), 5);
-    for (int i = 0, m = spy.count(); i < m; ++i) {
-        QList<QVariant> list = spy.takeFirst();
-        SignatureRecord * record = qvariant_cast<SignatureRecord*>(list.at(0));
-        int number = list.at(1).toInt();
-        int maxN = list.at(2).toInt();
-        QCOMPARE(maxN, 4);
-        switch (number) {
-            case 0:
-                QCOMPARE(record->getName(), "Hello");
-                QCOMPARE(record->getSigLength(), 15);
-                QCOMPARE(record->getSigPrefix(), "13234132512");
-                QCOMPARE(record->getSigHash(),
-                         QCryptographicHash::hash(QByteArray().append("Hello test"), QCryptographicHash::Md5));
-                QCOMPARE(record->getBeginOffset(), 13);
-                QCOMPARE(record->getEndOffset(), 56);
-                break;
-            case 1:
-                QCOMPARE(record->getName(), "Hello2");
-                QCOMPARE(record->getSigLength(), 12);
-                QCOMPARE(record->getSigPrefix(), "13234112");
-                QCOMPARE(record->getSigHash(),
-                         QCryptographicHash::hash(QByteArray().append("Hello test2"), QCryptographicHash::Md5));
-                QCOMPARE(record->getBeginOffset(), 15);
-                QCOMPARE(record->getEndOffset(), 16);
-                break;
-            case 2:
-                QCOMPARE(record->getName(), "Hello3");
-                QCOMPARE(record->getSigLength(), 15);
-                QCOMPARE(record->getSigPrefix(), "34132512");
-                QCOMPARE(record->getSigHash(),
-                         QCryptographicHash::hash(QByteArray().append("Hello test3"), QCryptographicHash::Md5));
-                QCOMPARE(record->getBeginOffset(), 17);
-                QCOMPARE(record->getEndOffset(), 56);
-                break;
-            case 3:
-                QCOMPARE(record->getName(), "Hello4");
-                QCOMPARE(record->getSigLength(), 15);
-                QCOMPARE(record->getSigPrefix(), "34f132512");
-                QCOMPARE(record->getSigHash(),
-                         QCryptographicHash::hash(QByteArray().append("Hello test4"), QCryptographicHash::Md5));
-                QCOMPARE(record->getBeginOffset(), 23);
-                QCOMPARE(record->getEndOffset(), 46);
-                break;
-            case 4:
-                QCOMPARE(record->getName(), "Hello5");
-                QCOMPARE(record->getSigLength(), 12);
-                QCOMPARE(record->getSigPrefix(), "132341dd");
-                QCOMPARE(record->getSigHash(),
-                         QCryptographicHash::hash(QByteArray().append("Hello test5"), QCryptographicHash::Md5));
-                QCOMPARE(record->getBeginOffset(), 11);
-                QCOMPARE(record->getEndOffset(), 59);
-                break;
-        }
-    }
+    QVERIFY(tokenizer.isReading());
+    QVERIFY(!tokenizer.isWriting());
+    QCOMPARE(tokenizer.startWrite(3), false);
+    int num = 0;
+
+    record = tokenizer.nextRecord(num);
+    QCOMPARE(num, 0);
+    QVERIFY(record != nullptr);
+    QCOMPARE(record->getName(), "Hello");
+    QCOMPARE(record->getSigLength(), 15);
+    QCOMPARE(record->getSigPrefix(), "13234132512");
+    QCOMPARE(record->getSigHash(),
+             QCryptographicHash::hash(QByteArray().append("Hello test"), QCryptographicHash::Md5));
+    QCOMPARE(record->getBeginOffset(), 13);
+    QCOMPARE(record->getEndOffset(), 56);
+    record = tokenizer.nextRecord(num);
+    QCOMPARE(num, 1);
+    QVERIFY(record != nullptr);
+    QCOMPARE(record->getName(), "Hello2");
+    QCOMPARE(record->getSigLength(), 12);
+    QCOMPARE(record->getSigPrefix(), "13234112");
+    QCOMPARE(record->getSigHash(),
+             QCryptographicHash::hash(QByteArray().append("Hello test2"), QCryptographicHash::Md5));
+    QCOMPARE(record->getBeginOffset(), 15);
+    QCOMPARE(record->getEndOffset(), 16);
+    record = tokenizer.nextRecord(num);
+    QCOMPARE(num, 2);
+    QVERIFY(record != nullptr);
+    QCOMPARE(record->getName(), "Hello3");
+    QCOMPARE(record->getSigLength(), 15);
+    QCOMPARE(record->getSigPrefix(), "34132512");
+    QCOMPARE(record->getSigHash(),
+             QCryptographicHash::hash(QByteArray().append("Hello test3"), QCryptographicHash::Md5));
+    QCOMPARE(record->getBeginOffset(), 17);
+    QCOMPARE(record->getEndOffset(), 56);
+    record = tokenizer.nextRecord(num);
+    QCOMPARE(num, 3);
+    QVERIFY(record != nullptr);
+    QCOMPARE(record->getName(), "Hello4");
+    QCOMPARE(record->getSigLength(), 15);
+    QCOMPARE(record->getSigPrefix(), "34f132512");
+    QCOMPARE(record->getSigHash(),
+             QCryptographicHash::hash(QByteArray().append("Hello test4"), QCryptographicHash::Md5));
+    QCOMPARE(record->getBeginOffset(), 23);
+    QCOMPARE(record->getEndOffset(), 46);
+    record = tokenizer.nextRecord(num);
+    QCOMPARE(num, 4);
+    QVERIFY(record != nullptr);
+    QCOMPARE(record->getName(), "Hello5");
+    QCOMPARE(record->getSigLength(), 12);
+    QCOMPARE(record->getSigPrefix(), "132341dd");
+    QCOMPARE(record->getSigHash(),
+             QCryptographicHash::hash(QByteArray().append("Hello test5"), QCryptographicHash::Md5));
+    QCOMPARE(record->getBeginOffset(), 11);
+    QCOMPARE(record->getEndOffset(), 59);
+
+    QVERIFY(!tokenizer.isReading());
+    record = tokenizer.nextRecord(num);
+    QCOMPARE(num, 4);
+    QVERIFY(record == nullptr);
 }
 
 void tokenizer::cleanupTestCase() {

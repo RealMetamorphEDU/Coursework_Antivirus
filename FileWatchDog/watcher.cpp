@@ -35,6 +35,7 @@ const QVector<QString>& Watcher::getPaths() {
 
 bool Watcher::event(QEvent *event) {
     if (onEvents) {
+        QString path;
         switch ((events) event->type()) {
             case addPathType:
                 AddEvent *add;
@@ -42,7 +43,6 @@ bool Watcher::event(QEvent *event) {
                 status = Status::failAdd;
                 fileInfo.setFile(add->getPath());
                 if (fileInfo.exists()) {
-                    QString path;
                     if (fileInfo.isFile())
                         path = fileInfo.canonicalPath();
                     else
@@ -91,8 +91,16 @@ bool Watcher::event(QEvent *event) {
                 RemoveEvent *remove;
                 remove = dynamic_cast<RemoveEvent*>(event);
                 status = Status::failRemove;
-                if (paths.contains(remove->getPath())) {
-                    int index = paths.indexOf(remove->getPath(), 0);
+                fileInfo.setFile(remove->getPath());
+                if (fileInfo.exists()) {
+                    if (fileInfo.isFile())
+                        path = fileInfo.canonicalPath();
+                    else
+                        path = fileInfo.canonicalFilePath();
+                } else
+                    path = remove->getPath();
+                if (paths.contains(path)) {
+                    int index = paths.indexOf(path, 0);
                     OVERLAPPED *overlapped = overs.at(index);
                     DWORD *buffer = buffers.at(index);
                     HANDLE dir = dirs.at(index);
@@ -145,16 +153,20 @@ void Watcher::watching() {
                     offset = info->NextEntryOffset;
                     QString filepath = QString::fromWCharArray(info->FileName, info->FileNameLength / 2);
                     ChangeNotificator *notificator = nullptr;
+                    fileInfo.setFile(path.append("/").append(filepath));
                     switch (info->Action) {
                         case FILE_ACTION_ADDED:
-                            notificator = new ChangeNotificator(path.append("/").append(filepath), fileCreated, this);
+                            notificator = new ChangeNotificator(fileInfo.canonicalFilePath(), changeType::fileCreated,
+                                                                this);
                             break;
                         case FILE_ACTION_MODIFIED:
-                            notificator = new ChangeNotificator(path.append("/").append(filepath), fileModified, this);
+                            notificator = new ChangeNotificator(fileInfo.canonicalFilePath(), changeType::fileModified,
+                                                                this);
                             break;
                     }
                     if (notificator != nullptr) {
                         emit changeNotify(notificator);
+                        SetEvent(eventHandles.at(0));
                     }
                 } while (offset);
                 //Возобновляем наблюдение
@@ -170,8 +182,9 @@ void Watcher::watching() {
                     buffers.remove(selected - 1);
                     delete[] buffer;
                     paths.remove(selected - 1);
-                    ChangeNotificator *notificator = new ChangeNotificator(path, dirCantWatch, this);
+                    ChangeNotificator *notificator = new ChangeNotificator(path, changeType::dirCantWatch, this);
                     emit changeNotify(notificator);
+                    SetEvent(eventHandles.at(0));
                 }
             }
         }
