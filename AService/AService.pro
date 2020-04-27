@@ -7,52 +7,54 @@ SOURCES += \
         main.cpp
 
 
-win32:CONFIG(release, debug|release): LIBS += -L$$OUT_PWD/../AServiceFileSeeker/release/ -lAServiceFileSeeker
-else:win32:CONFIG(debug, debug|release): LIBS += -L$$OUT_PWD/../AServiceFileSeeker/debug/ -lAServiceFileSeeker
+win32:CONFIG(release, debug|release): LIBS += -L$$OUT_PWD/../MessagePipeAService/release/ -lMessagePipeAService
+else:win32:CONFIG(debug, debug|release): LIBS += -L$$OUT_PWD/../MessagePipeAService/debug/ -lMessagePipeAService
 
-INCLUDEPATH += $$PWD/../AServiceFileSeeker
-DEPENDPATH += $$PWD/../AServiceFileSeeker
+INCLUDEPATH += $$PWD/../MessagePipeAService
+DEPENDPATH += $$PWD/../MessagePipeAService
 
-win32-g++:CONFIG(release, debug|release): PRE_TARGETDEPS += $$OUT_PWD/../AServiceFileSeeker/release/libAServiceFileSeeker.a
-else:win32-g++:CONFIG(debug, debug|release): PRE_TARGETDEPS += $$OUT_PWD/../AServiceFileSeeker/debug/libAServiceFileSeeker.a
-else:win32:!win32-g++:CONFIG(release, debug|release): PRE_TARGETDEPS += $$OUT_PWD/../AServiceFileSeeker/release/AServiceFileSeeker.lib
-else:win32:!win32-g++:CONFIG(debug, debug|release): PRE_TARGETDEPS += $$OUT_PWD/../AServiceFileSeeker/debug/AServiceFileSeeker.lib
+win32:CONFIG(release, debug|release): LIBS += -L$$OUT_PWD/../FileSeekerAService/release/ -lFileSeekerAService
+else:win32:CONFIG(debug, debug|release): LIBS += -L$$OUT_PWD/../FileSeekerAService/debug/ -lFileSeekerAService
+else:unix: LIBS += -L$$OUT_PWD/../FileSeekerAService/ -lFileSeekerAService
 
-win32:CONFIG(release, debug|release): LIBS += -L$$OUT_PWD/../AServiceFileWatchDog/release/ -lAServiceFileWatchDog
-else:win32:CONFIG(debug, debug|release): LIBS += -L$$OUT_PWD/../AServiceFileWatchDog/debug/ -lAServiceFileWatchDog
+INCLUDEPATH += $$PWD/../FileSeekerAService
+DEPENDPATH += $$PWD/../FileSeekerAService
 
-INCLUDEPATH += $$PWD/../AServiceFileWatchDog
-DEPENDPATH += $$PWD/../AServiceFileWatchDog
+win32-g++:CONFIG(release, debug|release): PRE_TARGETDEPS += $$OUT_PWD/../FileSeekerAService/release/libFileSeekerAService.a
+else:win32-g++:CONFIG(debug, debug|release): PRE_TARGETDEPS += $$OUT_PWD/../FileSeekerAService/debug/libFileSeekerAService.a
+else:win32:!win32-g++:CONFIG(release, debug|release): PRE_TARGETDEPS += $$OUT_PWD/../FileSeekerAService/release/FileSeekerAService.lib
+else:win32:!win32-g++:CONFIG(debug, debug|release): PRE_TARGETDEPS += $$OUT_PWD/../FileSeekerAService/debug/FileSeekerAService.lib
+else:unix: PRE_TARGETDEPS += $$OUT_PWD/../FileSeekerAService/libFileSeekerAService.a
 
-win32-g++:CONFIG(release, debug|release): PRE_TARGETDEPS += $$OUT_PWD/../AServiceFileWatchDog/release/libAServiceFileWatchDog.a
-else:win32-g++:CONFIG(debug, debug|release): PRE_TARGETDEPS += $$OUT_PWD/../AServiceFileWatchDog/debug/libAServiceFileWatchDog.a
-else:win32:!win32-g++:CONFIG(release, debug|release): PRE_TARGETDEPS += $$OUT_PWD/../AServiceFileWatchDog/release/AServiceFileWatchDog.lib
-else:win32:!win32-g++:CONFIG(debug, debug|release): PRE_TARGETDEPS += $$OUT_PWD/../AServiceFileWatchDog/debug/AServiceFileWatchDog.lib
+win32:CONFIG(release, debug|release): LIBS += -L$$OUT_PWD/../FileWatchDogAService/release/ -lFileWatchDogAService
+else:win32:CONFIG(debug, debug|release): LIBS += -L$$OUT_PWD/../FileWatchDogAService/debug/ -lFileWatchDogAService
 
-win32:CONFIG(release, debug|release): LIBS += -L$$OUT_PWD/../AServiceLog/release/ -lAServiceLog
-else:win32:CONFIG(debug, debug|release): LIBS += -L$$OUT_PWD/../AServiceLog/debug/ -lAServiceLog
+INCLUDEPATH += $$PWD/../FileWatchDogAService
+DEPENDPATH += $$PWD/../FileWatchDogAService
 
-INCLUDEPATH += $$PWD/../AServiceLog
-DEPENDPATH += $$PWD/../AServiceLog
+win32-g++:CONFIG(release, debug|release): PRE_TARGETDEPS += $$OUT_PWD/../FileWatchDogAService/release/libFileWatchDogAService.a
+else:win32-g++:CONFIG(debug, debug|release): PRE_TARGETDEPS += $$OUT_PWD/../FileWatchDogAService/debug/libFileWatchDogAService.a
+else:win32:!win32-g++:CONFIG(release, debug|release): PRE_TARGETDEPS += $$OUT_PWD/../FileWatchDogAService/release/FileWatchDogAService.lib
+else:win32:!win32-g++:CONFIG(debug, debug|release): PRE_TARGETDEPS += $$OUT_PWD/../FileWatchDogAService/debug/FileWatchDogAService.lib
 
-win32-g++:CONFIG(release, debug|release): PRE_TARGETDEPS += $$OUT_PWD/../AServiceLog/release/libAServiceLog.a
-else:win32-g++:CONFIG(debug, debug|release): PRE_TARGETDEPS += $$OUT_PWD/../AServiceLog/debug/libAServiceLog.a
-else:win32:!win32-g++:CONFIG(release, debug|release): PRE_TARGETDEPS += $$OUT_PWD/../AServiceLog/release/AServiceLog.lib
-else:win32:!win32-g++:CONFIG(debug, debug|release): PRE_TARGETDEPS += $$OUT_PWD/../AServiceLog/debug/AServiceLog.lib
+win32:CONFIG(release, debug|release): LIBS += -L$$OUT_PWD/../LogAService/release/ -lLogAService
+else:win32:CONFIG(debug, debug|release): LIBS += -L$$OUT_PWD/../LogAService/debug/ -lLogAService
 
-win32:CONFIG(release, debug|release): LIBS += -L$$OUT_PWD/../AServiceScanObjects/release/ -lAServiceScanObjects
-else:win32:CONFIG(debug, debug|release): LIBS += -L$$OUT_PWD/../AServiceScanObjects/debug/ -lAServiceScanObjects
+INCLUDEPATH += $$PWD/../LogAService
+DEPENDPATH += $$PWD/../LogAService
 
-INCLUDEPATH += $$PWD/../AServiceScanObjects
-DEPENDPATH += $$PWD/../AServiceScanObjects
+win32-g++:CONFIG(release, debug|release): PRE_TARGETDEPS += $$OUT_PWD/../LogAService/release/libLogAService.a
+else:win32-g++:CONFIG(debug, debug|release): PRE_TARGETDEPS += $$OUT_PWD/../LogAService/debug/libLogAService.a
+else:win32:!win32-g++:CONFIG(release, debug|release): PRE_TARGETDEPS += $$OUT_PWD/../LogAService/release/LogAService.lib
+else:win32:!win32-g++:CONFIG(debug, debug|release): PRE_TARGETDEPS += $$OUT_PWD/../LogAService/debug/LogAService.lib
 
-win32-g++:CONFIG(release, debug|release): PRE_TARGETDEPS += $$OUT_PWD/../AServiceScanObjects/release/libAServiceScanObjects.a
-else:win32-g++:CONFIG(debug, debug|release): PRE_TARGETDEPS += $$OUT_PWD/../AServiceScanObjects/debug/libAServiceScanObjects.a
-else:win32:!win32-g++:CONFIG(release, debug|release): PRE_TARGETDEPS += $$OUT_PWD/../AServiceScanObjects/release/AServiceScanObjects.lib
-else:win32:!win32-g++:CONFIG(debug, debug|release): PRE_TARGETDEPS += $$OUT_PWD/../AServiceScanObjects/debug/AServiceScanObjects.lib
+win32:CONFIG(release, debug|release): LIBS += -L$$OUT_PWD/../ScanObjectsAService/release/ -lScanObjectsAService
+else:win32:CONFIG(debug, debug|release): LIBS += -L$$OUT_PWD/../ScanObjectsAService/debug/ -lScanObjectsAService
 
-win32:CONFIG(release, debug|release): LIBS += -L$$OUT_PWD/../AServiceMessagePipe/release/ -lAServiceMessagePipe
-else:win32:CONFIG(debug, debug|release): LIBS += -L$$OUT_PWD/../AServiceMessagePipe/debug/ -lAServiceMessagePipe
+INCLUDEPATH += $$PWD/../ScanObjectsAService
+DEPENDPATH += $$PWD/../ScanObjectsAService
 
-INCLUDEPATH += $$PWD/../AServiceMessagePipe
-DEPENDPATH += $$PWD/../AServiceMessagePipe
+win32-g++:CONFIG(release, debug|release): PRE_TARGETDEPS += $$OUT_PWD/../ScanObjectsAService/release/libScanObjectsAService.a
+else:win32-g++:CONFIG(debug, debug|release): PRE_TARGETDEPS += $$OUT_PWD/../ScanObjectsAService/debug/libScanObjectsAService.a
+else:win32:!win32-g++:CONFIG(release, debug|release): PRE_TARGETDEPS += $$OUT_PWD/../ScanObjectsAService/release/ScanObjectsAService.lib
+else:win32:!win32-g++:CONFIG(debug, debug|release): PRE_TARGETDEPS += $$OUT_PWD/../ScanObjectsAService/debug/ScanObjectsAService.lib

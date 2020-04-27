@@ -6,15 +6,15 @@ SUBDIRS += \
     ABRecordTokenizer \
     ABRecordTokenizerTest \
     AService \
-    AServiceBaseLoad \
-    AServiceFileSeeker \
-    AServiceFindObjects \
+    BaseLoadAService \
+    FileSeekerAService \
+    FindObjectsAService \
     AServiceGUI \
-    AServiceLog \
-    AServiceFileWatchDog \
-    AServiceFileWatchDogTest \
-    AServiceMessagePipe \
-    AServiceScanObjects \
+    LogAService \
+    FileWatchDogAService \
+    FileWatchDogAServiceTest \
+    MessagePipeAService \
+    ScanObjectsAService \
     LiteBencodeTest \
     LiteBencode \
     QHexEdit

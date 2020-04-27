@@ -30,8 +30,9 @@ qnx: target.path = /tmp/$${TARGET}/bin
 else: unix:!android: target.path = /opt/$${TARGET}/bin
 !isEmpty(target.path): INSTALLS += target
 
-win32:CONFIG(release, debug|release): LIBS += -L$$OUT_PWD/../AServiceMessagePipe/release/ -lAServiceMessagePipe
-else:win32:CONFIG(debug, debug|release): LIBS += -L$$OUT_PWD/../AServiceMessagePipe/debug/ -lAServiceMessagePipe
 
-INCLUDEPATH += $$PWD/../AServiceMessagePipe
-DEPENDPATH += $$PWD/../AServiceMessagePipe
+win32:CONFIG(release, debug|release): LIBS += -L$$OUT_PWD/../MessagePipeAService/release/ -lMessagePipeAService
+else:win32:CONFIG(debug, debug|release): LIBS += -L$$OUT_PWD/../MessagePipeAService/debug/ -lMessagePipeAService
+
+INCLUDEPATH += $$PWD/../MessagePipeAService
+DEPENDPATH += $$PWD/../MessagePipeAService
