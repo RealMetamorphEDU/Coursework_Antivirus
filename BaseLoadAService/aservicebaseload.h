@@ -1,10 +1,13 @@
 #ifndef ASERVICEBASELOAD_H
 #define ASERVICEBASELOAD_H
 
-class AServiceBaseLoad
-{
+#include <QVector>
+
+class AServiceBaseLoad {
+    
+
 public:
-  AServiceBaseLoad();
+    AServiceBaseLoad();
 };
 
 #endif // ASERVICEBASELOAD_H

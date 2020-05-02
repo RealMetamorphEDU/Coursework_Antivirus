@@ -53,3 +53,11 @@ int SignatureRecord::getEndOffset() const {
 void SignatureRecord::setEndOffset(int endOffset) {
     this->endOffset = endOffset;
 }
+
+bool SignatureRecord::operator==(SignatureRecord &record) {
+    return this->getSigPrefix() == record.getSigPrefix() &&
+           this->getSigHash() == record.getSigHash() &&
+           this->getSigLength() == record.getSigLength() &&
+           this->getBeginOffset() == record.getBeginOffset() &&
+           this->getEndOffset() == record.getEndOffset();
+}

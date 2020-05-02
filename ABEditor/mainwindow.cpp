@@ -50,6 +50,14 @@ void MainWindow::showAddDialog() {
     EditRecordDialog dialog;
     if (dialog.exec()) {
         SignatureRecord *record = dialog.getRecord();
+        int size = recordView->getRecords().count();
+        for (int i = 0; i < size; ++i) {
+            if (*recordView->getRecords().at(i) == *record) {
+                QMessageBox::warning(this, "Совпадение", "Данная сигнатура уже существует в базе сигнатур антивируса!",
+                                     "Ок");
+                return;
+            }
+        }
         recordView->addRecord(record);
         ui->tableView->resizeColumnsToContents();
         saved = false;

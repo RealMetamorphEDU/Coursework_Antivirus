@@ -12,6 +12,7 @@ public:
     ~tokenizer();
 private slots:
     void initTestCase();
+    void test_equal();
     void test_write();
     void test_read();
     void cleanupTestCase();
@@ -27,6 +28,34 @@ tokenizer::~tokenizer() {
 
 void tokenizer::initTestCase() {
 
+}
+
+void tokenizer::test_equal() {
+    SignatureRecord r1;
+    SignatureRecord r2;
+    //1
+    r1.setName("Hello");
+    r1.setSigLength(15);
+    r1.setSigPrefix("13234132512");
+    r1.setSigHash(QCryptographicHash::hash(QByteArray().append("Hello test"), QCryptographicHash::Md5));
+    r1.setBeginOffset(13);
+    r1.setEndOffset(56);
+    //2
+    r2.setName("Hello2");
+    r2.setSigLength(12);
+    r2.setSigPrefix("13234112");
+    r2.setSigHash(QCryptographicHash::hash(QByteArray().append("Hello test2"), QCryptographicHash::Md5));
+    r2.setBeginOffset(15);
+    r2.setEndOffset(16);
+    QVERIFY(!(r1 == r2));
+    //2
+    r2.setName("Hello");
+    r2.setSigLength(15);
+    r2.setSigPrefix("13234132512");
+    r2.setSigHash(QCryptographicHash::hash(QByteArray().append("Hello test"), QCryptographicHash::Md5));
+    r2.setBeginOffset(13);
+    r2.setEndOffset(56);
+    QVERIFY(r1 == r2);
 }
 
 void tokenizer::test_write() {

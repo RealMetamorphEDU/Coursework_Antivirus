@@ -78,6 +78,7 @@ void RecordViewModel::updateRow(int row) {
 
 void RecordViewModel::removeRow(int row) {
     beginRemoveRows(QModelIndex(), row, row);
+    records.at(row)->deleteLater();
     records.remove(row);
     endRemoveRows();
 }
