@@ -18,12 +18,16 @@ DEFINES += QT_DEPRECATED_WARNINGS
 
 
 SOURCES += \
-    abstractscanobject.cpp \
-    aservicefindobjects.cpp
+    abstractscanbuilder.cpp \
+    aservicefindobjects.cpp \
+    dataregion.cpp \
+    scanobject.cpp
 
 HEADERS += \
-    abstractscanobject.h \
-    aservicefindobjects.h
+    abstractscanbuilder.h \
+    aservicefindobjects.h \
+    dataregion.h \
+    scanobject.h
 
 # Default rules for deployment.
 unix {

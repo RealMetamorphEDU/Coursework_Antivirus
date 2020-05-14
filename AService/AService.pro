@@ -13,19 +13,6 @@ else:win32:CONFIG(debug, debug|release): LIBS += -L$$OUT_PWD/../MessagePipeAServ
 INCLUDEPATH += $$PWD/../MessagePipeAService
 DEPENDPATH += $$PWD/../MessagePipeAService
 
-win32:CONFIG(release, debug|release): LIBS += -L$$OUT_PWD/../FileSeekerAService/release/ -lFileSeekerAService
-else:win32:CONFIG(debug, debug|release): LIBS += -L$$OUT_PWD/../FileSeekerAService/debug/ -lFileSeekerAService
-else:unix: LIBS += -L$$OUT_PWD/../FileSeekerAService/ -lFileSeekerAService
-
-INCLUDEPATH += $$PWD/../FileSeekerAService
-DEPENDPATH += $$PWD/../FileSeekerAService
-
-win32-g++:CONFIG(release, debug|release): PRE_TARGETDEPS += $$OUT_PWD/../FileSeekerAService/release/libFileSeekerAService.a
-else:win32-g++:CONFIG(debug, debug|release): PRE_TARGETDEPS += $$OUT_PWD/../FileSeekerAService/debug/libFileSeekerAService.a
-else:win32:!win32-g++:CONFIG(release, debug|release): PRE_TARGETDEPS += $$OUT_PWD/../FileSeekerAService/release/FileSeekerAService.lib
-else:win32:!win32-g++:CONFIG(debug, debug|release): PRE_TARGETDEPS += $$OUT_PWD/../FileSeekerAService/debug/FileSeekerAService.lib
-else:unix: PRE_TARGETDEPS += $$OUT_PWD/../FileSeekerAService/libFileSeekerAService.a
-
 win32:CONFIG(release, debug|release): LIBS += -L$$OUT_PWD/../FileWatchDogAService/release/ -lFileWatchDogAService
 else:win32:CONFIG(debug, debug|release): LIBS += -L$$OUT_PWD/../FileWatchDogAService/debug/ -lFileWatchDogAService
 
