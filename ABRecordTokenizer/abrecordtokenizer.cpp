@@ -74,6 +74,11 @@ int ABRecordTokenizer::startRead() {
         auto *bCount = qobject_cast<BInteger*>(element);
         prepareCount = bCount->getValue();
         currentCount = 0;
+        if (prepareCount == 0) {
+            readable->deleteLater();
+            readable = nullptr;
+            reading = false;
+        }
         return prepareCount;
     }
     return -1;

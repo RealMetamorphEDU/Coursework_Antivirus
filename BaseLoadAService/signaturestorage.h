@@ -15,7 +15,7 @@ public:
     explicit SignatureStorage(QObject *parent = nullptr);
 
     friend int AServiceBaseLoader::loadStorage(QString &storageName, QString &filepath);
-    friend int AServiceBaseLoader::appendStorage(QString &storageName, QString &filepath) const;
+    friend int AServiceBaseLoader::appendStorage(QString &storageName, QString &filepath);
 
     void startSearch();
     QVector<SignatureRecord*> search(QByteArray data);

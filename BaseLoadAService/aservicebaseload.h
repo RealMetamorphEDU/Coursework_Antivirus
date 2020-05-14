@@ -17,16 +17,17 @@ Q_OBJECT
     ABRecordTokenizer *tokenizer;
 
     AServiceBaseLoader(QObject *parent);
-
-static bool insertSignatureRecord(TSTNode *&root, SignatureRecord *record);
+    static bool insertSignatureRecord(TSTNode *&root, SignatureRecord *record);
 
 public:
+    ~AServiceBaseLoader();
+
     static void initLoader(QObject *parent);
-    static const AServiceBaseLoader* getInstance();
+    static AServiceBaseLoader* getInstance();
 
     int loadStorage(QString &storageName, QString &filepath);
-    int appendStorage(QString &storageName, QString &filepath) const;
-    const SignatureStorage* getStorage(QString &storageName);
+    int appendStorage(QString &storageName, QString &filepath);
+    SignatureStorage* getStorage(QString &storageName);
     void removeStorage(QString &storageName);
 };
 

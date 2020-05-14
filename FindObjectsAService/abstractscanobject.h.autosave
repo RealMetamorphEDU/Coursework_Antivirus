@@ -1,0 +1,16 @@
+#ifndef ABSTRACTSCANOBJECT_H
+#define ABSTRACTSCANOBJECT_H
+
+#include <QObject>
+
+class AbstractScanObject : public QObject
+{
+    Q_OBJECT
+public:
+    explicit AbstractScanObject(QObject *parent = nullptr);
+    
+    
+
+};
+
+#endif // ABSTRACTSCANOBJECT_H

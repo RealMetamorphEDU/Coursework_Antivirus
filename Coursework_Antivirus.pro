@@ -7,6 +7,7 @@ SUBDIRS += \
     ABRecordTokenizerTest \
     AService \
     BaseLoadAService \
+    BaseLoadAServiceTest \
     FileSeekerAService \
     FindObjectsAService \
     AServiceGUI \

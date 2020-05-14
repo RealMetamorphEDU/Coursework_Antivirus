@@ -7,6 +7,8 @@ SignatureStorage::SignatureStorage(QObject *parent) : QObject(parent) {
 }
 
 void SignatureStorage::startSearch() {
+    if (root == nullptr)
+        return;
     searching = true;
     current = root;
 }

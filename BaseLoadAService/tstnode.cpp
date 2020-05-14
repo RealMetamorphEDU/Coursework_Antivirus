@@ -45,7 +45,7 @@ bool TSTNode::addRecord(SignatureRecord *record) {
 }
 
 QVector<SignatureRecord*> TSTNode::getRecords() const {
-    QVector<SignatureRecord*> records(count);
+    QVector<SignatureRecord*> records;
     for (int i = 0; i < count; ++i) {
         records.append(array[i]);
     }

@@ -5,6 +5,7 @@
 
 AServiceBaseLoader *AServiceBaseLoader::instance = nullptr;
 
+
 AServiceBaseLoader::AServiceBaseLoader(QObject *parent) : QObject(parent) {
     tokenizer = new ABRecordTokenizer(this);
 }
@@ -20,7 +21,7 @@ bool AServiceBaseLoader::insertSignatureRecord(TSTNode *&root, SignatureRecord *
         bool end;
         switch (current->element == (byte) str.at(i) ? 0 : current->element > (byte) str.at(i) ? 1 : 2) {
             case 0: // Equal
-                end = (i - 1) == str.count();
+                end = i == (str.count() - 1);
                 if (end) {
                     QVector<SignatureRecord*> records = current->getRecords();
                     for (int j = 0; j < records.count(); ++j) {
@@ -55,6 +56,10 @@ bool AServiceBaseLoader::insertSignatureRecord(TSTNode *&root, SignatureRecord *
     return result;
 }
 
+AServiceBaseLoader::~AServiceBaseLoader() {
+    instance = nullptr;
+}
+
 
 void AServiceBaseLoader::initLoader(QObject *parent) {
     if (instance == nullptr)
@@ -62,7 +67,7 @@ void AServiceBaseLoader::initLoader(QObject *parent) {
 }
 
 
-const AServiceBaseLoader* AServiceBaseLoader::getInstance() {
+AServiceBaseLoader* AServiceBaseLoader::getInstance() {
     return instance;
 }
 
@@ -74,7 +79,7 @@ int AServiceBaseLoader::loadStorage(QString &storageName, QString &filepath) {
         SignatureStorage *storage = new SignatureStorage(this);
         TSTNode *root = nullptr;
         int num = 0;
-        QVector<SignatureRecord*> accum(need);
+        QVector<SignatureRecord*> accum;
         while (tokenizer->isReading()) {
             SignatureRecord *record = tokenizer->nextRecord(num);
             if (record != nullptr)
@@ -100,7 +105,7 @@ int AServiceBaseLoader::loadStorage(QString &storageName, QString &filepath) {
     return -1;
 }
 
-int AServiceBaseLoader::appendStorage(QString &storageName, QString &filepath) const {
+int AServiceBaseLoader::appendStorage(QString &storageName, QString &filepath) {
     if (storages.contains(storageName)) {
         tokenizer->setBaseFile(filepath);
         const int need = tokenizer->startRead();
@@ -109,7 +114,7 @@ int AServiceBaseLoader::appendStorage(QString &storageName, QString &filepath) c
             SignatureStorage *storage = storages.value(storageName);
             TSTNode *root = storage->root;
             int num = 0;
-            QVector<SignatureRecord*> accum(need);
+            QVector<SignatureRecord*> accum;
             while (tokenizer->isReading()) {
                 SignatureRecord *record = tokenizer->nextRecord(num);
                 if (record != nullptr)
@@ -133,7 +138,7 @@ int AServiceBaseLoader::appendStorage(QString &storageName, QString &filepath) c
     return -1;
 }
 
-const SignatureStorage* AServiceBaseLoader::getStorage(QString &storageName) {
+SignatureStorage* AServiceBaseLoader::getStorage(QString &storageName) {
     if (storages.contains(storageName))
         return storages.value(storageName);
     return nullptr;
