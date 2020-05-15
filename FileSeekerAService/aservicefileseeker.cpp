@@ -8,6 +8,6 @@ AServiceFileSeeker::~AServiceFileSeeker() {
 
 }
 
-void AServiceFileSeeker::findFiles(QString dirpath, bool recursive) {
+void AServiceFileSeeker::findFiles(QString dirpath, QString pattern, bool recursive) {
 
 }

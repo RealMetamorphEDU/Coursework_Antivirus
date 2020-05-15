@@ -11,7 +11,7 @@ public:
     explicit AServiceFileSeeker(QObject *parent = nullptr);
     ~AServiceFileSeeker();
 public slots:
-    void findFiles(QString dirpath, bool recursive);
+    void findFiles(QString dirpath, QString pattern, bool recursive);
 signals:
     void foundFile(QString filepath);
 };
