@@ -21,13 +21,21 @@ SOURCES += \
     abstractscanbuilder.cpp \
     aservicefindobjects.cpp \
     dataregion.cpp \
-    scanobject.cpp
+    pescanobject.cpp \
+    rawobject.cpp \
+    scanobject.cpp \
+    ziprawobject.cpp \
+    zipscanbuilder.cpp
 
 HEADERS += \
     abstractscanbuilder.h \
     aservicefindobjects.h \
     dataregion.h \
-    scanobject.h
+    pescanobject.h \
+    rawobject.h \
+    scanobject.h \
+    ziprawobject.h \
+    zipscanbuilder.h
 
 # Default rules for deployment.
 unix {
