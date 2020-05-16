@@ -43,6 +43,8 @@ unix {
 }
 !isEmpty(target.path): INSTALLS += target
 
+
+
 win32:CONFIG(release, debug|release): LIBS += -L$$OUT_PWD/../Zip/ZipLib/release/ -lZipLib
 else:win32:CONFIG(debug, debug|release): LIBS += -L$$OUT_PWD/../Zip/ZipLib/debug/ -lZipLib
 

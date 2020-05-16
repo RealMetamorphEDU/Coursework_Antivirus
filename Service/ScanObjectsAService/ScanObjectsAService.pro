@@ -28,6 +28,7 @@ unix {
 }
 !isEmpty(target.path): INSTALLS += target
 
+
 win32:CONFIG(release, debug|release): LIBS += -L$$OUT_PWD/../FindObjectsAService/release/ -lFindObjectsAService
 else:win32:CONFIG(debug, debug|release): LIBS += -L$$OUT_PWD/../FindObjectsAService/debug/ -lFindObjectsAService
 

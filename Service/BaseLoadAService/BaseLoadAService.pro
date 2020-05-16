@@ -32,8 +32,9 @@ unix {
 }
 !isEmpty(target.path): INSTALLS += target
 
-win32:CONFIG(release, debug|release): LIBS += -L$$OUT_PWD/../ABRecordTokenizer/release/ -lABRecordTokenizer
-else:win32:CONFIG(debug, debug|release): LIBS += -L$$OUT_PWD/../ABRecordTokenizer/debug/ -lABRecordTokenizer
 
-INCLUDEPATH += $$PWD/../ABRecordTokenizer
-DEPENDPATH += $$PWD/../ABRecordTokenizer
+win32:CONFIG(release, debug|release): LIBS += -L$$OUT_PWD/../../Loader/ABRecordTokenizer/release/ -lABRecordTokenizer
+else:win32:CONFIG(debug, debug|release): LIBS += -L$$OUT_PWD/../../Loader/ABRecordTokenizer/debug/ -lABRecordTokenizer
+
+INCLUDEPATH += $$PWD/../../Loader/ABRecordTokenizer
+DEPENDPATH += $$PWD/../../Loader/ABRecordTokenizer

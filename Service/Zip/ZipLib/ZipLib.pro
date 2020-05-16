@@ -69,6 +69,7 @@ HEADERS += \
     utils/stream_utils.h \
     utils/time_utils.h
 
+
 win32:CONFIG(release, debug|release): LIBS += -L$$OUT_PWD/../zlib/release/ -lzlib
 else:win32:CONFIG(debug, debug|release): LIBS += -L$$OUT_PWD/../zlib/debug/ -lzlib
 
