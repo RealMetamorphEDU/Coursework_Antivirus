@@ -3,6 +3,7 @@ Makefile*
 *.sln
 *.user
 .vs/*
+*/.vs/*
 */debug/*
 */release/*
 */x64/*
