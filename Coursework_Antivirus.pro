@@ -18,7 +18,8 @@ SUBDIRS += \
     ScanObjectsAService \
     LiteBencodeTest \
     LiteBencode \
-    QHexEdit
+    QHexEdit \
+    Zip
 
 HEADERS +=
 
