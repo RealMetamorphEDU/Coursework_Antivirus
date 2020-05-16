@@ -11,3 +11,4 @@ Makefile*
 *.filters
 *.vcxproj
 *.bat
+!*.pro.user
