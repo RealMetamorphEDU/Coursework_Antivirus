@@ -1,32 +1,39 @@
 #ifndef ASERVICELOG_H
 #define ASERVICELOG_H
-
 #include <QObject>
+typedef unsigned short WORD;
+typedef void* HANDLE;
 
 
 enum class Level {
-    INFO,
-    WARNING,
-    ERROR,
-    CRITICAL
+	INFO = 4,
+	WARNING = 3,
+	ERROR_ = 2,
+	CRITICAL = 1
 };
 
 class AServiceLog: public QObject {
 Q_OBJECT
-    void printLog(QString& tag, QString& message, Level level);
+	void printLog(QString &tag, QString &message, Level level);
+	static WORD getSystemLevel(Level level);
+	static const char* getLevelName(Level level);
+	HANDLE hEventLog;
+	Level currentLevel;
+	const char *lpszStrings[3]; // 0 - name 1 - tag 3 - message
+
+
 public:
-    AServiceLog(QString serviceName, QObject *parent = nullptr);
-    ~AServiceLog();
+	AServiceLog(QString serviceName, QObject *parent = nullptr);
+	~AServiceLog();
 
-    void setLevel(Level level);
-
-    void info(QString tag, QString message);
-    void warning(QString tag, QString message);
-    void error(QString tag, QString message);
-    void critical(QString tag, QString message);
+	void setLevel(Level level);
+	void info(QString tag, QString message);
+	void warning(QString tag, QString message);
+	void error(QString tag, QString message);
+	void critical(QString tag, QString message);
 
 signals:
-    void catchError(int code);
+	void catchError(int code);
 };
 
 #endif // ASERVICELOG_H

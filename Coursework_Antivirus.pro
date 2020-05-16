@@ -14,6 +14,7 @@ SUBDIRS += \
     LogAService \
     FileWatchDogAService \
     FileWatchDogAServiceTest \
+    LogAServiceTest \
     MessagePipeAService \
     ScanObjectsAService \
     LiteBencodeTest \

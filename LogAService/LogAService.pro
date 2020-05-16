@@ -27,3 +27,5 @@ unix {
     target.path = $$[QT_INSTALL_PLUGINS]/generic
 }
 !isEmpty(target.path): INSTALLS += target
+
+win32: LIBS += -lAdvAPI32
