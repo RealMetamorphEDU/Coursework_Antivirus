@@ -2,10 +2,9 @@
 #define ABSTRACTSCANBUILDER_H
 
 #include <QObject>
-#include <QFile>
 
-class ScanObject;
-class RawObject;
+#include "rawobject.h"
+#include "scanobject.h"
 
 
 class AbstractScanBuilder: public QObject {
