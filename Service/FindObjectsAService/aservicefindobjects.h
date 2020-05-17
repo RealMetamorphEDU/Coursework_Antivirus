@@ -1,10 +1,9 @@
 #ifndef ASERVICEFINDOBJECTS_H
 #define ASERVICEFINDOBJECTS_H
 
-class AServiceFindObjects
-{
+class AServiceFindObjects {
 public:
-  AServiceFindObjects();
+    AServiceFindObjects();
 };
 
 #endif // ASERVICEFINDOBJECTS_H

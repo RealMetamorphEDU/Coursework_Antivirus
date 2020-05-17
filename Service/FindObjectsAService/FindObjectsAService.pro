@@ -24,6 +24,7 @@ SOURCES += \
     pescanobject.cpp \
     rawobject.cpp \
     scanobject.cpp \
+    simplerawobject.cpp \
     ziprawobject.cpp \
     zipscanbuilder.cpp
 
@@ -34,6 +35,7 @@ HEADERS += \
     pescanobject.h \
     rawobject.h \
     scanobject.h \
+    simplerawobject.h \
     ziprawobject.h \
     zipscanbuilder.h
 

@@ -3,9 +3,8 @@
 
 #include <QObject>
 
-class ScanObject : public QObject
-{
-    Q_OBJECT
+class ScanObject: public QObject {
+Q_OBJECT
 public:
     explicit ScanObject(QObject *parent = nullptr);
 
