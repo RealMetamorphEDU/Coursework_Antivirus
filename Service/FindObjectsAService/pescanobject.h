@@ -2,9 +2,7 @@
 #define PESCANOBJECT_H
 
 
-class PEScanObject
-{
-    Q_OBJECT
+class PEScanObject {
 public:
     PEScanObject();
 };

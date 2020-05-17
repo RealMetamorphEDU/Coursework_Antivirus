@@ -4,7 +4,6 @@
 
 class ZipRawObject
 {
-    Q_OBJECT
 public:
     ZipRawObject();
 };

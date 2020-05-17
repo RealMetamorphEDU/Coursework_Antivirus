@@ -2,9 +2,8 @@
 #define ZIPSCANBUILDER_H
 
 
-class ZipScanBuilder
-{
-    Q_OBJECT
+class ZipScanBuilder {
+
 public:
     ZipScanBuilder();
 };
