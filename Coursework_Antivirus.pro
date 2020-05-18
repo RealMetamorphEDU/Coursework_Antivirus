@@ -5,3 +5,7 @@ SUBDIRS += \
     Editor \
     Loader \
     Service
+
+HEADERS +=
+
+SOURCES +=
