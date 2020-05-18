@@ -20,6 +20,7 @@ DEFINES += QT_DEPRECATED_WARNINGS
 SOURCES += \
     abstractscanbuilder.cpp \
     aservicefindobjects.cpp \
+    builder.cpp \
     dataregion.cpp \
     pescanobject.cpp \
     rawobject.cpp \
@@ -31,6 +32,7 @@ SOURCES += \
 HEADERS += \
     abstractscanbuilder.h \
     aservicefindobjects.h \
+    builder.h \
     dataregion.h \
     pescanobject.h \
     rawobject.h \

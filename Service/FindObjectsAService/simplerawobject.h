@@ -6,8 +6,11 @@ class QFile;
 
 class SimpleRawObject: public RawObject {
     QFile *source;
+    std::istream *stream;
+    FILE* file;
 public:
     SimpleRawObject(QString filename, QObject *parent = nullptr);
+    ~SimpleRawObject();
 
     QString getFullName() override;
     qint64 getSize() override;
@@ -15,6 +18,7 @@ public:
     QByteArray readNextBlock(qint64 len) override;
     bool canRead() override;
 
+    std::istream* getInputStream() override;
 };
 
 #endif // SIMPLERAWOBJECT_H

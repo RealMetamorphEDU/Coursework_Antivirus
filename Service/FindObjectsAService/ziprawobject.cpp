@@ -1,9 +1,11 @@
 #include "ziprawobject.h"
 #include "ZipArchive.h"
 
-ZipRawObject::ZipRawObject(QString &filename, std::shared_ptr<ZipArchive> &archive,
+ZipRawObject::ZipRawObject(std::shared_ptr<RawObject> &parentRaw, QString filename,
+                           std::shared_ptr<ZipArchive> &archive,
                            std::shared_ptr<ZipArchiveEntry> &entry,
                            QObject *parent) : RawObject(parent) {
+    this->parentRaw = parentRaw;
     this->filename = filename;
     this->archive = archive;
     this->entry = entry;
@@ -13,7 +15,7 @@ ZipRawObject::ZipRawObject(QString &filename, std::shared_ptr<ZipArchive> &archi
 
 QString ZipRawObject::getFullName() {
     QString fullname;
-    fullname.append(filename).append("!");
+    fullname.append(filename).append("|");
     fullname.append(QString::fromStdString(entry->GetFullName()));
     return fullname;
 }
@@ -47,4 +49,8 @@ QByteArray ZipRawObject::readNextBlock(qint64 len) {
 
 bool ZipRawObject::canRead() {
     return entry->CanExtract() && source != nullptr;
+}
+
+std::istream* ZipRawObject::getInputStream() {
+    return source;
 }
