@@ -1,6 +1,15 @@
 #include "dataregion.h"
 
-DataRegion::DataRegion(QObject *parent) : QObject(parent)
-{
 
+DataRegion::DataRegion(qint64 regionSize, int objectOffset) {
+    this->regionSize = regionSize;
+    this->objectOffset = objectOffset;
+}
+
+qint64 DataRegion::getRegionSize() {
+    return regionSize;
+}
+
+int DataRegion::getObjectOffset() {
+    return objectOffset;
 }

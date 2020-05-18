@@ -1,6 +1,5 @@
 #include "pescanobject.h"
 
-PEScanObject::PEScanObject()
-{
+PEScanObject::PEScanObject(QObject *parent) : ScanObject(parent) {
 
 }

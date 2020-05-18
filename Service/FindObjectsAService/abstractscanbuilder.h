@@ -11,8 +11,8 @@ class AbstractScanBuilder: public QObject {
 Q_OBJECT
 public:
     explicit AbstractScanBuilder(QObject *parent = nullptr);
-    virtual bool canBuildThis(RawObject *rawObject) = 0;
-    virtual void buildThis(RawObject *rawObject) = 0;
+    virtual bool canBuildThis(std::shared_ptr<RawObject> &rawObject) = 0;
+    virtual void buildThis(std::shared_ptr<RawObject> &rawObject) = 0;
 
 
 signals:

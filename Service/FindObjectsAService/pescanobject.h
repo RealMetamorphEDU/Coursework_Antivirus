@@ -1,10 +1,11 @@
 #ifndef PESCANOBJECT_H
 #define PESCANOBJECT_H
 
+#include "scanobject.h"
 
-class PEScanObject {
+class PEScanObject : public ScanObject{
 public:
-    PEScanObject();
+    PEScanObject(QObject *parent = nullptr);
 };
 
 #endif // PESCANOBJECT_H

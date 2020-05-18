@@ -3,11 +3,14 @@
 
 #include <QObject>
 
-class DataRegion: public QObject {
-Q_OBJECT
+class DataRegion {
+    qint64 regionSize;
+    int objectOffset;
 public:
-    explicit DataRegion(QObject *parent = nullptr);
+    DataRegion(qint64 regionSize, int objectOffset);
 
+    qint64 getRegionSize();
+    int getObjectOffset();
 };
 
 #endif // DATAREGION_H

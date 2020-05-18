@@ -14,6 +14,7 @@ public:
     virtual QByteArray readBlock(qint64 offset, qint64 len) = 0;
     virtual QByteArray readNextBlock(qint64 len) = 0;
     virtual bool canRead() = 0;
+    virtual std::istream* getInputStream() = 0;
 
 };
 
