@@ -7,6 +7,7 @@ class DataRegion {
     qint64 regionSize;
     int objectOffset;
 public:
+    DataRegion();
     DataRegion(qint64 regionSize, int objectOffset);
 
     qint64 getRegionSize();

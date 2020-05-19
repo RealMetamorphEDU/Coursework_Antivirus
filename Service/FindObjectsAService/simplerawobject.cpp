@@ -1,17 +1,16 @@
 #include "simplerawobject.h"
 #include <QFile>
 #include <QFileInfo>
-#include <fstream>
+#include "qfileinputstream.h"
 
 SimpleRawObject::SimpleRawObject(QString filename, QObject *parent) : RawObject(parent) {
     source = new QFile(filename, this);
     source->open(QIODevice::ReadOnly);
-    stream = nullptr;
+    stream = new std::istream(new QFileInputStream(source));
 }
 
 SimpleRawObject::~SimpleRawObject() {
-    if (stream != nullptr)
-        delete stream;
+    delete stream;
 }
 
 QString SimpleRawObject::getFullName() {
@@ -45,11 +44,5 @@ bool SimpleRawObject::canRead() {
 }
 
 std::istream* SimpleRawObject::getInputStream() {
-    if (stream == nullptr) {
-        file = _fdopen(source->handle(), "r");
-        if (file == nullptr)
-            return nullptr;
-        stream = new std::ifstream(file);
-    }
     return stream;
 }

@@ -20,9 +20,13 @@ DEFINES += QT_DEPRECATED_WARNINGS
 SOURCES += \
     abstractscanbuilder.cpp \
     aservicefindobjects.cpp \
+    binaryscanbuilder.cpp \
+    binaryscanobject.cpp \
     builder.cpp \
     dataregion.cpp \
+    pescanbuilder.cpp \
     pescanobject.cpp \
+    qfileinputstream.cpp \
     rawobject.cpp \
     scanobject.cpp \
     simplerawobject.cpp \
@@ -32,9 +36,13 @@ SOURCES += \
 HEADERS += \
     abstractscanbuilder.h \
     aservicefindobjects.h \
+    binaryscanbuilder.h \
+    binaryscanobject.h \
     builder.h \
     dataregion.h \
+    pescanbuilder.h \
     pescanobject.h \
+    qfileinputstream.h \
     rawobject.h \
     scanobject.h \
     simplerawobject.h \
@@ -47,10 +55,6 @@ unix {
 }
 !isEmpty(target.path): INSTALLS += target
 
-INCLUDEPATH += $$PWD/../Zip/zlib
-INCLUDEPATH += $$PWD/../Zip/lzma
-INCLUDEPATH += $$PWD/../Zip/bzip2
-
 win32:CONFIG(release, debug|release): LIBS += -L$$OUT_PWD/../Zip/ZipLib/release/ -lZipLib
 else:win32:CONFIG(debug, debug|release): LIBS += -L$$OUT_PWD/../Zip/ZipLib/debug/ -lZipLib
 
@@ -61,3 +65,8 @@ win32-g++:CONFIG(release, debug|release): PRE_TARGETDEPS += $$OUT_PWD/../Zip/Zip
 else:win32-g++:CONFIG(debug, debug|release): PRE_TARGETDEPS += $$OUT_PWD/../Zip/ZipLib/debug/libZipLib.a
 else:win32:!win32-g++:CONFIG(release, debug|release): PRE_TARGETDEPS += $$OUT_PWD/../Zip/ZipLib/release/ZipLib.lib
 else:win32:!win32-g++:CONFIG(debug, debug|release): PRE_TARGETDEPS += $$OUT_PWD/../Zip/ZipLib/debug/ZipLib.lib
+
+INCLUDEPATH += $$PWD/../Zip/zlib
+INCLUDEPATH += $$PWD/../Zip/lzma
+INCLUDEPATH += $$PWD/../Zip/bzip2
+

@@ -1,16 +1,17 @@
 #include "builder.h"
 #include "simplerawobject.h"
 #include "zipscanbuilder.h"
+#include "pescanbuilder.h"
+#include "binaryscanbuilder.h"
 
 void Builder::initBuilders() {
     builders.append(new ZipScanBuilder(this));
-
-
+    builders.append(new PEScanBuilder(this));
+    // Other builders insert this
+    builders.append(new BinaryScanBuilder(this));
     for (int i = 0; i < builders.count(); ++i) {
-        connect(builders.at(i), SIGNAL(builtScanObject(ScanObject *scanObject)),
-                SLOT(foundScanObject(ScanObject *scanObject)));
-        connect(builders.at(i), SIGNAL(builtRawObject(RawObject *rawObject)),
-                SLOT(addRawObject(RawObject *rawObject)));
+        connect(builders.at(i), &AbstractScanBuilder::builtScanObject, this, &Builder::foundScanObject);
+        connect(builders.at(i), &AbstractScanBuilder::builtRawObject, this, &Builder::addRawObject);
     }
 }
 
@@ -46,7 +47,7 @@ void Builder::building() {
         while (!requests.isEmpty()) {
             rawObjects.append(new SimpleRawObject(requests.takeFirst(), this));
             while (!rawObjects.isEmpty()) {
-                std::shared_ptr<RawObject> raw(rawObjects.takeFirst());
+                std::shared_ptr<RawObject> raw(rawObjects.takeFirst(), RawObject::deleter);
                 if (raw->canRead()) {
                     for (int i = 0; i < builders.count(); ++i) {
                         if (builders.at(i)->canBuildThis(raw)) {

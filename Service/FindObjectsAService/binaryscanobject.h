@@ -1,12 +1,15 @@
-#ifndef PESCANOBJECT_H
-#define PESCANOBJECT_H
+#ifndef BINARYSCANOBJECT_H
+#define BINARYSCANOBJECT_H
 
 #include "scanobject.h"
+#include <QVector>
+#include "rawobject.h"
 
-class PEScanObject: public ScanObject {
-    DataRegion err;
+class BinaryScanObject: public ScanObject {
+    DataRegion region;
+    std::shared_ptr<RawObject> rawObject;
 public:
-    PEScanObject(QObject *parent = nullptr);
+    explicit BinaryScanObject(std::shared_ptr<RawObject> &rawObject, QObject *parent = nullptr);
 
     QString getFullObjectName() override;
     int getRegionsCount() override;
@@ -16,4 +19,4 @@ public:
     QByteArray readNextBlockFromRegion(int region, qint64 len) override;
 };
 
-#endif // PESCANOBJECT_H
+#endif // BINARYSCANOBJECT_H

@@ -2,14 +2,14 @@
 #include "ziprawobject.h"
 #include "ZipArchive.h"
 #include <fstream>
+#include "binaryscanobject.h"
 
 ZipScanBuilder::ZipScanBuilder(QObject *parent) : AbstractScanBuilder(parent) {
 
 }
 
 bool ZipScanBuilder::canBuildThis(std::shared_ptr<RawObject> &rawObject) {
-    std::istream *stream;
-    stream = rawObject->getInputStream();
+    std::istream *stream = rawObject->getInputStream();
     if (stream == nullptr)
         return false;
     ZipArchive::Ptr archive = ZipArchive::Create(stream, false);
@@ -19,8 +19,7 @@ bool ZipScanBuilder::canBuildThis(std::shared_ptr<RawObject> &rawObject) {
 }
 
 void ZipScanBuilder::buildThis(std::shared_ptr<RawObject> &rawObject) {
-    std::istream *stream;
-    stream = rawObject->getInputStream();
+    std::istream *stream = rawObject->getInputStream();
     if (stream == nullptr)
         return;
     ZipArchive::Ptr archive = ZipArchive::Create(stream, false);
@@ -33,4 +32,5 @@ void ZipScanBuilder::buildThis(std::shared_ptr<RawObject> &rawObject) {
             emit builtRawObject(raw);
         }
     }
+    emit builtScanObject(new BinaryScanObject(rawObject, rawObject.get()));
 }

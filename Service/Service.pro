@@ -7,6 +7,7 @@ SUBDIRS += \
     BaseLoadAServiceTest \
     FileSeekerAService \
     FindObjectsAService \
+    FindObjectsAServiceTest \
     GUIAService \
     LogAService \
     LogAServiceTest \

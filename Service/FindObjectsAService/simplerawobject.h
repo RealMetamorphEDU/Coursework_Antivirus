@@ -7,7 +7,6 @@ class QFile;
 class SimpleRawObject: public RawObject {
     QFile *source;
     std::istream *stream;
-    FILE* file;
 public:
     SimpleRawObject(QString filename, QObject *parent = nullptr);
     ~SimpleRawObject();
