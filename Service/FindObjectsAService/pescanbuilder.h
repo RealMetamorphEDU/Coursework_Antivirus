@@ -1,15 +1,14 @@
-#ifndef ZIPSCANBUILDER_H
-#define ZIPSCANBUILDER_H
+#ifndef PESCANBUILDER_H
+#define PESCANBUILDER_H
 
 #include "abstractscanbuilder.h"
 
-class ZipScanBuilder: public AbstractScanBuilder {
-Q_OBJECT
+class PEScanBuilder: public AbstractScanBuilder {
 public:
-    ZipScanBuilder(QObject *parent = nullptr);
+    PEScanBuilder(QObject *parent = nullptr);
 
     bool canBuildThis(std::shared_ptr<RawObject> &rawObject) override;
     void buildThis(std::shared_ptr<RawObject> &rawObject) override;
 };
 
-#endif // ZIPSCANBUILDER_H
+#endif // PESCANBUILDER_H
