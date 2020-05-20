@@ -1,34 +1,51 @@
 #include "seeker.h"
 #include <QCoreApplication>
+
+
 Seeker::Seeker(HANDLE requestEvent, QObject *parent) : QObject(parent) {
 	this->requestEvent = requestEvent;
+	working = true;
 }
 
 bool Seeker::event(QEvent *event) {
-	if (onEvent) {
-		switch ((events) event->type()) {
-			case addPathType:
-				AddEvent* add;
-				add = dynamic_cast<AddEvent*>(event);
-				requests.push_back(FindRequest{ add->getPath(),add->getPattern(),add->isRecursive() });
-				status = Status::succAdd;
-				return true;
-			case stopType:
-				working = false;
-				return true;
-			default:
-				return QObject::event(event);
+	switch ((events) event->type()) {
+		case addPathType:
+			AddEvent *add;
+			add = dynamic_cast<AddEvent*>(event);
+			requests.push_back(FindRequest{add->getPath(), add->getPattern(), add->isRecursive()});
+			return true;
+		case stopType:
+			working = false;
+			return true;
+	}
+	return QObject::event(event);
+}
+
+
+void Seeker::searching() {
+	while (working) {
+		WaitForSingleObject(requestEvent, INFINITE);
+		QCoreApplication::processEvents(QEventLoop::AllEvents);
+		while (!requests.isEmpty()) {
+			if (!working)
+				break;
+			FindRequest fr = requests.takeFirst();
+			QDirIterator::IteratorFlags flags = fr.recursive ?
+				                                    QDirIterator::Subdirectories :
+				                                    QDirIterator::NoIteratorFlags;
+			QDirIterator iterator(fr.path, QStringList() << fr.pattern, QDir::NoDotAndDotDot | QDir::Files, flags);
+			while (iterator.hasNext()) {
+				QFileInfo fi(iterator.next());
+				emit seekerFoundFile(fi.absoluteFilePath());
+				SetEvent(requestEvent);
+			}
+			QCoreApplication::processEvents();
+
 		}
 	}
 }
 
-void Seeker::searching() {
-	WaitForSingleObject(requestEvent, INFINITE);
-	QCoreApplication::processEvents(QEventLoop::AllEvents);
-	
-}
-
-const QString & AddEvent::getPattern() const {
+const QString& AddEvent::getPattern() const {
 	return pattern;
 }
 
