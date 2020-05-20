@@ -33,9 +33,6 @@
 //
 // Define the severity codes
 //
-#define STATUS_SEVERITY_INFORMATIONAL    0x1
-#define STATUS_SEVERITY_WARNING          0x2
-#define STATUS_SEVERITY_ERROR            0x3
 
 
 //
@@ -45,7 +42,7 @@
 //
 // %1 [%2]: %3
 //
-#define ERROR_MESSAGE                    ((DWORD)0xC0000001L)
+#define ERROR_MESSAGE                    ((DWORD)0x00000001L)
 
 //
 // MessageId: WARNING_MESSAGE
@@ -54,7 +51,7 @@
 //
 // %1 [%2]: %3
 //
-#define WARNING_MESSAGE                  ((DWORD)0x80000002L)
+#define WARNING_MESSAGE                  ((DWORD)0x00000002L)
 
 //
 // MessageId: INFO_MESSAGE
@@ -63,7 +60,7 @@
 //
 // %1 [%2]: %3
 //
-#define INFO_MESSAGE                     ((DWORD)0x40000003L)
+#define INFO_MESSAGE                     ((DWORD)0x00000003L)
 
  // A message file must end with a period on its own line
  // followed by a blank line.

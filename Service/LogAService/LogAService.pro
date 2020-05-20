@@ -48,3 +48,6 @@ rctarget.depends = mctarget
 prebuild.target = Message.h
 prebuild.depends = linktarget FORCE
 QMAKE_EXTRA_TARGETS+= mctarget rctarget linktarget prebuild
+
+DISTFILES += \
+    debug/Message.rc

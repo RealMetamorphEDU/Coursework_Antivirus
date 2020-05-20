@@ -77,16 +77,20 @@ bool AServiceLog::RegisterSource(QString& source) {
 	QString regPath = "SYSTEM\\CurrentControlSet\\Services\\Eventlog\\";
 	//memset(szKey, 0, _MAX_PATH * 2 * sizeof(char));
 	regPath.append(source);
+	regPath.append("\\");
+	regPath.append(source);
 	DWORD dwResult = 0;
 	HKEY hKey = NULL;
 	LONG lRet = RegCreateKeyExA(HKEY_LOCAL_MACHINE, regPath.toStdString().c_str(), 0, NULL,
 	                            REG_OPTION_NON_VOLATILE, KEY_ALL_ACCESS, NULL, &hKey, &dwResult);
+	
+	//auto str = info.canonicalFilePath().toStdString();
 	if (lRet == ERROR_SUCCESS) {
 		
 		QFileInfo info("AMessageLogger.dll");
 
 		RegSetValueExA(hKey, "EventMessageFile", 0, REG_SZ,
-		              (byte*)info.canonicalFilePath().toStdString().c_str(),  info.canonicalFilePath().toStdString().length());
+			(byte*)info.canonicalFilePath().toStdString().c_str(),  info.canonicalFilePath().toStdString().length());
 		DWORD dwSupportedTypes = EVENTLOG_ERROR_TYPE |
 		                         EVENTLOG_WARNING_TYPE |
 		                         EVENTLOG_INFORMATION_TYPE;

@@ -38,7 +38,7 @@ void ALogServiceTest::cleanupTestCase()
 void ALogServiceTest::test_case1()
 {
     QString message("testmessage");
-    AServiceLog serviceLog(QString("LogTestName"), this);
+    AServiceLog serviceLog(QString("Coursework_Antivirus"), this);
     QSignalSpy spy(&serviceLog,SIGNAL(catchError(int)));
     serviceLog.error(QString("scan"),message);
     QVERIFY(spy.isEmpty());
