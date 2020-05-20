@@ -3,6 +3,7 @@
 
 #include <QObject>
 #include <QFile>
+#include <streambuf>
 
 class QFileInputStream: public QObject, public std::streambuf {
 Q_OBJECT

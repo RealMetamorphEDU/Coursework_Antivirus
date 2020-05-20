@@ -1,6 +1,8 @@
 #ifndef BINARYSCANOBJECT_H
 #define BINARYSCANOBJECT_H
 
+#include <memory>
+
 #include "scanobject.h"
 #include <QVector>
 #include "rawobject.h"

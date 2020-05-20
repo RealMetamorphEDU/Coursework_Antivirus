@@ -1,6 +1,8 @@
 #ifndef ZIPRAWOBJECT_H
 #define ZIPRAWOBJECT_H
 
+#include <memory>
+
 #include "rawobject.h"
 
 class ZipArchive;

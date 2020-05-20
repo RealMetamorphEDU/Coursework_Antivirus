@@ -2,6 +2,7 @@
 #include <QFile>
 #include <QFileInfo>
 #include "qfileinputstream.h"
+#include <iostream>
 
 SimpleRawObject::SimpleRawObject(QString filename, QObject *parent) : RawObject(parent) {
     source = new QFile(filename, this);

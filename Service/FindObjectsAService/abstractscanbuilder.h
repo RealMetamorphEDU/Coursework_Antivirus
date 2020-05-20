@@ -1,6 +1,7 @@
 #ifndef ABSTRACTSCANBUILDER_H
 #define ABSTRACTSCANBUILDER_H
 
+#include <memory>
 #include <QObject>
 
 #include "rawobject.h"
