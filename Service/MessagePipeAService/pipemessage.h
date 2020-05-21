@@ -14,6 +14,7 @@ public:
     explicit PipeMessage(MessageType type, QObject *parent = nullptr);
 
     MessageType getType() const;
+    virtual bool parseQByteArray(QByteArray &array) = 0;
     virtual QByteArray toByteArray() = 0;
 };
 
