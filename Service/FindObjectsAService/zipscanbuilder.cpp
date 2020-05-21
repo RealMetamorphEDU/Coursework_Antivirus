@@ -4,9 +4,7 @@
 #include <fstream>
 #include "binaryscanobject.h"
 
-ZipScanBuilder::ZipScanBuilder(QObject *parent) : AbstractScanBuilder(parent) {
-
-}
+ZipScanBuilder::ZipScanBuilder(QObject *parent) : AbstractScanBuilder(parent) {}
 
 bool ZipScanBuilder::canBuildThis(std::shared_ptr<RawObject> &rawObject) {
     std::istream *stream = rawObject->getInputStream();
@@ -23,7 +21,7 @@ void ZipScanBuilder::buildThis(std::shared_ptr<RawObject> &rawObject) {
     if (stream == nullptr)
         return;
     ZipArchive::Ptr archive = ZipArchive::Create(stream, false);
-    int count = archive->GetEntriesCount();
+    size_t count = archive->GetEntriesCount();
     if (count > 0) {
         for (int i = 0; i < count; ++i) {
             ZipArchiveEntry::Ptr entry = archive->GetEntry(i);

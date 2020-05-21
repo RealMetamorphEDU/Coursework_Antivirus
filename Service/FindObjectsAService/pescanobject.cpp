@@ -25,6 +25,3 @@ QByteArray PEScanObject::readBlockFromRegion(int region, qint64 offset, qint64 l
     return QByteArray("null");
 }
 
-QByteArray PEScanObject::readNextBlockFromRegion(int region, qint64 len) {
-    return QByteArray("null");
-}

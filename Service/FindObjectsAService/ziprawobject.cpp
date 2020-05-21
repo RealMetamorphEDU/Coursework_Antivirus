@@ -36,15 +36,8 @@ QByteArray ZipRawObject::readBlock(qint64 offset, qint64 len) {
     return data;
 }
 
-QByteArray ZipRawObject::readNextBlock(qint64 len) {
-    QByteArray data;
-    if (entry->CanExtract() && source != nullptr) {
-        char *buf = new char[len];
-        source->read(buf, len);
-        data.append(buf, source->gcount());
-        delete[] buf;
-    }
-    return data;
+void ZipRawObject::resetPos() {
+    source->seekg(0);
 }
 
 bool ZipRawObject::canRead() {

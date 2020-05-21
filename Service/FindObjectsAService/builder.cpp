@@ -51,6 +51,7 @@ void Builder::building() {
                 if (raw->canRead()) {
                     for (int i = 0; i < builders.count(); ++i) {
                         if (builders.at(i)->canBuildThis(raw)) {
+                            raw->resetPos();
                             builders.at(i)->buildThis(raw);
                             break;
                         }
@@ -76,6 +77,4 @@ const QString& FindEvent::getFilepath() {
 }
 
 
-StopEvent::StopEvent() : QEvent((Type) stopType) {
-
-}
+StopEvent::StopEvent() : QEvent((Type) stopType) {}
