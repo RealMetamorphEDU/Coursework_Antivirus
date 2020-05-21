@@ -1,23 +1,24 @@
 #include "pescanobject.h"
 
-PEScanObject::PEScanObject(QObject *parent) : ScanObject(parent) {
-
+PEScanObject::PEScanObject(std::shared_ptr<RawObject>& rawObject, QVector<DataRegion>& regions, QObject *parent) : ScanObject(parent) {
+    this->rawObject = rawObject;
+    this->regions = regions;
 }
 
 QString PEScanObject::getFullObjectName() {
-    return QString("null");
+    return rawObject->getFullName();
 }
 
 int PEScanObject::getRegionsCount() {
-    return 0;
+    return regions.size();
 }
 
 DataRegion PEScanObject::getRegion(int index) {
-    return DataRegion(0,0);
+    return regions.at(index);
 }
 
 qint64 PEScanObject::getObjectSize() {
-    return 0;
+    return rawObject->getSize();
 }
 
 QByteArray PEScanObject::readBlockFromRegion(int region, qint64 offset, qint64 len) {
