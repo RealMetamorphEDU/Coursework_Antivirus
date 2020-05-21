@@ -1,5 +1,7 @@
 #ifndef PESCANOBJECT_H
 #define PESCANOBJECT_H
+
+#include <memory>
 #include "rawobject.h"
 #include "scanobject.h"
 

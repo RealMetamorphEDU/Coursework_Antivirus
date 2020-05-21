@@ -1,7 +1,6 @@
 #include "pescanobject.h"
 
-PEScanObject::
-PEScanObject(std::shared_ptr<RawObject> &rawObject, QVector<DataRegion> &regions,
+PEScanObject::PEScanObject(std::shared_ptr<RawObject> &rawObject, QVector<DataRegion> &regions,
              QObject *parent) : ScanObject(parent) {
 	this->rawObject = rawObject;
 	this->regions = regions;

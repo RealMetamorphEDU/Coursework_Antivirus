@@ -35,15 +35,15 @@ signals:
 };
 
 enum events {
-    addRequestType = QEvent::User,
+    addPathType = QEvent::User,
     removePathType,
     stopType
 };
 
-class RequestEvent: public QEvent {
+class AddEvent: public QEvent {
     QString path;
 public:
-    explicit RequestEvent(QString path);
+    explicit AddEvent(QString path);
 
     const QString& getPath();
 };

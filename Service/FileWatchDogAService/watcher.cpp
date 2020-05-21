@@ -37,9 +37,9 @@ bool Watcher::event(QEvent *event) {
     if (onEvents) {
         QString path;
         switch ((events) event->type()) {
-            case addRequestType:
-                RequestEvent *add;
-                add = dynamic_cast<RequestEvent*>(event);
+            case addPathType:
+                AddEvent *add;
+                add = dynamic_cast<AddEvent*>(event);
                 status = Status::failAdd;
                 fileInfo.setFile(add->getPath());
                 if (fileInfo.exists()) {
@@ -192,11 +192,11 @@ void Watcher::watching() {
     }
 }
 
-RequestEvent::AddEvent(QString path) : QEvent((Type) addRequestType) {
+AddEvent::AddEvent(QString path) : QEvent((Type) addPathType) {
     this->path = path;
 }
 
-const QString& RequestEvent::getPath() {
+const QString& AddEvent::getPath() {
     return path;
 }
 
