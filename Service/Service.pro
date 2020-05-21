@@ -15,6 +15,8 @@ SUBDIRS += \
     FileWatchDogAService \
     FileWatchDogAServiceTest \
     MessagePipeAService \
+    MessagePipeAServiceTest \
     ScanObjectsAService \
+    ScanObjectsAServiceTest \
 	Zip
 	
