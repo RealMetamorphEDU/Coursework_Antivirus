@@ -13,7 +13,7 @@ public:
     virtual QString getFullName() = 0;
     virtual qint64 getSize() = 0;
     virtual QByteArray readBlock(qint64 offset, qint64 len) = 0;
-    virtual QByteArray readNextBlock(qint64 len) = 0;
+    virtual void resetPos() = 0;
     virtual bool canRead() = 0;
     virtual std::istream* getInputStream() = 0;
 

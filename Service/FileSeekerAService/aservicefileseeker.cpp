@@ -26,6 +26,6 @@ AServiceFileSeeker::~AServiceFileSeeker() {
 }
 
 void AServiceFileSeeker::findFiles(QString dirpath, QString pattern, bool recursive) {
-	QCoreApplication::postEvent(seeker, new AddEvent(dirpath, pattern, recursive));
+	QCoreApplication::postEvent(seeker, new RequestEvent(dirpath, pattern, recursive));
 	SetEvent(requestEvent);
 }

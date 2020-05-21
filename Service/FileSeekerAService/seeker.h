@@ -13,50 +13,42 @@ struct FindRequest {
     bool recursive;
 };
 
-enum class Status { succAdd, succRemove, def };
-class Seeker : public QObject
-{
-    Q_OBJECT
+class Seeker: public QObject {
+Q_OBJECT
     bool working;
-    bool alreadySearching;
     HANDLE requestEvent;
     QVector<FindRequest> requests;
 public:
-    explicit Seeker(HANDLE requestEvent,QObject *parent = nullptr);
-    bool event(QEvent* event) override;
+    explicit Seeker(HANDLE requestEvent, QObject *parent = nullptr);
+    bool event(QEvent *event) override;
 public slots:
     void searching();
 signals:
     void seekerFoundFile(QString filepath);
-	
 };
-
 
 
 enum events {
-    addPathType = QEvent::User,
+    addRequestType = QEvent::User,
     stopType
 };
 
-class AddEvent : public QEvent {
+class RequestEvent: public QEvent {
     QString path;
     QString pattern;
     bool recursive;
 public:
-    const QString & getPattern() const;
-    bool isRecursive() const;
-    explicit AddEvent(QString path, QString pattern, bool recursive) :
-        QEvent((Type)addPathType), path(path), pattern(pattern), recursive(recursive){}
+    explicit RequestEvent(QString &path, QString &pattern, bool recursive);
 
     const QString& getPath();
+    const QString& getPattern() const;
+    bool isRecursive() const;
 };
 
-class StopEvent : public QEvent {
-
+class StopEvent: public QEvent {
 public:
     explicit StopEvent();
 };
-
 
 
 #endif // SEEKER_H

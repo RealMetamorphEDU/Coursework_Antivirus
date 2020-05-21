@@ -23,7 +23,7 @@ public:
     QString getFullName() override;
     qint64 getSize() override;
     QByteArray readBlock(qint64 offset, qint64 len) override;
-    QByteArray readNextBlock(qint64 len) override;
+    void resetPos() override;
     bool canRead() override;
     std::istream* getInputStream() override;
 

@@ -32,12 +32,8 @@ QByteArray SimpleRawObject::readBlock(qint64 offset, qint64 len) {
     return data;
 }
 
-QByteArray SimpleRawObject::readNextBlock(qint64 len) {
-    QByteArray data;
-    if (!source->isReadable())
-        return data;
-    data = source->read(len);
-    return data;
+void SimpleRawObject::resetPos() {
+    source->seek(0);
 }
 
 bool SimpleRawObject::canRead() {

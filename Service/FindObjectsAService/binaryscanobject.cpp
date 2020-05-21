@@ -28,9 +28,3 @@ QByteArray BinaryScanObject::readBlockFromRegion(int region, qint64 offset, qint
         return QByteArray("");
     return rawObject->readBlock(offset, len);
 }
-
-QByteArray BinaryScanObject::readNextBlockFromRegion(int region, qint64 len) {
-    if (region != 0)
-        return QByteArray("");
-    return rawObject->readNextBlock(len);
-}

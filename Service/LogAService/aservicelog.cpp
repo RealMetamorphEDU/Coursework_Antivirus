@@ -5,9 +5,8 @@
 
 
 AServiceLog::AServiceLog(QString serviceName, QObject *parent): QObject(parent) {
-    //TCHAR Buffer[80];
     currentLevel = Level::INFO;
-    bool bRet = RegisterSource(serviceName);
+    RegisterSource(serviceName);
     hEventLog = RegisterEventSourceA(NULL, serviceName.toStdString().c_str());
 }
 
@@ -18,20 +17,21 @@ AServiceLog::~AServiceLog() {
 void AServiceLog::printLog(QString &tag, QString &message, Level level) {
     if (level > this->currentLevel)
         return;
-    lpszStrings[0] = getLevelName(level);
+    strings[0] = getLevelName(level);
     std::string tg = tag.toStdString();
     std::string msg = message.toStdString();
-    lpszStrings[1] = tg.c_str();
-    lpszStrings[2] = msg.c_str();
-    if (!ReportEventA(hEventLog,                 // event log handle
-                      getSystemLevel(level),     // event type
-                      tag == "scan" ? 1 : 0,     // event category
-                      getEventIdentifier(level), // event identifier
-                      0,                         // security identifier
-                      3,                         // size of lpszStrings array
-                      0,                         // no binary data
-                      lpszStrings,               // array of strings
-                      NULL))                     // no binary data
+    strings[1] = tg.c_str();
+    strings[2] = msg.c_str();
+    WORD sysLevel = getSystemLevel(level);
+    if (!ReportEventA(hEventLog,                       // event log handle
+                      sysLevel,                        // event type
+                      tag.toLower() == "scan" ? 1 : 0, // event category
+                      getEventIdentifier(sysLevel),    // event identifier
+                      0,                               // security identifier
+                      3,                               // size of strings array
+                      0,                               // no binary data
+                      strings,                         // array of strings
+                      NULL))                           // no binary data
     emit catchError(GetLastError());
 }
 
@@ -48,14 +48,13 @@ WORD AServiceLog::getSystemLevel(Level level) {
     }
 }
 
-DWORD AServiceLog::getEventIdentifier(Level level) {
+DWORD AServiceLog::getEventIdentifier(WORD level) {
     switch (level) {
-        case Level::INFO:
+        case EVENTLOG_INFORMATION_TYPE:
             return INFO_MESSAGE;
-        case Level::WARNING:
+        case EVENTLOG_WARNING_TYPE:
             return WARNING_MESSAGE;
-        case Level::ERROR_:
-        case Level::CRITICAL:
+        case EVENTLOG_ERROR_TYPE:
             return ERROR_MESSAGE;
     }
 }
@@ -77,7 +76,6 @@ const char* AServiceLog::getLevelName(Level level) {
 bool AServiceLog::RegisterSource(QString &source) {
 
     QString regPath = "SYSTEM\\CurrentControlSet\\Services\\Eventlog\\";
-    //memset(szKey, 0, _MAX_PATH * 2 * sizeof(char));
     regPath.append(source);
     regPath.append("\\");
     regPath.append(source);
@@ -86,7 +84,6 @@ bool AServiceLog::RegisterSource(QString &source) {
     LONG lRet = RegCreateKeyExA(HKEY_LOCAL_MACHINE, regPath.toStdString().c_str(), 0, NULL,
                                 REG_OPTION_NON_VOLATILE, KEY_ALL_ACCESS, NULL, &hKey, &dwResult);
 
-    //auto str = info.canonicalFilePath().toStdString();
     if (lRet == ERROR_SUCCESS) {
 
         QFileInfo info("AMessageLogger.dll");
@@ -97,7 +94,7 @@ bool AServiceLog::RegisterSource(QString &source) {
         DWORD dwSupportedTypes = EVENTLOG_ERROR_TYPE |
                                  EVENTLOG_WARNING_TYPE |
                                  EVENTLOG_INFORMATION_TYPE;
-        DWORD catCount = 3;
+        DWORD catCount = 2;
         RegSetValueExA(hKey, "TypesSupported", 0, REG_DWORD,
                        (const BYTE*) &dwSupportedTypes, sizeof(DWORD));
         RegSetValueExA(hKey, "CategoryCount", 0, REG_DWORD,
