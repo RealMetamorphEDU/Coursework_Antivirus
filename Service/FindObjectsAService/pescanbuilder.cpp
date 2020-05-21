@@ -44,6 +44,6 @@ void PEScanBuilder::buildThis(std::shared_ptr<RawObject> &rawObject) {
 			regions.append(DataRegion(sectionHeader->SizeOfRawData, sectionHeader->PointerToRawData));
 		offset += (DWORD) sizeof(IMAGE_SECTION_HEADER);
 	}
-	emit builtScanObject();
+	emit builtScanObject(new PEScanObject(rawObject,regions,rawObject.get()));
 
 }
