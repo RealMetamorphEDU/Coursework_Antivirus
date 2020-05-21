@@ -1,6 +1,6 @@
 #ifndef PESCANBUILDER_H
 #define PESCANBUILDER_H
-
+#include "dataregion.h"
 #include "abstractscanbuilder.h"
 
 class PEScanBuilder: public AbstractScanBuilder {
