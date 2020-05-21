@@ -13,7 +13,9 @@ int BinaryScanObject::getRegionsCount() {
     return 1;
 }
 
-const DataRegion& BinaryScanObject::getRegion(int index) {
+DataRegion BinaryScanObject::getRegion(int index) {
+    if (index != 0)
+        return DataRegion(0, 0);
     return region;
 }
 
@@ -22,9 +24,13 @@ qint64 BinaryScanObject::getObjectSize() {
 }
 
 QByteArray BinaryScanObject::readBlockFromRegion(int region, qint64 offset, qint64 len) {
+    if (region != 0)
+        return QByteArray("");
     return rawObject->readBlock(offset, len);
 }
 
 QByteArray BinaryScanObject::readNextBlockFromRegion(int region, qint64 len) {
+    if (region != 0)
+        return QByteArray("");
     return rawObject->readNextBlock(len);
 }

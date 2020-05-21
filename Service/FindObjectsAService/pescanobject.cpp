@@ -12,8 +12,8 @@ int PEScanObject::getRegionsCount() {
     return 0;
 }
 
-const DataRegion& PEScanObject::getRegion(int index) {
-    return err;
+DataRegion PEScanObject::getRegion(int index) {
+    return DataRegion(0,0);
 }
 
 qint64 PEScanObject::getObjectSize() {
