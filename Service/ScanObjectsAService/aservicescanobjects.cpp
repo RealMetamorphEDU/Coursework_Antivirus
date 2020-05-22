@@ -1,5 +1,3 @@
 #include "aservicescanobjects.h"
 
-AServiceScanObjects::AServiceScanObjects()
-{
-}
+AServiceScanObjects::AServiceScanObjects(QObject *parent): QObject(parent) { }

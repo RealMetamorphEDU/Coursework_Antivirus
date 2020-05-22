@@ -29,7 +29,7 @@ FileWatchDog::~FileWatchDog() {
 }
 
 bool FileWatchDog::addPath(QString &path) {
-    QCoreApplication::postEvent(watcher, new RequestEvent(path));
+    QCoreApplication::postEvent(watcher, new AddEvent(path));
     ResetEvent(completeEvent);
     SetEvent(requestEvent);
     WaitForSingleObject(completeEvent, INFINITE);

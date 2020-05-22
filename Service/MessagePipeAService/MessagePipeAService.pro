@@ -17,11 +17,13 @@ DEFINES += QT_DEPRECATED_WARNINGS
 #DEFINES += QT_DISABLE_DEPRECATED_BEFORE=0x060000    # disables all the APIs deprecated before Qt 6.0.0
 
 SOURCES += \
-    aservicemessagepipe.cpp
+    aservicemessagepipe.cpp \
+    pipemessage.cpp
 
 HEADERS += \
     AServiceMessagePipe_global.h \
-    aservicemessagepipe.h
+    aservicemessagepipe.h \
+    pipemessage.h
 
 # Default rules for deployment.
 unix {

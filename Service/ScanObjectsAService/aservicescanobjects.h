@@ -1,10 +1,11 @@
 #ifndef ASERVICESCANOBJECTS_H
 #define ASERVICESCANOBJECTS_H
 
-class AServiceScanObjects
-{
+#include <QObject>
+
+class AServiceScanObjects: public QObject {
 public:
-  AServiceScanObjects();
+    AServiceScanObjects(QObject *parent = nullptr);
 };
 
 #endif // ASERVICESCANOBJECTS_H

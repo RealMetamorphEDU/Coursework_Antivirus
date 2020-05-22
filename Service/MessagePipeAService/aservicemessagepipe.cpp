@@ -1,5 +1,8 @@
 #include "aservicemessagepipe.h"
 
-AServiceMessagePipe::AServiceMessagePipe()
-{
+AServiceMessagePipe::AServiceMessagePipe(QString &pipeName, QObject *parent) : QObject(parent) {
+    this->pipeName = pipeName;
+    connected = false;
 }
+
+void AServiceMessagePipe::sendMessage(PipeMessage *message) { }
