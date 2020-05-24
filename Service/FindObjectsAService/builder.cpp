@@ -49,13 +49,20 @@ void Builder::building() {
             while (!rawObjects.isEmpty()) {
                 std::shared_ptr<RawObject> raw(rawObjects.takeFirst(), RawObject::deleter);
                 if (raw->canRead()) {
+                    bool bad = true;
                     for (int i = 0; i < builders.count(); ++i) {
                         if (builders.at(i)->canBuildThis(raw)) {
                             raw->resetPos();
                             builders.at(i)->buildThis(raw);
+                            bad = false;
                             break;
                         }
                     }
+                    if (bad) {
+                        emit cantBuildThis(raw->getFullName());
+                    }
+                } else {
+                    emit cantBuildThis(raw->getFullName());
                 }
             }
             QCoreApplication::processEvents();
