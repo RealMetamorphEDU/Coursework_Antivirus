@@ -35,8 +35,9 @@ void PEScanBuilder::buildThis(std::shared_ptr<RawObject> &rawObject) {
 	qint64 offset = dosHeader->e_lfanew;
 	baheader = rawObject->readBlock(offset, sizeof(IMAGE_NT_HEADERS));
 	PIMAGE_NT_HEADERS peHeader = (PIMAGE_NT_HEADERS) baheader.data();
-	offset = (DWORD) peHeader + sizeof(DWORD) + (DWORD) (sizeof(IMAGE_FILE_HEADER)) + (DWORD) peHeader->FileHeader.
+	offset = offset + sizeof(DWORD) + (sizeof(IMAGE_FILE_HEADER)) + peHeader->FileHeader.
 	         SizeOfOptionalHeader;
+	DWORD sectionLocation = (DWORD)peHeader + sizeof(DWORD) + (DWORD)(sizeof(IMAGE_FILE_HEADER)) + (DWORD)peHeader->FileHeader.SizeOfOptionalHeader;
 	for (int i = 0; i < peHeader->FileHeader.NumberOfSections; i++) {
 		baheader = rawObject->readBlock(offset, sizeof(IMAGE_SECTION_HEADER));
 		PIMAGE_SECTION_HEADER sectionHeader = (PIMAGE_SECTION_HEADER) baheader.data();
