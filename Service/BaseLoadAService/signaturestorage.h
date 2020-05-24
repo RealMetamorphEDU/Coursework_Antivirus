@@ -11,6 +11,7 @@ Q_OBJECT
     TSTNode *root;
     bool searching;
     TSTNode *current;
+    qint64 maxLen;
 public:
     explicit SignatureStorage(QObject *parent = nullptr);
 
@@ -18,8 +19,9 @@ public:
     friend int AServiceBaseLoader::appendStorage(QString &storageName, QString &filepath);
 
     void startSearch();
-    QVector<SignatureRecord*> search(QByteArray data);
+    QVector<SignatureRecord*> search(byte* data, qint64 len);
     bool isSearching();
+    qint64 getMaxLen();
 
     ~SignatureStorage();
 };

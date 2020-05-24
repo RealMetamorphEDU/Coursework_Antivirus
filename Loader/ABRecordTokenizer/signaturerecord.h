@@ -4,6 +4,7 @@
 #include <QObject>
 #include "ABRecordTokenizer_global.h"
 
+const int MAX_PREFIX_LEN = 1024;
 
 class ABRECORDTOKENIZER_EXPORT SignatureRecord final: public QObject {
 Q_OBJECT

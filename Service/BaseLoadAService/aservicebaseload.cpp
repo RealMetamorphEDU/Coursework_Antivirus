@@ -10,7 +10,7 @@ AServiceBaseLoader::AServiceBaseLoader(QObject *parent) : QObject(parent) {
     tokenizer = new ABRecordTokenizer(this);
 }
 
-bool AServiceBaseLoader::insertSignatureRecord(TSTNode *&root, SignatureRecord *record) {
+bool AServiceBaseLoader::insertSignatureRecord(TSTNode *&root, SignatureRecord *record, qint64 *maxLen) {
     QByteArray str = record->getSigPrefix();
     TSTNode *current;
     bool result = true;
@@ -33,6 +33,8 @@ bool AServiceBaseLoader::insertSignatureRecord(TSTNode *&root, SignatureRecord *
                     if (result) {
                         current->isEnd = true;
                         current->addRecord(record);
+                        if (*maxLen < str.length())
+                            *maxLen = str.length();
                     }
                 } else {
                     if (current->equal == nullptr)
@@ -91,7 +93,7 @@ int AServiceBaseLoader::loadStorage(QString &storageName, QString &filepath) {
             return -1;
         }
         for (int i = 0; i < accum.count(); ++i) {
-            if (insertSignatureRecord(root, accum.at(i))) {
+            if (insertSignatureRecord(root, accum.at(i), &storage->maxLen)) {
                 loaded++;
                 accum.at(i)->setParent(storage);
             }
@@ -125,7 +127,7 @@ int AServiceBaseLoader::appendStorage(QString &storageName, QString &filepath) {
                 return -1;
             }
             for (int i = 0; i < accum.count(); ++i) {
-                if (insertSignatureRecord(root, accum.at(i))) {
+                if (insertSignatureRecord(root, accum.at(i), &storage->maxLen)) {
                     loaded++;
                     accum.at(i)->setParent(storage);
                 }

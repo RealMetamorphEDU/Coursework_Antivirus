@@ -27,7 +27,7 @@ const QByteArray& SignatureRecord::getSigPrefix() const {
 }
 
 void SignatureRecord::setSigPrefix(const QByteArray &sigPrefix) {
-    this->sigPrefix = sigPrefix;
+    this->sigPrefix = sigPrefix.left(MAX_PREFIX_LEN);
 }
 
 const QByteArray& SignatureRecord::getSigHash() const {

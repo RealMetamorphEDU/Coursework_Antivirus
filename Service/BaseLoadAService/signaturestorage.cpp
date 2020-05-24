@@ -13,11 +13,11 @@ void SignatureStorage::startSearch() {
     current = root;
 }
 
-QVector<SignatureRecord*> SignatureStorage::search(QByteArray data) {
+QVector<SignatureRecord*> SignatureStorage::search(byte *data, qint64 len) {
     QVector<SignatureRecord*> records;
     if (searching) {
-        for (int i = 0; i < data.count();) {
-            switch (current->element == (byte) data.at(i) ? 0 : current->element > (byte) data.at(i) ? 1 : 2) {
+        for (int i = 0; i < len;) {
+            switch (current->element == data[i] ? 0 : current->element > data[i] ? 1 : 2) {
                 case 0: // Equal
                     if (current->isEnd)
                         records.append(current->getRecords());
@@ -42,6 +42,10 @@ QVector<SignatureRecord*> SignatureStorage::search(QByteArray data) {
 
 bool SignatureStorage::isSearching() {
     return searching;
+}
+
+qint64 SignatureStorage::getMaxLen() {
+    return maxLen;
 }
 
 SignatureStorage::~SignatureStorage() {

@@ -17,7 +17,7 @@ Q_OBJECT
     ABRecordTokenizer *tokenizer;
 
     AServiceBaseLoader(QObject *parent);
-    static bool insertSignatureRecord(TSTNode *&root, SignatureRecord *record);
+    static bool insertSignatureRecord(TSTNode *&root, SignatureRecord *record, qint64 *maxLen);
 
 public:
     ~AServiceBaseLoader();
