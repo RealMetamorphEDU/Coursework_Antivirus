@@ -54,7 +54,7 @@ void Objects::test_pescanbuilder_valid_obj() {
 	PEScanBuilder *scanBuilder = new PEScanBuilder(this);
 	QSignalSpy spy(scanBuilder, &AbstractScanBuilder::builtScanObject);
 	std::shared_ptr<RawObject> ro = std::shared_ptr<RawObject>(new SimpleRawObject("debug\\FindObjectsAServiceTest.exe",
-	                                                                               this));
+	                                                                               this), RawObject::deleter);
 	QVERIFY(scanBuilder->canBuildThis(ro));
 	scanBuilder->buildThis(ro);
 	spy.wait(1000);
@@ -73,7 +73,7 @@ void Objects::test_pescanbuilder_invalid_obj() {
 		PEScanBuilder* scanBuilder = new PEScanBuilder(this);
 		QSignalSpy spy(scanBuilder, &AbstractScanBuilder::builtScanObject);
 		std::shared_ptr<RawObject> ro = std::shared_ptr<RawObject>(new SimpleRawObject("debug\\tst_objects.moc.cbt",
-			this));
+			this), RawObject::deleter);
 		QVERIFY(!scanBuilder->canBuildThis(ro));
 
 		delete scanBuilder;

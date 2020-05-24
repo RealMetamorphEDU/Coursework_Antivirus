@@ -21,13 +21,9 @@ private slots:
 
 };
 
-Storage::Storage() {
+Storage::Storage() {}
 
-}
-
-Storage::~Storage() {
-
-}
+Storage::~Storage() {}
 
 void Storage::initTestCase() {
     ABRecordTokenizer tokenizer;
@@ -103,12 +99,14 @@ void Storage::test_search() {
     QVERIFY(storage != nullptr);
     storage->startSearch();
     QVERIFY(storage->isSearching());
-    QVector<SignatureRecord*> records = storage->search("hello");
+    QByteArray ba("hello");
+    QVector<SignatureRecord*> records = storage->search((byte*) ba.data(), ba.length());
     QCOMPARE(records.count(), 1);
     QVERIFY(!storage->isSearching());
     storage->startSearch();
     QVERIFY(storage->isSearching());
-    records = storage->search("YOUR");
+    ba = "YOUR";
+    records = storage->search((byte*) ba.data(), ba.length());
     QCOMPARE(records.count(), 2);
     QCOMPARE(records.at(0)->getSigPrefix(), "YOU");
     QCOMPARE(records.at(1)->getSigPrefix(), "YOUR");
