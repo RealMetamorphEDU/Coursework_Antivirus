@@ -48,7 +48,7 @@ void Scanner::scanning() {
                 qint64 len = 0;
                 QByteArray data;
                 QVector<SignatureRecord*> records;
-                while (offset < region.getRegionSize()) {
+                while (offset + storage->getMaxLen() < region.getRegionSize()) {
                     data = scanObject->readBlockFromRegion(i, offset, BLOCK_SIZE);
                     len = 0;
                     while (data.length() - len > 0) {
@@ -86,6 +86,7 @@ void Scanner::scanning() {
                     }
                     if (infected)
                         break;
+        
                     offset += data.length() - storage->getMaxLen() + 1;
                 }
                 if (infected)
