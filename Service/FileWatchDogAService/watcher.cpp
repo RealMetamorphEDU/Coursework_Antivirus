@@ -1,3 +1,4 @@
+#include "filewatchdog.h"
 #include "watcher.h"
 #include <QTimerEvent>
 #include <QCoreApplication>
@@ -152,21 +153,16 @@ void Watcher::watching() {
                     FILE_NOTIFY_INFORMATION *info = (FILE_NOTIFY_INFORMATION*) (((char*) buffer) + offset);
                     offset = info->NextEntryOffset;
                     QString filepath = QString::fromWCharArray(info->FileName, info->FileNameLength / 2);
-                    ChangeNotificator *notificator = nullptr;
                     fileInfo.setFile(path.append("/").append(filepath));
                     switch (info->Action) {
                         case FILE_ACTION_ADDED:
-                            notificator = new ChangeNotificator(fileInfo.canonicalFilePath(), changeType::fileCreated,
-                                                                this);
+                            emit changeNotify(fileInfo.canonicalFilePath(), ChangeType::fileCreated);
+                            SetEvent(eventHandles.at(0));
                             break;
                         case FILE_ACTION_MODIFIED:
-                            notificator = new ChangeNotificator(fileInfo.canonicalFilePath(), changeType::fileModified,
-                                                                this);
+                            emit changeNotify(fileInfo.canonicalFilePath(), ChangeType::fileModified);
+                            SetEvent(eventHandles.at(0));
                             break;
-                    }
-                    if (notificator != nullptr) {
-                        emit changeNotify(notificator);
-                        SetEvent(eventHandles.at(0));
                     }
                 } while (offset);
                 //Возобновляем наблюдение
@@ -182,8 +178,7 @@ void Watcher::watching() {
                     buffers.remove(selected - 1);
                     delete[] buffer;
                     paths.remove(selected - 1);
-                    ChangeNotificator *notificator = new ChangeNotificator(path, changeType::dirCantWatch, this);
-                    emit changeNotify(notificator);
+                    emit changeNotify(path, ChangeType::dirCantWatch);
                     SetEvent(eventHandles.at(0));
                 }
             }
@@ -192,7 +187,7 @@ void Watcher::watching() {
     }
 }
 
-AddEvent::AddEvent(QString path) : QEvent((Type) addPathType) {
+AddEvent::AddEvent(QString &path) : QEvent((Type) addPathType) {
     this->path = path;
 }
 
@@ -200,7 +195,7 @@ const QString& AddEvent::getPath() {
     return path;
 }
 
-RemoveEvent::RemoveEvent(QString path) : QEvent((Type) removePathType) {
+RemoveEvent::RemoveEvent(QString &path) : QEvent((Type) removePathType) {
     this->path = path;
 }
 
@@ -209,6 +204,4 @@ const QString& RemoveEvent::getPath() {
     return path;
 }
 
-StopEvent::StopEvent() : QEvent((Type) stopType) {
-
-}
+StopEvent::StopEvent() : QEvent((Type) stopType) {}

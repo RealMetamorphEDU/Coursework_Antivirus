@@ -2,7 +2,14 @@
 #define FILEWATCHDOG_H
 
 #include <QObject>
-#include "changenotificator.h"
+
+enum class ChangeType {
+    fileCreated = 0,
+    fileModified,
+    dirCantWatch
+};
+
+Q_DECLARE_METATYPE(ChangeType);
 
 QT_BEGIN_NAMESPACE
 
@@ -27,7 +34,7 @@ public:
     bool removePath(QString &path);
     bool removeAllPaths();
 signals:
-    void changeNotify(ChangeNotificator *notificator);
+    void changeNotify(QString filepath, ChangeType type);
 };
 
 #endif // FILEWATCHDOG_H

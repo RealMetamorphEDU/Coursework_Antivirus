@@ -5,6 +5,7 @@
 
 // add necessary includes here
 
+
 class watcher: public QObject {
 Q_OBJECT
 
@@ -18,13 +19,9 @@ private slots:
     void cleanupTestCase();
 };
 
-watcher::watcher() {
+watcher::watcher() {}
 
-}
-
-watcher::~watcher() {
-
-}
+watcher::~watcher() {}
 
 void watcher::initTestCase() {
     QDir::current().mkdir("TEST_DIR");
@@ -34,7 +31,7 @@ void watcher::initTestCase() {
 
 void watcher::test_Watch() {
     FileWatchDog watch;
-    QSignalSpy spy(&watch, SIGNAL(changeNotify(ChangeNotificator*)));
+    QSignalSpy spy(&watch, SIGNAL(changeNotify(QString, ChangeType)));
     SetConsoleOutputCP(1251);
     QString filename = "TEST_DIR/DIR2";
     QVERIFY(watch.addPath(filename));
@@ -47,7 +44,6 @@ void watcher::test_Watch() {
     QCOMPARE(spy.count(), 0);
     //
     QFileInfo info;
-    ChangeNotificator *notificator;
     //
     file.setFileName("TEST_DIR/DIR2/test3");
     file.open(QIODevice::WriteOnly);
@@ -59,15 +55,17 @@ void watcher::test_Watch() {
     spy.wait();
     QCOMPARE(spy.count(), 2);
     //
-    notificator = qvariant_cast<ChangeNotificator*>(spy.takeFirst().at(0));
-    QCOMPARE(notificator->getChange(), changeType::fileCreated);
-    QCOMPARE(notificator->getPath(), info.canonicalFilePath());
-    notificator->deleteLater();
+    QList<QVariant> notify = spy.takeFirst();
+    QString path = notify.at(0).toString();
+    ChangeType type = qvariant_cast<ChangeType>(notify.at(1));
+    QCOMPARE(type, ChangeType::fileCreated);
+    QCOMPARE(path, info.canonicalFilePath());
     //
-    notificator = qvariant_cast<ChangeNotificator*>(spy.takeFirst().at(0));
-    QCOMPARE(notificator->getChange(), changeType::fileModified);
-    QCOMPARE(notificator->getPath(), info.canonicalFilePath());
-    notificator->deleteLater();
+    notify = spy.takeFirst();
+    path = notify.at(0).toString();
+    type = qvariant_cast<ChangeType>(notify.at(1));
+    QCOMPARE(type, ChangeType::fileModified);
+    QCOMPARE(path, info.canonicalFilePath());
     //
     file.setFileName("TEST_DIR/DIR2/DIR3/test5");
     file.open(QIODevice::WriteOnly);
@@ -79,15 +77,17 @@ void watcher::test_Watch() {
     spy.wait();
     QCOMPARE(spy.count(), 2);
     //
-    notificator = qvariant_cast<ChangeNotificator*>(spy.takeFirst().at(0));
-    QCOMPARE(notificator->getChange(), changeType::fileCreated);
-    QCOMPARE(notificator->getPath(), info.canonicalFilePath());
-    notificator->deleteLater();
+    notify = spy.takeFirst();
+    path = notify.at(0).toString();
+    type = qvariant_cast<ChangeType>(notify.at(1));
+    QCOMPARE(type, ChangeType::fileCreated);
+    QCOMPARE(path, info.canonicalFilePath());
     //
-    notificator = qvariant_cast<ChangeNotificator*>(spy.takeFirst().at(0));
-    QCOMPARE(notificator->getChange(), changeType::fileModified);
-    QCOMPARE(notificator->getPath(), info.canonicalFilePath());
-    notificator->deleteLater();
+    notify = spy.takeFirst();
+    path = notify.at(0).toString();
+    type = qvariant_cast<ChangeType>(notify.at(1));
+    QCOMPARE(type, ChangeType::fileModified);
+    QCOMPARE(path, info.canonicalFilePath());
     //
     QVERIFY(watch.removeAllPaths());
     file.setFileName("TEST_DIR/DIR2/test7");

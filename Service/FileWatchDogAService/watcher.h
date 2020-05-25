@@ -5,7 +5,8 @@
 #include <QVector>
 #include <QFileInfo>
 #include <Windows.h>
-#include "changenotificator.h"
+
+enum class ChangeType;
 
 enum class Status { succAdd, succRemove, failAdd, failRemove, def };
 
@@ -31,7 +32,7 @@ public:
 private slots:
     void watching();
 signals:
-    void changeNotify(ChangeNotificator* notificator);
+    void changeNotify(QString filepath, ChangeType type);
 };
 
 enum events {
@@ -43,7 +44,7 @@ enum events {
 class AddEvent: public QEvent {
     QString path;
 public:
-    explicit AddEvent(QString path);
+    explicit AddEvent(QString &path);
 
     const QString& getPath();
 };
@@ -51,7 +52,7 @@ public:
 class RemoveEvent: public QEvent {
     QString path;
 public:
-    explicit RemoveEvent(QString path);
+    explicit RemoveEvent(QString &path);
 
     const QString& getPath();
 };
