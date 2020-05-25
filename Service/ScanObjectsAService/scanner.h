@@ -28,7 +28,7 @@ public slots:
     void scanning();
 signals:
     void uninfected(QString filename);
-    void infectedBy(QString filename, SignatureRecord *signatureRecord);
+    void infectedBy(QString filename, QString signatureName);
 };
 
 class ScanEvent: public QEvent {

@@ -11,8 +11,8 @@ AServiceScanObjects::AServiceScanObjects(SignatureStorage *storage, QObject *par
     connect(thread, SIGNAL(finished()), thread, SLOT(deleteLater()));
     connect(thread, SIGNAL(started()), scanner, SLOT(scanning()));
     connect(scanner, SIGNAL(uninfected(QString)), this, SIGNAL(uninfected(QString)));
-    connect(scanner, SIGNAL(infectedBy(QString, SignatureRecord *)), this,
-            SIGNAL(infectedBy(QString, SignatureRecord *)));
+    connect(scanner, SIGNAL(infectedBy(QString, QString)), this,
+            SIGNAL(infectedBy(QString, QString)));
     thread->start();
 }
 

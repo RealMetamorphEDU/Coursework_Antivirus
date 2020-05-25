@@ -59,10 +59,10 @@ void Builder::building() {
                         }
                     }
                     if (bad) {
-                        emit cantBuildThis(raw->getFullName());
+                        emit cantBuildThis(raw->getFullName(), "NOT_RECOGNIZED");
                     }
                 } else {
-                    emit cantBuildThis(raw->getFullName());
+                    emit cantBuildThis(raw->getFullName(), "NOT_READ");
                 }
             }
             QCoreApplication::processEvents();

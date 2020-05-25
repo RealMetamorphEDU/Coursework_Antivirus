@@ -55,7 +55,7 @@ void EditRecordDialog::checkAccept() {
     record->setName(ui->nameEdit->text());
     record->setSigLength(ui->lenBox->value());
     record->setSigPrefix(selectedData.left(ui->prefLenBox->value()));
-    record->setSigHash(QCryptographicHash::hash(selectedData, QCryptographicHash::Sha1));
+    record->setSigHash(QCryptographicHash::hash(selectedData, QCryptographicHash::Sha256));
     record->setBeginOffset(ui->beginOffsetBox->value());
     record->setEndOffset(ui->endOffsetBox->value());
     accept();

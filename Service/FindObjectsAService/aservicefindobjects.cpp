@@ -11,7 +11,7 @@ AServiceFindObjects::AServiceFindObjects(QObject *parent) : QObject(parent) {
     connect(thread, SIGNAL(finished()), thread, SLOT(deleteLater()));
     connect(thread, SIGNAL(started()), builder, SLOT(building()));
     connect(builder, SIGNAL(foundScanObject(ScanObject *)), this, SIGNAL(foundScanObject(ScanObject *)));
-    connect(builder, SIGNAL(cantBuildThis(QString)), this, SIGNAL(cantBuildThis(QString)));
+    connect(builder, SIGNAL(cantBuildThis(QString, QString)), this, SIGNAL(cantBuildThis(QString, QString)));
     thread->start();
 }
 

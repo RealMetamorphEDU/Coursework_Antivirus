@@ -20,7 +20,7 @@ public slots:
     void scanScanObject(ScanObject *scanObject);
 signals:
     void uninfected(QString filename);
-    void infectedBy(QString filename, SignatureRecord *signatureRecord);
+    void infectedBy(QString filename, QString signatureName);
 };
 
 #endif // ASERVICESCANOBJECTS_H

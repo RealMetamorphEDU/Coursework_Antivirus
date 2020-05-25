@@ -30,7 +30,7 @@ private slots:
     void addRawObject(RawObject *rawObject);
 signals:
     void foundScanObject(ScanObject *scanObject);
-    void cantBuildThis(QString filepath);
+    void cantBuildThis(QString filepath, QString reason);
 };
 
 class FindEvent: public QEvent {

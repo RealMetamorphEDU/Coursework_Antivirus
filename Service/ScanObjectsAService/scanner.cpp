@@ -1,4 +1,6 @@
 #include "scanner.h"
+#include <QCryptographicHash>
+
 const int BLOCK_SIZE = (1024 * 1024 * 4);
 
 Scanner::Scanner(HANDLE updateEvent, SignatureStorage *storage, QObject *parent) : QObject(parent) {
@@ -39,6 +41,7 @@ void Scanner::scanning() {
         while (!queue.isEmpty()) {
             ScanObject *scanObject = queue.takeFirst();
             int regionCount = scanObject->getRegionsCount();
+            bool infected = false;
             for (int i = 0; i < regionCount; ++i) {
                 DataRegion region = scanObject->getRegion(i);
                 qint64 offset = 0;
@@ -53,14 +56,44 @@ void Scanner::scanning() {
                         records.clear();
                         records.append(storage->search((byte*) (data.data() + len), data.length() - len));
                         for (int j = 0; j < records.count(); ++j) {
+                            SignatureRecord *record = records.at(j);
                             qint64 startOffset = region.getObjectOffset() + offset + len;
+                            if (startOffset < record->getBeginOffset() || startOffset > record->
+                                getEndOffset())
+                                continue;
+                            int sigLen = record->getSigLength();
+                            startOffset -= region.getObjectOffset();
+                            if (startOffset + sigLen > region.getRegionSize())
+                                continue;
+                            int sigOffset = 0;
+                            QCryptographicHash hash(QCryptographicHash::Sha256);
+                            while (sigLen > 0) {
+                                QByteArray value = scanObject->readBlockFromRegion(i, startOffset + sigOffset,
+                                                                                   min(BLOCK_SIZE, sigLen));
+                                hash.addData(value);
+                                sigLen -= value.length();
+                                sigOffset += value.length();
+                            }
+                            if (record->getSigHash() == hash.result()) {
+                                infected = true;
+                                emit infectedBy(scanObject->getFullObjectName(), record->getName());
+                                break;
+                            }
                         }
+                        if (infected)
+                            break;
                         len++;
                     }
+                    if (infected)
+                        break;
                     offset += data.length() - storage->getMaxLen() + 1;
                 }
+                if (infected)
+                    break;
             }
-            emit uninfected(scanObject->getFullObjectName());
+            if (!infected) {
+                emit uninfected(scanObject->getFullObjectName());
+            }
             scanObject->deleteLater();
             QCoreApplication::processEvents();
         }

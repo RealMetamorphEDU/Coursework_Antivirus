@@ -27,7 +27,7 @@ public slots:
     void findObjects(QString filepath);
 signals:
     void foundScanObject(ScanObject *scanObject);
-    void cantBuildThis(QString filepath);
+    void cantBuildThis(QString filepath, QString reason);
 };
 
 #endif // ASERVICEFINDOBJECTS_H
