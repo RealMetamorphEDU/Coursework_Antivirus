@@ -27,3 +27,7 @@ void AServiceFindObjects::findObjects(QString filepath) {
     QCoreApplication::postEvent(builder, new FindEvent(filepath));
     SetEvent(requestEvent);
 }
+
+void AServiceFindObjects::updateEvents() {
+    SetEvent(requestEvent);
+}
