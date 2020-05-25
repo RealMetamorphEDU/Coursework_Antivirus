@@ -13,7 +13,7 @@ FileWatchDog::FileWatchDog(QObject *parent): QObject(parent) {
     connect(thread, SIGNAL(finished()), watcher, SLOT(deleteLater()));
     connect(thread, SIGNAL(finished()), thread, SLOT(deleteLater()));
     connect(thread, SIGNAL(started()), watcher, SLOT(watching()));
-    connect(watcher, SIGNAL(changeNotify(ChangeNotificator*)), this, SIGNAL(changeNotify(ChangeNotificator*)));
+    connect(watcher, SIGNAL(changeNotify(QString, ChangeType)), this, SIGNAL(changeNotify(QString, ChangeType)));
     thread->start();
 }
 
@@ -50,7 +50,8 @@ bool FileWatchDog::removePath(QString &path) {
 
 bool FileWatchDog::removeAllPaths() {
     for (int i = 0; i < watcher->getPaths().size(); ++i) {
-        QCoreApplication::postEvent(watcher, new RemoveEvent(watcher->getPaths().at(i)));
+        QString str = watcher->getPaths().at(i);
+        QCoreApplication::postEvent(watcher, new RemoveEvent(str));
     }
     ResetEvent(completeEvent);
     SetEvent(requestEvent);

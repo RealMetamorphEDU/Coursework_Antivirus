@@ -18,13 +18,11 @@ DEFINES += QT_DEPRECATED_WARNINGS
 
 SOURCES += \
     filewatchdog.cpp \
-	watcher.cpp \
-	changenotificator.cpp
+	watcher.cpp
 
 HEADERS += \
     filewatchdog.h \
-	watcher.h \
-	changenotificator.h
+	watcher.h
 
 # Default rules for deployment.
 unix {
