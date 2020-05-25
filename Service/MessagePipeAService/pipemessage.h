@@ -2,6 +2,8 @@
 #define PIPEMESSAGE_H
 
 #include <QObject>
+#include <QBuffer>
+#include <QDataStream>
 
 enum class MessageType {
     abstract = 0,
@@ -19,12 +21,13 @@ enum class MessageType {
 
 class PipeMessage : public QObject {
     Q_OBJECT
+protected:
         MessageType type;
 public:
     explicit PipeMessage(MessageType type, QObject* parent = nullptr);
 
     MessageType getType() const;
-    virtual bool parseQByteArray(QByteArray& array) = 0;
+    virtual bool parseQByteArray(QByteArray& array);
     virtual QByteArray toByteArray() = 0;
 };
 // TODO: —татус: флаг сканировани€ чего-либо, индекс задани€, текущий сканируемый объект, сколько осталось сканировать в задании, сколько уже засканили в задании, сколько заданий осталось, 
@@ -37,15 +40,15 @@ class ScanStatusMessage : public PipeMessage {
     int objScanned;
     int tasksLeft;
 public:
-    explicit ScanStatusMessage(bool scanning, int taskIndex, QString curObject, int objLeft, int objScanned, int tasksLeft, MessageType type, QObject* parent = nullptr);
-    bool parseQByteArray(QByteArray& array);
-    QByteArray toByteArray();
-    bool isScanning();
-    int getTaskIndex();
-    QString getCurObject();
-    int getObjLeft;
-    int getObjScanned;
-    int getTasksLeft;
+    explicit ScanStatusMessage(bool scanning, int taskIndex, const QString& curObject, int objLeft, int objScanned, int tasksLeft, QObject* parent = nullptr);
+    bool parseQByteArray(QByteArray& array) override;
+    QByteArray toByteArray() override;
+    bool isScanning() const;
+    int getTaskIndex() const;
+    const QString& getCurObject() const;
+    int getObjLeft() const;
+    int getObjScanned() const;
+    int getTasksLeft() const;
 
 
 };
@@ -54,69 +57,70 @@ class StartScanMessage : public PipeMessage {
     QString objectPath;
     bool file; // true if file, false if dir
 public:
-    explicit StartScanMessage(QString objectPath, QObject* parent = nullptr);
-    bool parseQByteArray(QByteArray& array);
-    QByteArray toByteArray();
-    QString getObjectPath();
-    bool isFile();
-    bool isDir();
+    explicit StartScanMessage(const QString& objectPath, bool file, QObject* parent = nullptr);
+    bool parseQByteArray(QByteArray& array) override;
+    QByteArray toByteArray() override;
+    const QString& getObjectPath() const;
+    bool isFile() const;
+    bool isDir() const;
 };
 
 class StopScanMessage : public PipeMessage {
 public:
-    bool parseQByteArray(QByteArray& array);
-    QByteArray toByteArray();
+
+    explicit StopScanMessage(QObject* parent = nullptr);
+    QByteArray toByteArray() override;
 };
 
 class PauseScanMessage : public PipeMessage {
 public:
-    bool parseQByteArray(QByteArray& array);
-    QByteArray toByteArray();
+    explicit PauseScanMessage(QObject* parent = nullptr);
+    QByteArray toByteArray() override;
 };
 
 class AddDirectoryToMonitorMessage : public PipeMessage {
     QString dirPath;
 public:
-    explicit AddDirectoryToMonitorMessage(QString dirPath, QObject* parent = nullptr);
-    bool parseQByteArray(QByteArray& array);
-    QByteArray toByteArray();
-    QString getPath();
+    explicit AddDirectoryToMonitorMessage(const QString& dirPath, QObject* parent = nullptr);
+    bool parseQByteArray(QByteArray& array) override;
+    QByteArray toByteArray() override;
+    const QString& getPath() const;
 };
 
 class RemoveDirectoryFromMonitorMessage : public PipeMessage {
     QString dirPath;
 public:
-    explicit RemoveDirectoryFromMonitorMessage(QString dirPath, QObject* parent = nullptr);
-    bool parseQByteArray(QByteArray& array);
-    QByteArray toByteArray();
-    QString getPath();
+    explicit RemoveDirectoryFromMonitorMessage(const QString& dirPath, QObject* parent = nullptr);
+    bool parseQByteArray(QByteArray& array) override;
+    QByteArray toByteArray() override;
+    const QString& getPath() const;
 };
 
 class GetMonitoredDirectoriesMessage : public PipeMessage {
 public:
-    bool parseQByteArray(QByteArray& array);
-    QByteArray toByteArray();
+    explicit GetMonitoredDirectoriesMessage(QObject* parent = nullptr);
+    QByteArray toByteArray() override;
 };
 
 class MonitoredDirectoriesMessage : public PipeMessage {
     QStringList dirList;
 public:
-    explicit MonitoredDirectoriesMessage(QStringList dirList, QObject* parent = nullptr);
-    bool parseQByteArray(QByteArray& array);
-    QByteArray toByteArray();
-    QStringList getDirList();
+    explicit MonitoredDirectoriesMessage(const QStringList& dirList, QObject* parent = nullptr);
+    bool parseQByteArray(QByteArray& array) override;
+    QByteArray toByteArray() override;
+    const QStringList& getDirList() const;
 };
 
 class StartDirectoryMonitoringMessage : public PipeMessage {
 public:
-    bool parseQByteArray(QByteArray& array);
-    QByteArray toByteArray();
+    explicit StartDirectoryMonitoringMessage(QObject* parent = nullptr);
+    QByteArray toByteArray() override;
 };
 
 class StopDirectoryMonitoringMessage : public PipeMessage {
 public:
-    bool parseQByteArray(QByteArray& array);
-    QByteArray toByteArray();
+    explicit StopDirectoryMonitoringMessage(QObject* parent = nullptr);
+    QByteArray toByteArray() override;
 };
 
 
