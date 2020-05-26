@@ -40,7 +40,7 @@ class ScanStatusMessage : public PipeMessage {
     int objScanned;
     int tasksLeft;
 public:
-    explicit ScanStatusMessage(bool scanning, int taskIndex, const QString& curObject, int objLeft, int objScanned, int tasksLeft, QObject* parent = nullptr);
+    explicit ScanStatusMessage(bool scanning = false, int taskIndex = 0, const QString& curObject = "", int objLeft=0, int objScanned=0, int tasksLeft=0, QObject* parent = nullptr);
     bool parseQByteArray(QByteArray& array) override;
     QByteArray toByteArray() override;
     bool isScanning() const;
@@ -57,7 +57,7 @@ class StartScanMessage : public PipeMessage {
     QString objectPath;
     bool file; // true if file, false if dir
 public:
-    explicit StartScanMessage(const QString& objectPath, bool file, QObject* parent = nullptr);
+    explicit StartScanMessage(const QString& objectPath = "", bool file = false, QObject* parent = nullptr);
     bool parseQByteArray(QByteArray& array) override;
     QByteArray toByteArray() override;
     const QString& getObjectPath() const;
@@ -81,7 +81,7 @@ public:
 class AddDirectoryToMonitorMessage : public PipeMessage {
     QString dirPath;
 public:
-    explicit AddDirectoryToMonitorMessage(const QString& dirPath, QObject* parent = nullptr);
+    explicit AddDirectoryToMonitorMessage(const QString& dirPath = "", QObject* parent = nullptr);
     bool parseQByteArray(QByteArray& array) override;
     QByteArray toByteArray() override;
     const QString& getPath() const;
@@ -90,7 +90,7 @@ public:
 class RemoveDirectoryFromMonitorMessage : public PipeMessage {
     QString dirPath;
 public:
-    explicit RemoveDirectoryFromMonitorMessage(const QString& dirPath, QObject* parent = nullptr);
+    explicit RemoveDirectoryFromMonitorMessage(const QString& dirPath = "", QObject* parent = nullptr);
     bool parseQByteArray(QByteArray& array) override;
     QByteArray toByteArray() override;
     const QString& getPath() const;
@@ -105,7 +105,7 @@ public:
 class MonitoredDirectoriesMessage : public PipeMessage {
     QStringList dirList;
 public:
-    explicit MonitoredDirectoriesMessage(const QStringList& dirList, QObject* parent = nullptr);
+    explicit MonitoredDirectoriesMessage(const QStringList& dirList = QStringList(), QObject* parent = nullptr);
     bool parseQByteArray(QByteArray& array) override;
     QByteArray toByteArray() override;
     const QStringList& getDirList() const;

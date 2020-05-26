@@ -18,12 +18,14 @@ DEFINES += QT_DEPRECATED_WARNINGS
 
 SOURCES += \
     aservicemessagepipe.cpp \
-    pipemessage.cpp
+    pipemessage.cpp \
+    reader.cpp
 
 HEADERS += \
     AServiceMessagePipe_global.h \
     aservicemessagepipe.h \
-    pipemessage.h
+    pipemessage.h \
+    reader.h
 
 # Default rules for deployment.
 unix {
