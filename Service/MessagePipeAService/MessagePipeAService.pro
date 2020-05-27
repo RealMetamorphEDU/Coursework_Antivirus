@@ -23,9 +23,20 @@ SOURCES += \
 
 HEADERS += \
     AServiceMessagePipe_global.h \
+    adddirectorytomonitormessage.h \
     aservicemessagepipe.h \
+    getmonitoreddirectoriesmessage.h \
+    messages.h \
+    monitoreddirectoriesmessage.h \
+    pausescanmessage.h \
     pipemessage.h \
-    reader.h
+    reader.h \
+    removedirectoryfrommonitormessage.h \
+    scanstatusmessage.h \
+    startdirectorymonitoringmessage.h \
+    startscanmessage.h \
+    stopdirectorymonitoringmessage.h \
+    stopscanmessage.h
 
 # Default rules for deployment.
 unix {

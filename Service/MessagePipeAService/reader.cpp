@@ -1,32 +1,46 @@
 #include "reader.h"
-#include <Windows.h>
 #include <QCoreApplication>
-#include "pipemessage.h"
+#include "messages.h"
+#include <QDebug>
 
-
-Reader::Reader(HANDLE writePipe, QString readPipeName, QObject *parent) :
+Reader::Reader(HANDLE writePipe, QString readPipeName, HANDLE requestEvent, bool first, QObject *parent) :
 	QObject(parent),
 	writePipe(writePipe),
-	readPipeName(readPipeName) {
+	readPipeName(readPipeName),
+	first(first) {
+	events[0] = requestEvent;
+	overlapped = new OVERLAPPED{0, 0, 0, 0, 0};
+	overlapped->hEvent = CreateEventA(NULL,FALSE,FALSE,NULL);
+	events[1] = overlapped->hEvent;
 	connected = false;
 	working = true;
 }
 
 
+
 void Reader::reading() {
 	while (working) {
 		if (!connected) {
-			connected = ConnectNamedPipe(writePipe, NULL);
-			if (connected && working) {
-				emit readerUpdateConnect(connected);
+			if (!first)
 				readPipe = CreateFileA(readPipeName.toStdString().c_str(), GENERIC_READ, 0, NULL, OPEN_EXISTING, 0,
 				                       NULL);
+			ConnectNamedPipe(writePipe, overlapped);
+			DWORD selected = WaitForMultipleObjects(2, events, FALSE, INFINITE) - WAIT_OBJECT_0;
+			connected = selected;
+			qDebug() << "finished waiting for event #" << selected;
+			if (selected == 1) {
+				emit readerUpdateConnect(connected);
+				if (first)
+					readPipe = CreateFileA(readPipeName.toStdString().c_str(), GENERIC_READ, 0, NULL, OPEN_EXISTING, 0,
+					                       NULL);
 			}
 			continue;
 		}
 		ReadFile(readPipe, NULL, 0, NULL, NULL);
 		if (GetLastError() == ERROR_BROKEN_PIPE) {
-			resetConnection();
+			connected = false;
+			DisconnectNamedPipe(writePipe);
+			CloseHandle(readPipe);
 			emit readerUpdateConnect(connected);
 			continue;
 		}
@@ -36,7 +50,7 @@ void Reader::reading() {
 		DWORD bytesRead = 0;
 		bool status = ReadFile(readPipe, ba.data(), messageSize, &bytesRead, NULL);
 		if (status)
-		emit readerRecievdMsg(createPipeMessage(ba));
+		emit readerRecievedMsg(createPipeMessage(ba));
 	}
 }
 
@@ -50,48 +64,43 @@ PipeMessage* Reader::createPipeMessage(QByteArray &array) {
 	array = array.right(array.length() - 4);
 	switch (type) {
 		case MessageType::scanStatus:
-			msg = new ScanStatusMessage();
+			msg = new ScanStatusMessage(false, 0, "", 0, 0, 0, this);
+			msg->parseQByteArray(array);
 			break;
 		case MessageType::startScan:
-			msg = new StartScanMessage();
+			msg = new StartScanMessage("", false, this);
+			msg->parseQByteArray(array);
 			break;
 		case MessageType::stopScan:
-			msg = new StopScanMessage();
+			msg = new StopScanMessage(this);
 			break;
 		case MessageType::pauseScan:
-			msg = new StopScanMessage();
+			msg = new PauseScanMessage(this);
 			break;
 		case MessageType::addDirToMonitor:
-			msg = new AddDirectoryToMonitorMessage();
+			msg = new AddDirectoryToMonitorMessage("", this);
+			msg->parseQByteArray(array);
 			break;
 		case MessageType::remDirFromMonitor:
-			msg = new RemoveDirectoryFromMonitorMessage();
+			msg = new RemoveDirectoryFromMonitorMessage("", this);
+			msg->parseQByteArray(array);
 			break;
 		case MessageType::getMonitoredDirectories:
-			msg = new GetMonitoredDirectoriesMessage();
+			msg = new GetMonitoredDirectoriesMessage(this);
 			break;
 		case MessageType::monitoredDirectories:
-			msg = new MonitoredDirectoriesMessage();
+			msg = new MonitoredDirectoriesMessage(QStringList(), this);
+			msg->parseQByteArray(array);
 			break;
 		case MessageType::startDirMonitor:
-			msg = new StartDirectoryMonitoringMessage();
+			msg = new StartDirectoryMonitoringMessage(this);
 			break;
 		case MessageType::stopDirMonitor:
-			msg = new StopDirectoryMonitoringMessage();
+			msg = new StopDirectoryMonitoringMessage(this);
 			break;
 	}
-	msg->parseQByteArray(array);
+	qDebug() << "RECIEVED MESSAGE TYPE: " << (int)msg->getType();
 	return msg;
-}
-
-void Reader::resetConnection() {
-	connected = false;
-	if (writePipe != INVALID_HANDLE_VALUE)
-		DisconnectNamedPipe(writePipe);
-	if (readPipe == INVALID_HANDLE_VALUE)
-		return;
-	CloseHandle(readPipe);
-	readPipe = INVALID_HANDLE_VALUE;
 }
 
 

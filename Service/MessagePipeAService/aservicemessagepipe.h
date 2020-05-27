@@ -3,23 +3,24 @@
 
 #include "AServiceMessagePipe_global.h"
 #include <QObject>
-#include "pipemessage.h"
+#include "messages.h"
 
 class Reader;
 class QThread;
 typedef void *HANDLE;
 
 class ASERVICEMESSAGEPIPE_EXPORT AServiceMessagePipe: public QObject {
+	Q_OBJECT
 	QString pipeName;
 	HANDLE readPipe;
 	HANDLE writePipe;
-	QString writePipeName;
 	Reader *reader;
 	QThread *readerThread;
+	HANDLE requestEvent;
 public:
 	AServiceMessagePipe(QString &pipeName, QObject *parent = nullptr);
 	~AServiceMessagePipe();
-
+	bool isConnected();
 public slots:
 	void sendMessage(PipeMessage *message);
 
