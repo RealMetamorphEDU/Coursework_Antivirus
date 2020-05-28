@@ -18,12 +18,25 @@ DEFINES += QT_DEPRECATED_WARNINGS
 
 SOURCES += \
     aservicemessagepipe.cpp \
-    pipemessage.cpp
+    pipemessage.cpp \
+    reader.cpp
 
 HEADERS += \
     AServiceMessagePipe_global.h \
+    adddirectorytomonitormessage.h \
     aservicemessagepipe.h \
-    pipemessage.h
+    getmonitoreddirectoriesmessage.h \
+    messages.h \
+    monitoreddirectoriesmessage.h \
+    pausescanmessage.h \
+    pipemessage.h \
+    reader.h \
+    removedirectoryfrommonitormessage.h \
+    scanstatusmessage.h \
+    startdirectorymonitoringmessage.h \
+    startscanmessage.h \
+    stopdirectorymonitoringmessage.h \
+    stopscanmessage.h
 
 # Default rules for deployment.
 unix {

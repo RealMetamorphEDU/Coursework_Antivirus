@@ -1,4 +1,14 @@
 #include "pipemessage.h"
+#include "adddirectorytomonitormessage.h"
+#include "getmonitoreddirectoriesmessage.h"
+#include "monitoreddirectoriesmessage.h"
+#include "pausescanmessage.h"
+#include "removedirectoryfrommonitormessage.h"
+#include "scanstatusmessage.h"
+#include "startdirectorymonitoringmessage.h"
+#include "stopdirectorymonitoringmessage.h"
+#include "startscanmessage.h"
+#include "stopscanmessage.h"
 
 PipeMessage::PipeMessage(MessageType type, QObject *parent) : QObject(parent) {
 	this->type = type;
@@ -75,6 +85,7 @@ bool StartScanMessage::parseQByteArray(QByteArray &array) {
 	buff.open(QIODevice::ReadOnly);
 	QDataStream bs(&buff);
 	bs >> objectPath >> file;
+	return true;
 }
 
 QByteArray StartScanMessage::toByteArray() {
@@ -102,13 +113,17 @@ bool StartScanMessage::isDir() const {
 StopScanMessage::StopScanMessage(QObject *parent) : PipeMessage(MessageType::stopScan, parent) {}
 QByteArray StopScanMessage::toByteArray() {
 	QByteArray ba;
-	ba.append((const char*) type, sizeof(type));
+	QDataStream stream(&ba, QIODevice::WriteOnly);
+	stream << type;
+	return ba;
 }
 
-PauseScanMessage::PauseScanMessage(QObject* parent) : PipeMessage(MessageType::stopScan, parent) {}
+PauseScanMessage::PauseScanMessage(QObject* parent) : PipeMessage(MessageType::pauseScan, parent) {}
 QByteArray PauseScanMessage::toByteArray() {
 	QByteArray ba;
-	ba.append((const char*) type, sizeof(type));
+	QDataStream stream(&ba, QIODevice::WriteOnly);
+	stream << type;
+	return ba;
 }
 
 AddDirectoryToMonitorMessage::AddDirectoryToMonitorMessage(const QString& dirPath, QObject *parent) :
@@ -168,7 +183,9 @@ const QString& RemoveDirectoryFromMonitorMessage::getPath() const {
 GetMonitoredDirectoriesMessage::GetMonitoredDirectoriesMessage(QObject* parent) : PipeMessage(MessageType::getMonitoredDirectories, parent) {}
 QByteArray GetMonitoredDirectoriesMessage::toByteArray() {
 	QByteArray ba;
-	ba.append((const char*)type, sizeof(type));
+	QDataStream stream(&ba, QIODevice::WriteOnly);
+	stream << type;
+	return ba;
 }
 
 MonitoredDirectoriesMessage::MonitoredDirectoriesMessage(const QStringList& dirList, QObject *parent) :
@@ -201,12 +218,16 @@ const QStringList & MonitoredDirectoriesMessage::getDirList() const {
 StartDirectoryMonitoringMessage::StartDirectoryMonitoringMessage(QObject* parent) : PipeMessage(MessageType::startDirMonitor, parent) {}
 QByteArray StartDirectoryMonitoringMessage::toByteArray() {
 	QByteArray ba;
-	ba.append((const char*)type, sizeof(type));
+	QDataStream stream(&ba, QIODevice::WriteOnly);
+	stream << type;
+	return ba;
 }
 
-StopDirectoryMonitoringMessage::StopDirectoryMonitoringMessage(QObject* parent) : PipeMessage(MessageType::stopScan, parent) {}
+StopDirectoryMonitoringMessage::StopDirectoryMonitoringMessage(QObject* parent) : PipeMessage(MessageType::stopDirMonitor, parent) {}
 QByteArray StopDirectoryMonitoringMessage::toByteArray() {
 	QByteArray ba;
-	ba.append((const char*)type, sizeof(type));
+	QDataStream stream(&ba, QIODevice::WriteOnly);
+	stream << type;
+	return ba;
 }
 

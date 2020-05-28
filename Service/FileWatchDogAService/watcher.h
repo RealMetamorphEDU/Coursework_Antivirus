@@ -62,3 +62,4 @@ class StopEvent: public QEvent {
 public:
     explicit StopEvent();
 };
+
