@@ -1,113 +1,76 @@
 #include "reader.h"
-#include <QCoreApplication>
-#include "messages.h"
-#include <QDebug>
+#include "pipemessage.h"
+#include "aservicemessagepipe.h"
 
-Reader::Reader(HANDLE writePipe, QString readPipeName, HANDLE requestEvent, bool first, QObject *parent) :
-	QObject(parent),
-	writePipe(writePipe),
-	readPipeName(readPipeName),
-	first(first) {
-	events[0] = requestEvent;
-	overlapped = new OVERLAPPED{0, 0, 0, 0, 0};
-	overlapped->hEvent = CreateEventA(NULL,FALSE,FALSE,NULL);
-	events[1] = overlapped->hEvent;
-	connected = false;
-	working = true;
+
+Reader::Reader(AServiceMessagePipe *root) : QObject(nullptr) {
+    this->root = root;
+    events[0] = root->requestEvent;
+    overlapped = new OVERLAPPED;
+    overlapped->Offset = 0;
+    overlapped->OffsetHigh = 0;
+    overlapped->hEvent = CreateEventA(NULL,FALSE,FALSE,NULL);
+    events[1] = overlapped->hEvent;
+    working = true;
 }
 
-
+Reader::~Reader() {
+    CloseHandle(overlapped->hEvent);
+    delete overlapped;
+}
 
 void Reader::reading() {
-	while (working) {
-		if (!connected) {
-			if (!first)
-				readPipe = CreateFileA(readPipeName.toStdString().c_str(), GENERIC_READ, 0, NULL, OPEN_EXISTING, 0,
-				                       NULL);
-			ConnectNamedPipe(writePipe, overlapped);
-			DWORD selected = WaitForMultipleObjects(2, events, FALSE, INFINITE) - WAIT_OBJECT_0;
-			connected = selected;
-			qDebug() << "finished waiting for event #" << selected;
-			if (selected == 1) {
-				emit readerUpdateConnect(connected);
-				if (first)
-					readPipe = CreateFileA(readPipeName.toStdString().c_str(), GENERIC_READ, 0, NULL, OPEN_EXISTING, 0,
-					                       NULL);
-			}
-			continue;
-		}
-		ReadFile(readPipe, NULL, 0, NULL, NULL);
-		if (GetLastError() == ERROR_BROKEN_PIPE) {
-			connected = false;
-			DisconnectNamedPipe(writePipe);
-			CloseHandle(readPipe);
-			emit readerUpdateConnect(connected);
-			continue;
-		}
-		DWORD messageSize = 0;
-		PeekNamedPipe(readPipe, NULL, NULL, NULL, NULL, &messageSize);
-		QByteArray ba(messageSize, 0);
-		DWORD bytesRead = 0;
-		bool status = ReadFile(readPipe, ba.data(), messageSize, &bytesRead, NULL);
-		if (status)
-		emit readerRecievedMsg(createPipeMessage(ba));
-	}
-}
-
-PipeMessage* Reader::createPipeMessage(QByteArray &array) {
-	QBuffer buff(&array);
-	buff.open(QIODevice::ReadOnly);
-	QDataStream stream(&buff);
-	MessageType type;
-	stream >> type;
-	PipeMessage *msg;
-	array = array.right(array.length() - 4);
-	switch (type) {
-		case MessageType::scanStatus:
-			msg = new ScanStatusMessage(false, 0, "", 0, 0, 0, this);
-			msg->parseQByteArray(array);
-			break;
-		case MessageType::startScan:
-			msg = new StartScanMessage("", false, this);
-			msg->parseQByteArray(array);
-			break;
-		case MessageType::stopScan:
-			msg = new StopScanMessage(this);
-			break;
-		case MessageType::pauseScan:
-			msg = new PauseScanMessage(this);
-			break;
-		case MessageType::addDirToMonitor:
-			msg = new AddDirectoryToMonitorMessage("", this);
-			msg->parseQByteArray(array);
-			break;
-		case MessageType::remDirFromMonitor:
-			msg = new RemoveDirectoryFromMonitorMessage("", this);
-			msg->parseQByteArray(array);
-			break;
-		case MessageType::getMonitoredDirectories:
-			msg = new GetMonitoredDirectoriesMessage(this);
-			break;
-		case MessageType::monitoredDirectories:
-			msg = new MonitoredDirectoriesMessage(QStringList(), this);
-			msg->parseQByteArray(array);
-			break;
-		case MessageType::startDirMonitor:
-			msg = new StartDirectoryMonitoringMessage(this);
-			break;
-		case MessageType::stopDirMonitor:
-			msg = new StopDirectoryMonitoringMessage(this);
-			break;
-	}
-	qDebug() << "RECIEVED MESSAGE TYPE: " << (int)msg->getType();
-	return msg;
-}
-
-
-bool Reader::isConnected() const {
-	return connected;
+    while (working) {
+        if (!root->connected) {
+            if (root->first) {
+                ConnectNamedPipe(root->writePipe, overlapped);
+                root->connected = WaitForMultipleObjects(2, events, FALSE, INFINITE) - WAIT_OBJECT_0;
+                if (root->connected) {
+                    emit connectUpdate(root->connected);
+                    root->readPipe = CreateFileA(root->readName.toStdString().c_str(), GENERIC_READ, 0, NULL,
+                                                 OPEN_EXISTING,
+                                                 0,
+                                                 NULL);
+                }
+            } else {
+                root->readPipe = CreateFileA(root->writeName.toStdString().c_str(), GENERIC_READ, 0, NULL,
+                                             OPEN_EXISTING, 0,
+                                             NULL);
+                ConnectNamedPipe(root->writePipe, overlapped);
+                root->connected = WaitForMultipleObjects(2, events, FALSE, INFINITE) - WAIT_OBJECT_0;
+                if (root->connected) {
+                    emit connectUpdate(root->connected);
+                } else
+                    CloseHandle(root->readPipe);
+            }
+            continue;
+        }
+        ReadFile(root->readPipe, NULL, 0, NULL, NULL);
+        if (GetLastError() == ERROR_BROKEN_PIPE) {
+            root->connected = false;
+            DisconnectNamedPipe(root->writePipe);
+            CloseHandle(root->readPipe);
+            emit connectUpdate(root->connected);
+            if (!root->first)
+                root->reinit();
+            continue;
+        }
+        DWORD messageSize = 0;
+        PeekNamedPipe(root->readPipe, NULL, NULL, NULL, NULL, &messageSize);
+        if (messageSize > 0) {
+            QByteArray ba(messageSize, 0);
+            DWORD bytesRead = 0;
+            bool status = ReadFile(root->readPipe, ba.data(), messageSize, &bytesRead, NULL);
+            if (status) {
+                PipeMessage *message = PipeMessage::parseByteArray(ba, this);
+                if (message != nullptr) {
+                    emit receivedMessage(message);
+                }
+            }
+        }
+    }
 }
 
 void Reader::setWorking(bool working) {
-	this->working = working;
+    this->working = working;
 }

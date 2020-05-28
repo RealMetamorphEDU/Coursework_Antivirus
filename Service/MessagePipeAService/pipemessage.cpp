@@ -1,233 +1,268 @@
 #include "pipemessage.h"
-#include "adddirectorytomonitormessage.h"
-#include "getmonitoreddirectoriesmessage.h"
-#include "monitoreddirectoriesmessage.h"
-#include "pausescanmessage.h"
-#include "removedirectoryfrommonitormessage.h"
-#include "scanstatusmessage.h"
-#include "startdirectorymonitoringmessage.h"
-#include "stopdirectorymonitoringmessage.h"
-#include "startscanmessage.h"
-#include "stopscanmessage.h"
+#include <QBuffer>
+#include <QDataStream>
 
-PipeMessage::PipeMessage(MessageType type, QObject *parent) : QObject(parent) {
-	this->type = type;
+PipeMessage::PipeMessage(QObject *parent) : QObject(parent) {}
+
+PipeMessage* PipeMessage::parseByteArray(QByteArray array, QObject *parent) {
+    QDataStream stream(array);
+    MessageType type;
+    stream >> type;
+    switch (type) {
+        case MessageType::scanStatus: {
+            bool scanning;
+            int taskIndex;
+            int taskCount;
+            QString curObject;
+            int objLeft;
+            int objScanned;
+            stream >> scanning >> taskIndex >> taskCount >> curObject >> objLeft >> objScanned;
+            return new ScanStatusMessage(scanning, taskIndex, taskCount, curObject, objLeft, objScanned, parent);
+        }
+        case MessageType::startScan: {
+            QString objectPath;
+            bool file;
+            stream >> objectPath >> file;
+            return new StartScanMessage(objectPath, file, parent);
+        }
+        case MessageType::stopScan: {
+            int taskIndex;
+            stream >> taskIndex;
+            return new StopScanMessage(taskIndex, parent);
+        }
+        case MessageType::pauseScan: {
+            int taskIndex;
+            stream >> taskIndex;
+            return new PauseScanMessage(taskIndex, parent);
+        }
+        case MessageType::addDirToMonitor: {
+            QString dirPath;
+            stream >> dirPath;
+            return new AddDirectoryToMonitorMessage(dirPath, parent);
+        }
+        case MessageType::remDirFromMonitor: {
+            QString dirPath;
+            stream >> dirPath;
+            return new RemoveDirectoryFromMonitorMessage(dirPath, parent);
+        }
+        case MessageType::getMonitoredDirectories:
+            return new GetMonitoredDirectoriesMessage(parent);
+        case MessageType::monitoredDirectories: {
+            QStringList dirList;
+            stream >> dirList;
+            return new MonitoredDirectoriesMessage(dirList, parent);
+        }
+        case MessageType::startDirMonitor:
+            return new StartDirectoryMonitoringMessage(parent);
+        case MessageType::stopDirMonitor:
+            return new StopDirectoryMonitoringMessage(parent);
+        default:
+            return nullptr;
+    }
 }
 
-MessageType PipeMessage::getType() const {
-	return type;
+MessageType ScanStatusMessage::getType() {
+    return MessageType::scanStatus;
 }
 
-bool PipeMessage::parseQByteArray(QByteArray &array) {
-	return true;
+MessageType StartScanMessage::getType() {
+    return MessageType::startScan;
 }
 
-ScanStatusMessage::ScanStatusMessage(bool scanning, int taskIndex, const QString &curObject,
-                                     int objLeft, int objScanned, int tasksLeft, QObject *parent) :
-	PipeMessage(MessageType::scanStatus, parent),
-	scanning(scanning),
-	taskIndex(taskIndex),
-	curObject(curObject),
-	objLeft(objLeft),
-	objScanned(objScanned),
-	tasksLeft(tasksLeft) {}
+MessageType StopScanMessage::getType() {
+    return MessageType::stopScan;
+}
 
-bool ScanStatusMessage::parseQByteArray(QByteArray &array) {
-	QBuffer buff(&array);
-	buff.open(QIODevice::ReadOnly);
-	QDataStream bs(&buff);
-	bs >> scanning >> taskIndex >> curObject >> objLeft >> objScanned >> tasksLeft;
-	buff.close();
-	return true;
+MessageType PauseScanMessage::getType() {
+    return MessageType::pauseScan;
+}
+
+MessageType AddDirectoryToMonitorMessage::getType() {
+    return MessageType::addDirToMonitor;
+}
+
+MessageType RemoveDirectoryFromMonitorMessage::getType() {
+    return MessageType::remDirFromMonitor;
+}
+
+MessageType GetMonitoredDirectoriesMessage::getType() {
+    return MessageType::getMonitoredDirectories;
+}
+
+MessageType MonitoredDirectoriesMessage::getType() {
+    return MessageType::monitoredDirectories;
+}
+
+MessageType StartDirectoryMonitoringMessage::getType() {
+    return MessageType::startDirMonitor;
+}
+
+MessageType StopDirectoryMonitoringMessage::getType() {
+    return MessageType::stopDirMonitor;
+}
+
+ScanStatusMessage::ScanStatusMessage(bool scanning, int taskIndex, int taskCount, const QString &curObject, int objLeft,
+                                     int objScanned, QObject *parent): PipeMessage(parent) {
+    this->scanning = scanning;
+    this->taskIndex = taskIndex;
+    this->taskCount = taskCount;
+    this->curObject = curObject;
+    this->objLeft = objLeft;
+    this->objScanned = objScanned;
 }
 
 QByteArray ScanStatusMessage::toByteArray() {
-	QByteArray ba;
-	QBuffer buff(&ba);
-	buff.open(QIODevice::WriteOnly);
-	QDataStream bs(&buff);
-	bs << type << scanning << taskIndex << curObject << objLeft << objScanned << tasksLeft;
-	buff.close();
-	return ba;
+    QByteArray array;
+    QDataStream stream(&array, QIODevice::WriteOnly);
+    stream << getType() << scanning << taskIndex << taskCount << curObject << objLeft << objScanned;
+    return array;
 }
 
 bool ScanStatusMessage::isScanning() const {
-	return scanning;
+    return scanning;
 }
 
 int ScanStatusMessage::getTaskIndex() const {
-	return taskIndex;
+    return taskIndex;
 }
 
-const QString& ScanStatusMessage::getCurObject() const {
-	return curObject;
+QString ScanStatusMessage::getCurObject() const {
+    return curObject;
 }
 
 int ScanStatusMessage::getObjLeft() const {
-	return objLeft;
+    return objLeft;
 }
 
 int ScanStatusMessage::getObjScanned() const {
-	return objScanned;
+    return objScanned;
 }
 
-int ScanStatusMessage::getTasksLeft() const {
-	return tasksLeft;
+int ScanStatusMessage::getTaskCount() const {
+    return taskCount;
 }
 
-StartScanMessage::StartScanMessage(const QString &objectPath, bool file, QObject *parent) :
-	PipeMessage(MessageType::startScan, parent),
-	objectPath(objectPath),
-	file(file) {}
-
-bool StartScanMessage::parseQByteArray(QByteArray &array) {
-	QBuffer buff(&array);
-	buff.open(QIODevice::ReadOnly);
-	QDataStream bs(&buff);
-	bs >> objectPath >> file;
-	return true;
+StartScanMessage::StartScanMessage(const QString &objectPath, bool file, QObject *parent) : PipeMessage(parent) {
+    this->objectPath = objectPath;
+    this->file = file;
 }
 
 QByteArray StartScanMessage::toByteArray() {
-	QByteArray ba;
-	QBuffer buff(&ba);
-	buff.open(QIODevice::WriteOnly);
-	QDataStream bs(&buff);
-	bs << type << objectPath << file;
-	buff.close();
-	return ba;
+    QByteArray array;
+    QDataStream stream(&array, QIODevice::WriteOnly);
+    stream << getType() << objectPath << file;
+    return array;
 }
 
-const QString& StartScanMessage::getObjectPath() const {
-	return objectPath;
+QString StartScanMessage::getObjectPath() const {
+    return objectPath;
 }
 
 bool StartScanMessage::isFile() const {
-	return file;
+    return file;
 }
 
-bool StartScanMessage::isDir() const {
-	return !file;
+StopScanMessage::StopScanMessage(int taskIndex, QObject *parent) : PipeMessage(parent) {
+    this->taskIndex = taskIndex;
 }
 
-StopScanMessage::StopScanMessage(QObject *parent) : PipeMessage(MessageType::stopScan, parent) {}
+int StopScanMessage::getTaskIndex() const {
+    return taskIndex;
+}
+
 QByteArray StopScanMessage::toByteArray() {
-	QByteArray ba;
-	QDataStream stream(&ba, QIODevice::WriteOnly);
-	stream << type;
-	return ba;
+    QByteArray array;
+    QDataStream stream(&array, QIODevice::WriteOnly);
+    stream << getType() << taskIndex;
+    return array;
 }
 
-PauseScanMessage::PauseScanMessage(QObject* parent) : PipeMessage(MessageType::pauseScan, parent) {}
+PauseScanMessage::PauseScanMessage(int taskIndex, QObject *parent) : PipeMessage(parent) {
+    this->taskIndex = taskIndex;
+}
+
+int PauseScanMessage::getTaskIndex() const {
+    return taskIndex;
+}
+
 QByteArray PauseScanMessage::toByteArray() {
-	QByteArray ba;
-	QDataStream stream(&ba, QIODevice::WriteOnly);
-	stream << type;
-	return ba;
+    QByteArray array;
+    QDataStream stream(&array, QIODevice::WriteOnly);
+    stream << getType() << taskIndex;
+    return array;
 }
 
-AddDirectoryToMonitorMessage::AddDirectoryToMonitorMessage(const QString& dirPath, QObject *parent) :
-	PipeMessage(MessageType::addDirToMonitor,parent),
-	dirPath(dirPath)
-{ }
-
-bool AddDirectoryToMonitorMessage::parseQByteArray(QByteArray &array) {
-	QBuffer buff(&array);
-	buff.open(QIODevice::ReadOnly);
-	QDataStream bs(&buff);
-	bs >> dirPath;
-	return true;
+AddDirectoryToMonitorMessage::AddDirectoryToMonitorMessage(const QString &dirPath,
+                                                           QObject *parent) : PipeMessage(parent) {
+    this->dirPath = dirPath;
 }
 
 QByteArray AddDirectoryToMonitorMessage::toByteArray() {
-	QByteArray ba;
-	QBuffer buff(&ba);
-	buff.open(QIODevice::WriteOnly);
-	QDataStream bs(&buff);
-	bs << type << dirPath;
-	buff.close();
-	return ba;
+    QByteArray array;
+    QDataStream stream(&array, QIODevice::WriteOnly);
+    stream << getType() << dirPath;
+    return array;
 }
 
-const QString& AddDirectoryToMonitorMessage::getPath() const {
-	return dirPath;
+QString AddDirectoryToMonitorMessage::getPath() const {
+    return dirPath;
 }
 
-RemoveDirectoryFromMonitorMessage::RemoveDirectoryFromMonitorMessage(const QString& dirPath, QObject* parent) :
-	PipeMessage(MessageType::remDirFromMonitor, parent),
-	dirPath(dirPath)
-{ }
-
-bool RemoveDirectoryFromMonitorMessage::parseQByteArray(QByteArray& array) {
-	QBuffer buff(&array);
-	buff.open(QIODevice::ReadOnly);
-	QDataStream bs(&buff);
-	bs >> dirPath;
-	return true;
+RemoveDirectoryFromMonitorMessage::RemoveDirectoryFromMonitorMessage(const QString &dirPath,
+                                                                     QObject *parent) : PipeMessage(parent) {
+    this->dirPath = dirPath;
 }
 
 QByteArray RemoveDirectoryFromMonitorMessage::toByteArray() {
-	QByteArray ba;
-	QBuffer buff(&ba);
-	buff.open(QIODevice::WriteOnly);
-	QDataStream bs(&buff);
-	bs << type << dirPath;
-	buff.close();
-	return ba;
+    QByteArray array;
+    QDataStream stream(&array, QIODevice::WriteOnly);
+    stream << getType() << dirPath;
+    return array;
 }
 
-const QString& RemoveDirectoryFromMonitorMessage::getPath() const {
-	return dirPath;
+QString RemoveDirectoryFromMonitorMessage::getPath() const {
+    return dirPath;
 }
 
-GetMonitoredDirectoriesMessage::GetMonitoredDirectoriesMessage(QObject* parent) : PipeMessage(MessageType::getMonitoredDirectories, parent) {}
+GetMonitoredDirectoriesMessage::GetMonitoredDirectoriesMessage(QObject *parent) : PipeMessage(parent) {}
+
 QByteArray GetMonitoredDirectoriesMessage::toByteArray() {
-	QByteArray ba;
-	QDataStream stream(&ba, QIODevice::WriteOnly);
-	stream << type;
-	return ba;
+    QByteArray array;
+    QDataStream stream(&array, QIODevice::WriteOnly);
+    stream << getType();
+    return array;
 }
 
-MonitoredDirectoriesMessage::MonitoredDirectoriesMessage(const QStringList& dirList, QObject *parent) :
-	PipeMessage(MessageType::monitoredDirectories,parent),
-	dirList(dirList)
-{}
-
-bool MonitoredDirectoriesMessage::parseQByteArray(QByteArray &array) {
-	QBuffer buff(&array);
-	buff.open(QIODevice::ReadOnly);
-	QDataStream bs(&buff);
-	bs >> dirList;
-	return true;
+MonitoredDirectoriesMessage::MonitoredDirectoriesMessage(const QStringList &dirList,
+                                                         QObject *parent) : PipeMessage(parent) {
+    this->dirList = dirList;
 }
 
 QByteArray MonitoredDirectoriesMessage::toByteArray() {
-	QByteArray ba;
-	QBuffer buff(&ba);
-	buff.open(QIODevice::WriteOnly);
-	QDataStream bs(&buff);
-	bs << type << dirList;
-	buff.close();
-	return ba;
+    QByteArray array;
+    QDataStream stream(&array, QIODevice::WriteOnly);
+    stream << getType() << dirList;
+    return array;
 }
 
-const QStringList & MonitoredDirectoriesMessage::getDirList() const {
-	return dirList;
+QStringList MonitoredDirectoriesMessage::getDirList() const {
+    return dirList;
 }
 
-StartDirectoryMonitoringMessage::StartDirectoryMonitoringMessage(QObject* parent) : PipeMessage(MessageType::startDirMonitor, parent) {}
+StartDirectoryMonitoringMessage::StartDirectoryMonitoringMessage(QObject *parent) : PipeMessage(parent) {}
+
 QByteArray StartDirectoryMonitoringMessage::toByteArray() {
-	QByteArray ba;
-	QDataStream stream(&ba, QIODevice::WriteOnly);
-	stream << type;
-	return ba;
+    QByteArray array;
+    QDataStream stream(&array, QIODevice::WriteOnly);
+    stream << getType();
+    return array;
 }
 
-StopDirectoryMonitoringMessage::StopDirectoryMonitoringMessage(QObject* parent) : PipeMessage(MessageType::stopDirMonitor, parent) {}
+StopDirectoryMonitoringMessage::StopDirectoryMonitoringMessage(QObject *parent) : PipeMessage(parent) {}
+
 QByteArray StopDirectoryMonitoringMessage::toByteArray() {
-	QByteArray ba;
-	QDataStream stream(&ba, QIODevice::WriteOnly);
-	stream << type;
-	return ba;
+    QByteArray array;
+    QDataStream stream(&array, QIODevice::WriteOnly);
+    stream << getType();
+    return array;
 }
-

@@ -1,72 +1,85 @@
 #include "aservicemessagepipe.h"
 #include <Windows.h>
-#include "Reader.h"
+#include "reader.h"
 #include <QThread>
-#include <QDebug>
+
+void AServiceMessagePipe::reinit() {
+    if (!first) {
+        CloseHandle(writePipe);
+        writePipe = CreateNamedPipeA(writeName.toStdString().c_str(),PIPE_ACCESS_OUTBOUND | FILE_FLAG_OVERLAPPED,
+                                     PIPE_TYPE_MESSAGE | PIPE_READMODE_MESSAGE,
+                                     1, 8192, 8192, 5000, NULL);
+        if (writePipe == INVALID_HANDLE_VALUE) {
+            writePipe = CreateNamedPipeA(readName.toStdString().c_str(), PIPE_ACCESS_OUTBOUND | FILE_FLAG_OVERLAPPED,
+                                         PIPE_TYPE_MESSAGE | PIPE_READMODE_MESSAGE,
+                                         1, 8192, 8192, 5000, NULL);
+            first = false;
+        } else {
+            first = true;
+        }
+    }
+}
 
 AServiceMessagePipe::AServiceMessagePipe(QString &pipeName, QObject *parent) : QObject(parent) {
-	this->pipeName = pipeName;
-	requestEvent = CreateEventA(NULL, FALSE, FALSE, NULL);
-	QString pipeName1(QString("\\\\.\\pipe\\ASMP_") + pipeName + QString("1"));
-	QString pipeName2(QString("\\\\.\\pipe\\ASMP_") + pipeName + QString("2"));
-	reader = nullptr;
-	bool first = true;
-	writePipe = CreateNamedPipeA(pipeName1.toStdString().c_str(), PIPE_ACCESS_OUTBOUND | FILE_FLAG_OVERLAPPED | FILE_FLAG_FIRST_PIPE_INSTANCE,
-	                             PIPE_TYPE_MESSAGE | PIPE_READMODE_MESSAGE | PIPE_WAIT,
-	                             2, 8192, 8192, 5000, NULL);
-	if (writePipe == INVALID_HANDLE_VALUE) {
-		writePipe = CreateNamedPipeA(pipeName2.toStdString().c_str(), PIPE_ACCESS_OUTBOUND | FILE_FLAG_OVERLAPPED,
-		                             PIPE_TYPE_MESSAGE | PIPE_READMODE_MESSAGE | PIPE_WAIT,
-		                             2, 8192, 8192, 5000, NULL);
-		if (writePipe == INVALID_HANDLE_VALUE)
-			return;
-		reader = new Reader(writePipe, pipeName1, requestEvent,false);
-	} else {
-		HANDLE secondTest = CreateNamedPipeA(pipeName2.toStdString().c_str(), PIPE_ACCESS_OUTBOUND | FILE_FLAG_OVERLAPPED,
-			PIPE_TYPE_MESSAGE | PIPE_READMODE_MESSAGE | PIPE_WAIT,
-			2, 8192, 8192, 5000, NULL);
-		if (secondTest == INVALID_HANDLE_VALUE)
-			first = false;
-		CloseHandle(secondTest);
-		reader = new Reader(writePipe, pipeName2, requestEvent,first);
-	}
-	readerThread = new QThread(this);
-	reader->moveToThread(readerThread);
-	connect(readerThread, SIGNAL(finished()), reader, SLOT(deleteLater()));
-	connect(readerThread, SIGNAL(finished()), readerThread, SLOT(deleteLater()));
-	connect(readerThread, SIGNAL(started()), reader, SLOT(reading()));
-	connect(reader, SIGNAL(readerUpdateConnect(bool)), SIGNAL(connectUpdate(bool)));
-	connect(reader, SIGNAL(readerRecievedMsg(PipeMessage*)), SIGNAL(receivedMessage(PipeMessage*)));
-	readerThread->start();
+    requestEvent = CreateEventA(NULL, FALSE, FALSE, NULL);
+    writeName = "";
+    readName = "";
+    readPipe = NULL;
+    writeName.append(R"(\\.\pipe\ASMP_)").append(pipeName).append("_1");
+    readName.append(R"(\\.\pipe\ASMP_)").append(pipeName).append("_2");
+    reader = nullptr;
+    connected = false;
+    writePipe = CreateNamedPipeA(writeName.toStdString().c_str(),PIPE_ACCESS_OUTBOUND | FILE_FLAG_OVERLAPPED,
+                                 PIPE_TYPE_MESSAGE | PIPE_READMODE_MESSAGE,
+                                 1, 8192, 8192, 5000, NULL);
+    if (writePipe == INVALID_HANDLE_VALUE) {
+        writePipe = CreateNamedPipeA(readName.toStdString().c_str(), PIPE_ACCESS_OUTBOUND | FILE_FLAG_OVERLAPPED,
+                                     PIPE_TYPE_MESSAGE | PIPE_READMODE_MESSAGE,
+                                     1, 8192, 8192, 5000, NULL);
+        if (writePipe == INVALID_HANDLE_VALUE)
+            return;
+        first = false;
+        reader = new Reader(this);
+    } else {
+        first = true;
+        reader = new Reader(this);
+    }
+    thread = new QThread(this);
+    reader->moveToThread(thread);
+    connect(thread, SIGNAL(finished()), reader, SLOT(deleteLater()));
+    connect(thread, SIGNAL(finished()), thread, SLOT(deleteLater()));
+    connect(thread, SIGNAL(started()), reader, SLOT(reading()));
+    connect(reader, SIGNAL(connectUpdate(bool)), SIGNAL(connectUpdate(bool)));
+    connect(reader, SIGNAL(receivedMessage(PipeMessage*)), SIGNAL(receivedMessage(PipeMessage*)));
+    thread->start();
 }
 
 AServiceMessagePipe::~AServiceMessagePipe() {
-	if (reader != nullptr) {
-		SetEvent(requestEvent);
-		readerThread->quit();
-		readerThread->wait();
-		CloseHandle(writePipe);
-	}
-	CloseHandle(requestEvent);
+    if (reader != nullptr) {
+        reader->setWorking(false);
+        CloseHandle(writePipe);
+        SetEvent(requestEvent);
+        thread->quit();
+        thread->wait();
+    }
+    CloseHandle(requestEvent);
 }
 
 bool AServiceMessagePipe::isConnected() {
-	if (reader == nullptr)
-		return false;
-	return reader->isConnected();
+    return connected;
 }
 
 void AServiceMessagePipe::sendMessage(PipeMessage *message) {
-	if (reader != nullptr && reader->isConnected()) {
-		QByteArray msg = message->toByteArray();
-		DWORD bytesWritten;
-		boolean status = WriteFile(writePipe, msg.data(), msg.size(), &bytesWritten, NULL);
-		FlushFileBuffers(writePipe);
-		if (!status) {
-			emit catchError(GetLastError());
-		}
-		message->deleteLater();
-	}
-
-
+    if (reader != nullptr && connected) {
+        QByteArray msg = message->toByteArray();
+        DWORD bytesWritten;
+        boolean status = WriteFile(writePipe, msg.data(), msg.size(), &bytesWritten, NULL);
+        if (!status) {
+            emit catchError(GetLastError());
+        } else
+            FlushFileBuffers(writePipe);
+        message->deleteLater();
+    } else {
+        emit connectUpdate(false);
+    }
 }
