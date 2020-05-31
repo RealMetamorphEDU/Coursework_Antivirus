@@ -44,7 +44,7 @@ void Pipe::initTestCase() {
     scanStatus = new ScanStatusMessage(true, 69, 80, "C:\\Papka\\File.exe", 0, 0, this);
     startScan = new StartScanMessage("C:\\Papka\\DrugoyFile.zip", true, this);
     stopScan = new StopScanMessage(5, this);
-    pauseScan = new PauseScanMessage(4, this);
+    pauseScan = new PauseScanMessage(4, true, this);
     addDirectory = new AddDirectoryToMonitorMessage("C:\\monitoretypapkypazhalasta", this);
     removeDirectory = new RemoveDirectoryFromMonitorMessage("C:\\avotetyperestanspasibo", this);
     getMonitoredDirectories = new GetMonitoredDirectoriesMessage(this);
