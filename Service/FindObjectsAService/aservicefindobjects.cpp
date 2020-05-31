@@ -28,6 +28,11 @@ void AServiceFindObjects::findObjects(QString filepath) {
     SetEvent(requestEvent);
 }
 
+void AServiceFindObjects::setPause(bool pause) {
+    QCoreApplication::postEvent(builder, new PauseEvent(pause));
+    SetEvent(requestEvent);
+}
+
 void AServiceFindObjects::updateEvents() {
     SetEvent(requestEvent);
 }

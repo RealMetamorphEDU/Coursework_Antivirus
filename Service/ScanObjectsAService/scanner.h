@@ -8,15 +8,12 @@
 #include "signaturestorage.h"
 #include "signaturerecord.h"
 #include <QCoreApplication>
-
-enum events {
-    scanObjectsType = QEvent::User,
-    stopType
-};
+#include "eventsaservice.h"
 
 class Scanner: public QObject {
 Q_OBJECT
     bool working;
+    bool pause;
     HANDLE updateEvent;
     SignatureStorage *storage;
     QVector<ScanObject*> queue;
@@ -29,19 +26,6 @@ public slots:
 signals:
     void uninfected(QString filename);
     void infectedBy(QString filename, QString signatureName);
-};
-
-class ScanEvent: public QEvent {
-    ScanObject *scanObject;
-public:
-    explicit ScanEvent(ScanObject *scanObject);
-
-    ScanObject* getScanObject();
-};
-
-class StopEvent: public QEvent {
-public:
-    explicit StopEvent();
 };
 
 #endif // SCANNER_H

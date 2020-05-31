@@ -5,12 +5,11 @@
 #include "aservicebaseload.h"
 #include "tstnode.h"
 
+class SearchInstance;
 
 class SignatureStorage: public QObject {
 Q_OBJECT
     TSTNode *root;
-    bool searching;
-    TSTNode *current;
     qint64 maxLen;
 public:
     explicit SignatureStorage(QObject *parent = nullptr);
@@ -18,12 +17,24 @@ public:
     friend int AServiceBaseLoader::loadStorage(QString &storageName, QString &filepath);
     friend int AServiceBaseLoader::appendStorage(QString &storageName, QString &filepath);
 
-    void startSearch();
-    QVector<SignatureRecord*> search(byte* data, qint64 len);
-    bool isSearching();
+    SearchInstance* startSearch();
     qint64 getMaxLen();
 
     ~SignatureStorage();
+};
+
+
+class SearchInstance: public QObject {
+Q_OBJECT
+    bool searching;
+    TSTNode *root;
+    TSTNode *current;
+    friend class SignatureStorage;
+public:
+    explicit SearchInstance(QObject *parent = nullptr);
+    QVector<SignatureRecord*> search(byte *data, qint64 len);
+    void resetSearch();
+    bool isSearching();
 };
 
 #endif // SIGNATURESTORAGE_H

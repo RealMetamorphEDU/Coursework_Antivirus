@@ -6,6 +6,7 @@
 #include <QEvent>
 #include <QDirIterator>
 #include <QDebug>
+#include "eventsaservice.h"
 
 struct FindRequest {
     QString path;
@@ -26,29 +27,5 @@ public slots:
 signals:
     void seekerFoundFile(QString filepath);
 };
-
-
-enum events {
-    addRequestType = QEvent::User,
-    stopType
-};
-
-class RequestEvent: public QEvent {
-    QString path;
-    QString pattern;
-    bool recursive;
-public:
-    explicit RequestEvent(QString &path, QString &pattern, bool recursive);
-
-    const QString& getPath();
-    const QString& getPattern() const;
-    bool isRecursive() const;
-};
-
-class StopEvent: public QEvent {
-public:
-    explicit StopEvent();
-};
-
 
 #endif // SEEKER_H

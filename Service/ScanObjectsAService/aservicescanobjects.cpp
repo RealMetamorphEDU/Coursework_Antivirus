@@ -24,6 +24,11 @@ AServiceScanObjects::~AServiceScanObjects() {
     CloseHandle(requestEvent);
 }
 
+void AServiceScanObjects::setPause(bool pause) {
+    QCoreApplication::postEvent(scanner, new PauseEvent(pause));
+    SetEvent(requestEvent);
+}
+
 void AServiceScanObjects::scanScanObject(ScanObject *scanObject) {
     QCoreApplication::postEvent(scanner, new ScanEvent(scanObject));
     SetEvent(requestEvent);

@@ -25,6 +25,7 @@ public:
     ~AServiceFindObjects();
 public slots:
     void findObjects(QString filepath);
+    void setPause(bool pause);
 private slots:
     void updateEvents();
 signals:

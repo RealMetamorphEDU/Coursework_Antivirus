@@ -7,15 +7,14 @@
 #include "scanobject.h"
 #include <QCoreApplication>
 #include <Windows.h>
+#include "eventsaservice.h"
 
-enum events {
-    findObjectsType = QEvent::User,
-    stopType
-};
+
 
 class Builder: public QObject {
 Q_OBJECT
     bool working;
+    bool pause;
     HANDLE updateEvent;
     QVector<QString> requests;
     QVector<RawObject*> rawObjects;
@@ -33,19 +32,7 @@ signals:
     void cantBuildThis(QString filepath, QString reason);
 };
 
-class FindEvent: public QEvent {
-    QString filepath;
-public:
-    explicit FindEvent(QString filepath);
 
-    const QString& getFilepath();
-};
-
-
-class StopEvent: public QEvent {
-public:
-    explicit StopEvent();
-};
 
 
 #endif // BUILDER_H

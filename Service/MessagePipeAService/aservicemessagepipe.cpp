@@ -78,8 +78,8 @@ void AServiceMessagePipe::sendMessage(PipeMessage *message) {
             emit catchError(GetLastError());
         } else
             FlushFileBuffers(writePipe);
-        message->deleteLater();
     } else {
         emit connectUpdate(false);
     }
+    message->deleteLater();
 }

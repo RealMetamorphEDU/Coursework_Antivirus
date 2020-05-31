@@ -13,11 +13,11 @@ PipeMessage* PipeMessage::parseByteArray(QByteArray array, QObject *parent) {
             bool scanning;
             int taskIndex;
             int taskCount;
-            QString curObject;
+            QString lastObject;
             int objLeft;
             int objScanned;
-            stream >> scanning >> taskIndex >> taskCount >> curObject >> objLeft >> objScanned;
-            return new ScanStatusMessage(scanning, taskIndex, taskCount, curObject, objLeft, objScanned, parent);
+            stream >> scanning >> taskIndex >> taskCount >> lastObject >> objLeft >> objScanned;
+            return new ScanStatusMessage(scanning, taskIndex, taskCount, lastObject, objLeft, objScanned, parent);
         }
         case MessageType::startScan: {
             QString objectPath;
@@ -32,8 +32,9 @@ PipeMessage* PipeMessage::parseByteArray(QByteArray array, QObject *parent) {
         }
         case MessageType::pauseScan: {
             int taskIndex;
-            stream >> taskIndex;
-            return new PauseScanMessage(taskIndex, parent);
+            bool pause;
+            stream >> taskIndex >> pause;
+            return new PauseScanMessage(taskIndex, pause, parent);
         }
         case MessageType::addDirToMonitor: {
             QString dirPath;
@@ -56,6 +57,31 @@ PipeMessage* PipeMessage::parseByteArray(QByteArray array, QObject *parent) {
             return new StartDirectoryMonitoringMessage(parent);
         case MessageType::stopDirMonitor:
             return new StopDirectoryMonitoringMessage(parent);
+        case MessageType::objectStatus: {
+            int taskID;
+            bool infected;
+            bool brek;
+            QString path;
+            QString infection;
+            stream >> taskID >> infected >> brek >> path >> infection;
+            return new ObjectStatusMessage(taskID, infected, brek, path, infection, parent);
+        }
+        case MessageType::lostWatch: {
+            QString path;
+            stream >> path;
+            return new LostWatchMessage(path, parent);
+        }
+        case MessageType::getResultList: {
+            int taskID;
+            stream >> taskID;
+            return new GetResultList(taskID, parent);
+        }
+        case MessageType::resultList: {
+            int taskID;
+            QStringList results;
+            stream >> taskID >> results;
+            return new ResultList(taskID, results, parent);
+        }
         default:
             return nullptr;
     }
@@ -101,12 +127,28 @@ MessageType StopDirectoryMonitoringMessage::getType() {
     return MessageType::stopDirMonitor;
 }
 
-ScanStatusMessage::ScanStatusMessage(bool scanning, int taskIndex, int taskCount, const QString &curObject, int objLeft,
-                                     int objScanned, QObject *parent): PipeMessage(parent) {
+MessageType ObjectStatusMessage::getType() {
+    return MessageType::objectStatus;
+}
+
+MessageType LostWatchMessage::getType() {
+    return MessageType::lostWatch;
+}
+
+MessageType GetResultList::getType() {
+    return MessageType::getResultList;
+}
+
+MessageType ResultList::getType() {
+    return MessageType::resultList;
+}
+
+ScanStatusMessage::ScanStatusMessage(bool scanning, int taskIndex, int taskCount, const QString &lastObject,
+                                     int objLeft, int objScanned, QObject *parent): PipeMessage(parent) {
     this->scanning = scanning;
     this->taskIndex = taskIndex;
     this->taskCount = taskCount;
-    this->curObject = curObject;
+    this->lastObject = lastObject;
     this->objLeft = objLeft;
     this->objScanned = objScanned;
 }
@@ -114,7 +156,7 @@ ScanStatusMessage::ScanStatusMessage(bool scanning, int taskIndex, int taskCount
 QByteArray ScanStatusMessage::toByteArray() {
     QByteArray array;
     QDataStream stream(&array, QIODevice::WriteOnly);
-    stream << getType() << scanning << taskIndex << taskCount << curObject << objLeft << objScanned;
+    stream << getType() << scanning << taskIndex << taskCount << lastObject << objLeft << objScanned;
     return array;
 }
 
@@ -127,7 +169,7 @@ int ScanStatusMessage::getTaskIndex() const {
 }
 
 QString ScanStatusMessage::getCurObject() const {
-    return curObject;
+    return lastObject;
 }
 
 int ScanStatusMessage::getObjLeft() const {
@@ -177,18 +219,23 @@ QByteArray StopScanMessage::toByteArray() {
     return array;
 }
 
-PauseScanMessage::PauseScanMessage(int taskIndex, QObject *parent) : PipeMessage(parent) {
+PauseScanMessage::PauseScanMessage(int taskIndex, bool pause, QObject *parent) : PipeMessage(parent) {
     this->taskIndex = taskIndex;
+    this->pause = pause;
 }
 
 int PauseScanMessage::getTaskIndex() const {
     return taskIndex;
 }
 
+bool PauseScanMessage::getPause() {
+    return pause;
+}
+
 QByteArray PauseScanMessage::toByteArray() {
     QByteArray array;
     QDataStream stream(&array, QIODevice::WriteOnly);
-    stream << getType() << taskIndex;
+    stream << getType() << taskIndex << pause;
     return array;
 }
 
@@ -264,5 +311,91 @@ QByteArray StopDirectoryMonitoringMessage::toByteArray() {
     QByteArray array;
     QDataStream stream(&array, QIODevice::WriteOnly);
     stream << getType();
+    return array;
+}
+
+ObjectStatusMessage::ObjectStatusMessage(int taskID, bool infected, bool brek, QString &path, QString &infection,
+                                         QObject *parent) : PipeMessage(parent) {
+    this->taskID = taskID;
+    this->infected = infected;
+    this->brek = brek;
+    this->path = path;
+    this->infection = infection;
+}
+
+int ObjectStatusMessage::getTaskId() {
+    return taskID;
+}
+
+bool ObjectStatusMessage::isInfected() const {
+    return infected;
+}
+
+bool ObjectStatusMessage::isBreak() const {
+    return brek;
+}
+
+const QString& ObjectStatusMessage::getPath() const {
+    return path;
+}
+
+const QString& ObjectStatusMessage::getInfection() const {
+    return infection;
+}
+
+QByteArray ObjectStatusMessage::toByteArray() {
+    QByteArray array;
+    QDataStream stream(&array, QIODevice::WriteOnly);
+    stream << getType() << taskID << infected << brek << path << infection;
+    return array;
+}
+
+LostWatchMessage::LostWatchMessage(QString &path, QObject *parent) : PipeMessage(parent) {
+    this->path = path;
+}
+
+const QString& LostWatchMessage::getPath() const {
+    return path;
+}
+
+QByteArray LostWatchMessage::toByteArray() {
+    QByteArray array;
+    QDataStream stream(&array, QIODevice::WriteOnly);
+    stream << getType() << path;
+    return array;
+}
+
+GetResultList::GetResultList(int taskID, QObject *parent) : PipeMessage(parent) {
+    this->taskID = taskID;
+}
+
+int GetResultList::getTaskID() {
+    return taskID;
+}
+
+QByteArray GetResultList::toByteArray() {
+    QByteArray array;
+    QDataStream stream(&array, QIODevice::WriteOnly);
+    stream << getType() << taskID;
+    return array;
+}
+
+ResultList::ResultList(int taskID, QStringList &results, QObject *parent) : PipeMessage(parent) {
+    this->results = results;
+    this->taskID = taskID;
+}
+
+int ResultList::getTaskID() {
+    return taskID;
+}
+
+const QStringList& ResultList::getResults() const {
+    return results;
+}
+
+QByteArray ResultList::toByteArray() {
+    QByteArray array;
+    QDataStream stream(&array, QIODevice::WriteOnly);
+    stream << getType() << taskID << results;
     return array;
 }

@@ -16,6 +16,7 @@ Q_OBJECT
 public:
     AServiceScanObjects(SignatureStorage *storage, QObject *parent = nullptr);
     ~AServiceScanObjects();
+    void setPause(bool pause);
 public slots:
     void scanScanObject(ScanObject *scanObject);
 signals:

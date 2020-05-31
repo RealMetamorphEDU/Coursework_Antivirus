@@ -5,6 +5,7 @@
 #include <QVector>
 #include <QFileInfo>
 #include <Windows.h>
+#include "eventsaservice.h"
 
 enum class ChangeType;
 
@@ -35,31 +36,5 @@ signals:
     void changeNotify(QString filepath, ChangeType type);
 };
 
-enum events {
-    addPathType = QEvent::User,
-    removePathType,
-    stopType
-};
 
-class AddEvent: public QEvent {
-    QString path;
-public:
-    explicit AddEvent(QString &path);
-
-    const QString& getPath();
-};
-
-class RemoveEvent: public QEvent {
-    QString path;
-public:
-    explicit RemoveEvent(QString &path);
-
-    const QString& getPath();
-};
-
-class StopEvent: public QEvent {
-
-public:
-    explicit StopEvent();
-};
 

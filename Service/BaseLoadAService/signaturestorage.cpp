@@ -2,18 +2,19 @@
 
 SignatureStorage::SignatureStorage(QObject *parent) : QObject(parent) {
     root = nullptr;
-    current = nullptr;
-    searching = false;
 }
 
-void SignatureStorage::startSearch() {
+SearchInstance* SignatureStorage::startSearch() {
     if (root == nullptr)
-        return;
-    searching = true;
-    current = root;
+        return nullptr;
+    SearchInstance *instance = new SearchInstance(this);
+    instance->root = root;
+    instance->current = root;
+    instance->searching = true;
+    return instance;
 }
 
-QVector<SignatureRecord*> SignatureStorage::search(byte *data, qint64 len) {
+QVector<SignatureRecord*> SearchInstance::search(byte *data, qint64 len) {
     QVector<SignatureRecord*> records;
     if (searching) {
         for (int i = 0; i < len;) {
@@ -40,7 +41,12 @@ QVector<SignatureRecord*> SignatureStorage::search(byte *data, qint64 len) {
     return records;
 }
 
-bool SignatureStorage::isSearching() {
+void SearchInstance::resetSearch() {
+    searching = true;
+    current = root;
+}
+
+bool SearchInstance::isSearching() {
     return searching;
 }
 
@@ -49,6 +55,11 @@ qint64 SignatureStorage::getMaxLen() {
 }
 
 SignatureStorage::~SignatureStorage() {
-    if (root != nullptr)
-        delete root;
+    delete root;
+}
+
+SearchInstance::SearchInstance(QObject *parent): QObject(parent) {
+    searching = false;
+    root = nullptr;
+    current = nullptr;
 }

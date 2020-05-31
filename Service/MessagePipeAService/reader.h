@@ -8,7 +8,7 @@
 class PipeMessage;
 class AServiceMessagePipe;
 
-class ASERVICEMESSAGEPIPE_EXPORT Reader: public QObject {
+class Reader: public QObject {
 Q_OBJECT
     AServiceMessagePipe *root;
     bool working;

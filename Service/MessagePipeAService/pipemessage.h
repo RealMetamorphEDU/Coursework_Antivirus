@@ -14,7 +14,11 @@ enum class MessageType {
     getMonitoredDirectories,
     monitoredDirectories,
     startDirMonitor,
-    stopDirMonitor
+    stopDirMonitor,
+    objectStatus,
+    lostWatch,
+    getResultList,
+    resultList
 };
 
 class ASERVICEMESSAGEPIPE_EXPORT PipeMessage: public QObject {
@@ -32,17 +36,17 @@ class ASERVICEMESSAGEPIPE_EXPORT ScanStatusMessage: public PipeMessage {
 Q_OBJECT
     bool scanning;
     int taskIndex;
-    QString curObject;
+    QString lastObject;
     int objLeft;
     int objScanned;
     int taskCount;
 public:
-    explicit ScanStatusMessage(bool scanning, int taskIndex, int taskCount, const QString &curObject, int objLeft,
+    explicit ScanStatusMessage(bool scanning, int taskIndex, int taskCount, const QString &lastObject, int objLeft,
                                int objScanned, QObject *parent = nullptr);
 
+    bool isScanning() const;
     MessageType getType() override;
     QByteArray toByteArray() override;
-    bool isScanning() const;
     int getTaskIndex() const;
     QString getCurObject() const;
     int getObjLeft() const;
@@ -77,10 +81,12 @@ public:
 class ASERVICEMESSAGEPIPE_EXPORT PauseScanMessage: public PipeMessage {
 Q_OBJECT
     int taskIndex;
+    bool pause;
 public:
-    explicit PauseScanMessage(int taskIndex, QObject *parent = nullptr);
+    explicit PauseScanMessage(int taskIndex, bool pause, QObject *parent = nullptr);
 
     int getTaskIndex() const;
+    bool getPause();
     MessageType getType() override;
     QByteArray toByteArray() override;
 };
@@ -144,5 +150,66 @@ public:
     MessageType getType() override;
     QByteArray toByteArray() override;
 };
+
+class ASERVICEMESSAGEPIPE_EXPORT ObjectStatusMessage: public PipeMessage {
+Q_OBJECT
+    int taskID;
+    bool infected;
+    bool brek;
+    QString path;
+    QString infection;
+public:
+    // taskID -- номер задачи, -1 если смотритель директории
+    // infected -- заражен объект или нет.
+    // brek -- break, ошибка сканирования объекта.
+    // path -- путь к объекту.
+    // infection -- название вируса или пояснение ошибки.
+    explicit ObjectStatusMessage(int taskID, bool infected, bool brek, QString &path, QString &infection,
+                                 QObject *parent = nullptr);
+
+    int getTaskId();
+    bool isInfected() const;
+    bool isBreak() const;
+    const QString& getPath() const;
+    const QString& getInfection() const;
+    MessageType getType() override;
+    QByteArray toByteArray() override;
+};
+
+class ASERVICEMESSAGEPIPE_EXPORT LostWatchMessage: public PipeMessage {
+Q_OBJECT
+    QString path;
+public:
+    explicit LostWatchMessage(QString &path, QObject *parent = nullptr);
+
+    const QString& getPath() const;
+    MessageType getType() override;
+    QByteArray toByteArray() override;
+};
+
+class ASERVICEMESSAGEPIPE_EXPORT GetResultList: public PipeMessage {
+Q_OBJECT
+    int taskID;
+public:
+    explicit GetResultList(int taskID, QObject *parent = nullptr);
+
+    int getTaskID();
+    MessageType getType() override;
+    QByteArray toByteArray() override;
+};
+
+class ASERVICEMESSAGEPIPE_EXPORT ResultList: public PipeMessage {
+Q_OBJECT
+    int taskID;
+    QStringList results;
+public:
+    explicit ResultList(int taskID, QStringList &results, QObject *parent = nullptr);
+
+    int getTaskID();
+    const QStringList& getResults() const;
+    MessageType getType() override;
+    QByteArray toByteArray() override;
+};
+
 
 #endif // PIPEMESSAGE_H

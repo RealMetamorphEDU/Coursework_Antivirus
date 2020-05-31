@@ -74,6 +74,8 @@ AServiceBaseLoader* AServiceBaseLoader::getInstance() {
 }
 
 int AServiceBaseLoader::loadStorage(QString &storageName, QString &filepath) {
+    if (storages.contains(storageName))
+        return appendStorage(storageName, filepath);
     tokenizer->setBaseFile(filepath);
     const int need = tokenizer->startRead();
     if (need != -1) {
@@ -136,8 +138,9 @@ int AServiceBaseLoader::appendStorage(QString &storageName, QString &filepath) {
             return loaded;
         }
         tokenizer->close();
+        return -1;
     }
-    return -1;
+    return loadStorage(storageName, filepath);
 }
 
 SignatureStorage* AServiceBaseLoader::getStorage(QString &storageName) {

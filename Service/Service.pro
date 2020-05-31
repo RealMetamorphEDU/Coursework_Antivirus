@@ -5,6 +5,7 @@ SUBDIRS += \
     AService \
     BaseLoadAService \
     BaseLoadAServiceTest \
+    EventsAService \
     FileSeekerAService \
     FileSeekerAServiceTest \
     FindObjectsAService \

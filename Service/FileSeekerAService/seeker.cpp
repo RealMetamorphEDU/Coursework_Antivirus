@@ -45,23 +45,3 @@ void Seeker::searching() {
         }
     }
 }
-
-RequestEvent::RequestEvent(QString &path, QString &pattern, bool recursive) : QEvent((Type) addRequestType) {
-    this->path = path;
-    this->pattern = pattern;
-    this->recursive = recursive;
-}
-
-const QString& RequestEvent::getPattern() const {
-    return pattern;
-}
-
-bool RequestEvent::isRecursive() const {
-    return recursive;
-}
-
-const QString& RequestEvent::getPath() {
-    return path;
-}
-
-StopEvent::StopEvent() : QEvent((Type) stopType) {}

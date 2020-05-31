@@ -28,6 +28,11 @@ bool Builder::event(QEvent *event) {
             find = dynamic_cast<FindEvent*>(event);
             requests.push_back(find->getFilepath());
             return true;
+        case pauseType:
+            PauseEvent *pauseEvent;
+            pauseEvent = dynamic_cast<PauseEvent*>(event);
+            pause = pauseEvent->getPause();
+            return true;
         case stopType:
             working = false;
             return true;
@@ -44,9 +49,9 @@ void Builder::building() {
         QCoreApplication::processEvents();
         if (!working)
             break;
-        while (!requests.isEmpty()) {
+        while (!requests.isEmpty() && !pause) {
             rawObjects.append(new SimpleRawObject(requests.takeFirst(), this));
-            while (!rawObjects.isEmpty()) {
+            while (!rawObjects.isEmpty() && !pause) {
                 std::shared_ptr<RawObject> raw(rawObjects.takeFirst(), RawObject::deleter);
                 if (raw->canRead()) {
                     bool bad = true;
@@ -75,13 +80,3 @@ void Builder::addRawObject(RawObject *rawObject) {
 }
 
 
-FindEvent::FindEvent(QString filepath) : QEvent((Type) findObjectsType) {
-    this->filepath = filepath;
-}
-
-const QString& FindEvent::getFilepath() {
-    return filepath;
-}
-
-
-StopEvent::StopEvent() : QEvent((Type) stopType) {}

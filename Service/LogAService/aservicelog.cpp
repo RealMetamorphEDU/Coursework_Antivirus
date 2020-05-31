@@ -6,7 +6,6 @@
 
 AServiceLog::AServiceLog(QString serviceName, QObject *parent): QObject(parent) {
     currentLevel = Level::INFO;
-    RegisterSource(serviceName);
     hEventLog = RegisterEventSourceA(NULL, serviceName.toStdString().c_str());
 }
 
@@ -73,7 +72,7 @@ const char* AServiceLog::getLevelName(Level level) {
 }
 
 
-bool AServiceLog::RegisterSource(QString &source) {
+bool AServiceLog::registerSource(QString source) {
 
     QString regPath = "SYSTEM\\CurrentControlSet\\Services\\Eventlog\\";
     regPath.append(source);
@@ -101,10 +100,18 @@ bool AServiceLog::RegisterSource(QString &source) {
                        (const BYTE*) &catCount, sizeof(DWORD));
 
         RegCloseKey(hKey);
-
         return true;
     }
+    return false;
+}
 
+bool AServiceLog::unregisterSource(QString source) {
+    QString regPath = "SYSTEM\\CurrentControlSet\\Services\\Eventlog\\";
+    regPath.append(source);
+    DWORD dwResult = 0;
+    LONG lRet = RegDeleteKeyA(HKEY_LOCAL_MACHINE, regPath.toStdString().c_str());
+    if (lRet == ERROR_SUCCESS)
+        return true;
     return false;
 }
 

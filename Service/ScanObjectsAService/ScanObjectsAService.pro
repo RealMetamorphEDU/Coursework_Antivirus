@@ -58,3 +58,14 @@ else:win32:CONFIG(debug, debug|release): LIBS += -L$$OUT_PWD/../../Loader/ABReco
 
 INCLUDEPATH += $$PWD/../../Loader/ABRecordTokenizer
 DEPENDPATH += $$PWD/../../Loader/ABRecordTokenizer
+
+win32:CONFIG(release, debug|release): LIBS += -L$$OUT_PWD/../EventsAService/release/ -lEventsAService
+else:win32:CONFIG(debug, debug|release): LIBS += -L$$OUT_PWD/../EventsAService/debug/ -lEventsAService
+
+INCLUDEPATH += $$PWD/../EventsAService
+DEPENDPATH += $$PWD/../EventsAService
+
+win32-g++:CONFIG(release, debug|release): PRE_TARGETDEPS += $$OUT_PWD/../EventsAService/release/libEventsAService.a
+else:win32-g++:CONFIG(debug, debug|release): PRE_TARGETDEPS += $$OUT_PWD/../EventsAService/debug/libEventsAService.a
+else:win32:!win32-g++:CONFIG(release, debug|release): PRE_TARGETDEPS += $$OUT_PWD/../EventsAService/release/EventsAService.lib
+else:win32:!win32-g++:CONFIG(debug, debug|release): PRE_TARGETDEPS += $$OUT_PWD/../EventsAService/debug/EventsAService.lib

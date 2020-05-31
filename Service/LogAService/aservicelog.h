@@ -23,12 +23,15 @@ Q_OBJECT
     void printLog(QString &tag, QString &message, Level level);
     static WORD getSystemLevel(Level level);
     static const char* getLevelName(Level level);
-    bool RegisterSource(QString &source);
+
     static DWORD getEventIdentifier(WORD level);
 
 public:
     AServiceLog(QString serviceName, QObject *parent = nullptr);
     ~AServiceLog();
+
+    static bool registerSource(QString source);
+    static bool unregisterSource(QString source);
 
     void setLevel(Level level);
     void info(QString tag, QString message);

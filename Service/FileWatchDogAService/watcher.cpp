@@ -187,21 +187,4 @@ void Watcher::watching() {
     }
 }
 
-AddEvent::AddEvent(QString &path) : QEvent((Type) addPathType) {
-    this->path = path;
-}
 
-const QString& AddEvent::getPath() {
-    return path;
-}
-
-RemoveEvent::RemoveEvent(QString &path) : QEvent((Type) removePathType) {
-    this->path = path;
-}
-
-
-const QString& RemoveEvent::getPath() {
-    return path;
-}
-
-StopEvent::StopEvent() : QEvent((Type) stopType) {}
