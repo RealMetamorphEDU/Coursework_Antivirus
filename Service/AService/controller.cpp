@@ -119,7 +119,7 @@ void Controller::receivedMessage(PipeMessage *message) {
                 taskCount--;
                 delete task;
                 if (connected) {
-                    pipe->sendMessage(new StopScanMessage(taskCount, this));
+                    pipe->sendMessage(new StopScanMessage(stop->getTaskIndex(), this));
                 }
             }
         }
