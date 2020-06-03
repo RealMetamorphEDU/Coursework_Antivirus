@@ -152,10 +152,16 @@ void Controller::receivedMessage(PipeMessage *message) {
         break;
         case MessageType::startDirMonitor: {
             watcher->setPause(false);
+            if (connected) {
+                pipe->sendMessage(new StartDirectoryMonitoringMessage(this));
+            }
         }
         break;
         case MessageType::stopDirMonitor: {
             watcher->setPause(true);
+            if (connected) {
+                pipe->sendMessage(new StopDirectoryMonitoringMessage(this));
+            }
         }
         break;
         case MessageType::getResultList: {
