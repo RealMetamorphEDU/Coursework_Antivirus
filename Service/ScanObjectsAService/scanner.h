@@ -16,9 +16,10 @@ Q_OBJECT
     bool pause;
     HANDLE updateEvent;
     SignatureStorage *storage;
+    SearchInstance *search;
     QVector<ScanObject*> queue;
 public:
-    explicit Scanner(HANDLE updateEvent, SignatureStorage *storage, QObject *parent = nullptr);
+    explicit Scanner(HANDLE updateEvent, SignatureStorage *storage, SearchInstance *search, QObject *parent = nullptr);
     ~Scanner();
     bool event(QEvent *event) override;
 public slots:

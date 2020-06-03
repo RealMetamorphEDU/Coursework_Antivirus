@@ -5,7 +5,7 @@
 AServiceScanObjects::AServiceScanObjects(SignatureStorage *storage, QObject *parent): QObject(parent) {
     requestEvent = CreateEventA(NULL, FALSE, FALSE, NULL);
     thread = new QThread(this);
-    scanner = new Scanner(requestEvent, storage);
+    scanner = new Scanner(requestEvent, storage, storage->startSearch());
     scanner->moveToThread(thread);
     connect(thread, SIGNAL(finished()), scanner, SLOT(deleteLater()));
     connect(thread, SIGNAL(finished()), thread, SLOT(deleteLater()));

@@ -3,11 +3,13 @@
 
 const int BLOCK_SIZE = (1024 * 1024 * 4);
 
-Scanner::Scanner(HANDLE updateEvent, SignatureStorage *storage, QObject *parent) : QObject(parent) {
+Scanner::Scanner(HANDLE updateEvent, SignatureStorage *storage, SearchInstance *search,
+                 QObject *parent) : QObject(parent) {
     this->updateEvent = updateEvent;
     this->storage = storage;
     this->working = false;
     this->pause = false;
+    this->search = search;
 }
 
 Scanner::~Scanner() {
@@ -48,7 +50,7 @@ void Scanner::scanning() {
             ScanObject *scanObject = queue.takeFirst();
             int regionCount = scanObject->getRegionsCount();
             bool infected = false;
-            SearchInstance *search = storage->startSearch();
+
             if (search != nullptr) {
                 for (int i = 0; i < regionCount; ++i) {
                     DataRegion region = scanObject->getRegion(i);
