@@ -46,18 +46,19 @@ Controller::Controller(AServiceLog *logger, SERVICE_STATUS_HANDLE handle, QObjec
         return;
     }
     status.dwWaitHint = 3000;
-    this->connected = false;
     this->watcher = new WatchTask(loader->getStorage(innerName), pipe);
     connect(pipe, &AServiceMessagePipe::connectUpdate, this, &Controller::connectUpdate);
     connect(pipe, &AServiceMessagePipe::receivedMessage, this, &Controller::receivedMessage);
     connect(watcher, &WatchTask::sendLostStatus, this, &Controller::sendLostStatus);
     connect(watcher, &WatchTask::sendObjectStatus, this, &Controller::sendObjectStatus);
+    this->connected = pipe->isConnected();
     taskCount = 0;
     logger->info("CONTROLLER", "Initialization completed.");
     status.dwCheckPoint = 0;
     status.dwCurrentState = SERVICE_RUNNING;
     status.dwControlsAccepted = SERVICE_ACCEPT_STOP;
     SetServiceStatus(statusHandle, &status);
+
 }
 
 Controller::~Controller() {
