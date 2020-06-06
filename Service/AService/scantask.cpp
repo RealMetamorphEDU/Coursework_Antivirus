@@ -87,13 +87,13 @@ void ScanTask::uninfected(QString filename) {
                                               scannedCount,
                                               this));
     timer->start();
-    storage->addResultString(filename.append('\n'));
+    storage->addResultString(filename);
 }
 
 void ScanTask::infectedBy(QString filename, QString signatureName) {
     scannedCount++;
     leftCount--;
-    emit sendObjectStatus(new ObjectStatusMessage(taskID, false, false, filename, signatureName, this));
+    emit sendObjectStatus(new ObjectStatusMessage(taskID, true, false, filename, signatureName, this));
     emit sendScanStatus(new ScanStatusMessage(pause, taskID, *taskCount, filename, leftCount - scannedCount,
                                               scannedCount,
                                               this));
