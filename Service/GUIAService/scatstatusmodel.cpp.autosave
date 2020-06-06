@@ -1,0 +1,64 @@
+#include "scatstatusmodel.h"
+
+ScatStatusModel::ScatStatusModel(QObject *parent)
+    : QAbstractListModel(parent)
+{
+    vector.append({true,2,5,QStringLiteral("Dangerous object"),10,20});
+    vector.append({true,23,55,QStringLiteral("Cool object"),310,620});
+    vector.append({true,32,25,QStringLiteral("im fucking tired"),103,210});
+}
+
+int ScatStatusModel::rowCount(const QModelIndex &parent) const
+{
+    // For list models only the root node (an invalid parent) should return the list's size. For all
+    // other (valid) parents, rowCount() should return 0 so that it does not become a tree model.
+    if (parent.isValid())
+        return 0;
+
+    return vector.size();
+}
+
+QVariant ScatStatusModel::data(const QModelIndex &index, int role) const
+{
+    if (!index.isValid())
+        return QVariant();
+    ScanStatus scanStatus = vector.at(index.row());
+    switch(role){
+    case ScanningRole:
+        return QVariant(scanStatus.scanning);
+    case TaskIndexRole:
+        return QVariant(scanStatus.taskIndex);
+    case TaskCountRole:
+        return QVariant(scanStatus.taskCount);
+    case LastObjectRole:
+        return QVariant(scanStatus.lastObject);
+    case ObjLeftRole:
+        return QVariant(scanStatus.objLeft);
+    case ObjScannedRole:
+        return QVariant(scanStatus.objScanned);
+    }
+
+    return QVariant();
+}
+
+QHash<int, QByteArray> ScatStatusModel::roleNames() const
+{
+    QHash<int, QByteArray> names;
+    names[ScanningRole] = "scanning";
+    names[TaskIndexRole] = "taskIndex";
+    names[TaskCountRole] = "taskCount";
+    names[LastObjectRole] = "lastObject";
+    names[ObjLeftRole] = "objLeft";
+    names[ObjScannedRole] = "objScanned";
+    return names;
+}
+
+bool ScatStatusModel::append(ScanStatus scanStatus)
+{
+    int i = vector.size();
+	beginInsertRows(QModelIndex(), i, i);
+    vector.append(scanStatus);
+    endInsertRows();
+}
+
+

@@ -1,6 +1,4 @@
-QT       += core gui
-
-greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
+QT       += core quick
 
 CONFIG += c++11
 
@@ -17,23 +15,26 @@ DEFINES += QT_DEPRECATED_WARNINGS
 
 SOURCES += \
     main.cpp \
-    mainwindow.cpp
+    scanstatuslist.cpp \
+    scanstatusmodel.cpp
 
 HEADERS += \
-    mainwindow.h
+    scanstatuslist.h \
+    scanstatusmodel.h
 
-FORMS += \
-    mainwindow.ui
+RESOURCES += \
+    qml.qrc
 
 # Default rules for deployment.
 qnx: target.path = /tmp/$${TARGET}/bin
 else: unix:!android: target.path = /opt/$${TARGET}/bin
 !isEmpty(target.path): INSTALLS += target
 
-
-
 win32:CONFIG(release, debug|release): LIBS += -L$$OUT_PWD/../MessagePipeAService/release/ -lMessagePipeAService
 else:win32:CONFIG(debug, debug|release): LIBS += -L$$OUT_PWD/../MessagePipeAService/debug/ -lMessagePipeAService
 
 INCLUDEPATH += $$PWD/../MessagePipeAService
 DEPENDPATH += $$PWD/../MessagePipeAService
+
+DISTFILES +=
+
