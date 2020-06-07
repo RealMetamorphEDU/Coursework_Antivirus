@@ -1,0 +1,19 @@
+<RCC>
+    <qresource prefix="/">
+        <file>HomeForm.qml</file>
+        <file>main.qml</file>
+        <file>Page1Form.qml</file>
+        <file>Page2Form.qml</file>
+        <file>qtquickcontrols2.conf</file>
+        <file>icons/search.png</file>
+        <file>icons/eye.png</file>
+        <file>icons/folder.png</file>
+        <file>icons/file.png</file>
+        <file>TestPage1Form.ui.qml</file>
+        <file>icons/pause.png</file>
+        <file>icons/play-button.png</file>
+        <file>icons/stop.png</file>
+        <file>icons/cross.png</file>
+        <file>icons/close.png</file>
+    </qresource>
+</RCC>
