@@ -3,6 +3,8 @@ import QtQuick.Controls 2.5
 import QtQuick.Controls.Universal 2.12
 import QtQuick.Layouts 1.14
 
+import ScanStatus 1.0
+
 Page {
     id: page
     width: 800
@@ -62,53 +64,8 @@ Page {
         spacing: 5
         clip: true
 
-        model: ListModel {
-            ListElement {
-                scanning: false
-                taskIndex: 0
-                taskCount: 3
-                lastObject: ""
-                objLeft: 0
-                objScanned: 3
-                foundCount: 2
-            }
-            ListElement {
-                scanning: false
-                taskIndex: 1
-                taskCount: 3
-                lastObject: "file.exe"
-                objLeft: 2
-                objScanned: 1
-                foundCount: 0
-            }
-            ListElement {
-                scanning: true
-                taskIndex: 2
-                taskCount: 3
-                lastObject: "file.exe"
-                objLeft: 2
-                objScanned: 3
-                foundCount: 0
-            }
-
-            ListElement {
-                scanning: false
-                taskIndex: 1
-                taskCount: 3
-                lastObject: "file.exe"
-                objLeft: 2
-                objScanned: 1
-                foundCount: 0
-            }
-            ListElement {
-                scanning: true
-                taskIndex: 2
-                taskCount: 3
-                lastObject: "file.exe"
-                objLeft: 2
-                objScanned: 3
-                foundCount: 1
-            }
+        model: ScanStatusModel {
+            statusList: StatusList
         }
 
         delegate: delegateComponent

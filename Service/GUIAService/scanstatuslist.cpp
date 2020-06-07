@@ -1,26 +1,29 @@
 #include "scanstatuslist.h"
 
-ScanStatusList::ScanStatusList(QObject *parent) : QObject(parent)
-{
-    vector.append({true,2,5,QStringLiteral("Dangerous object"),10,20});
-    vector.append({true,23,55,QStringLiteral("Cool object"),310,620});
-    vector.append({true,32,25,QStringLiteral("im fucking tired"),103,210});
+ScanStatusList::ScanStatusList(QObject *parent) : QObject(parent) {}
+
+void ScanStatusList::updateScanStatus(int taskID, const ScanStatus &status) {
+    emit beginInsertRow(taskID);
+    if (taskID >= statuses.count()) {
+        statuses.insert(taskID, status);
+    } else {
+        statuses.replace(taskID, status);
+    }
+    emit insertedRow();
 }
 
-QVector<ScanStatus>& ScanStatusList::items()
-{
-    return vector;
+void ScanStatusList::removeScanStatus(int taskID) {
+    if (taskID > -1 && taskID < statuses.count()) {
+        emit beginRemovRow(taskID);
+        statuses.remove(taskID);
+        emit removedRow();
+    }
 }
 
-bool ScanStatusList::setItemAt(int index, ScanStatus &scanStatus)
-{
-    if (index >= vector.size() || index < 0 )
-        return false;
-    vector[index] = scanStatus;
-    return true;
+const ScanStatus& ScanStatusList::getStatus(int row) {
+    return statuses.at(row);
 }
 
-void ScanStatusList::append(ScanStatus &scanStatus)
-{
-    vector.append(scanStatus);
+int ScanStatusList::getCount() {
+    return statuses.count();
 }
