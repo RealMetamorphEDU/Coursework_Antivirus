@@ -4,46 +4,30 @@
 #include <QAbstractListModel>
 #include "scanstatuslist.h"
 
-
-
-class ScanStatusModel : public QAbstractListModel
-{
-    Q_OBJECT
-    Q_PROPERTY(ScanStatusList *statusList READ getList WRITE setList NOTIFY listChanged)
+class ScanStatusModel: public QAbstractListModel {
+Q_OBJECT
+    Q_PROPERTY(ScanStatusList *statusList READ getList WRITE setList)
 
     enum {
-        ScanningRole = Qt::UserRole,
-        TaskIndexRole,
-        TaskCountRole,
-        LastObjectRole,
-        ObjLeftRole,
-        ObjScannedRole,
+        scanningRole = Qt::UserRole,
+        taskIndexRole,
+        lastObjectRole,
+        objLeftRole,
+        objScannedRole,
+        foundCountRole
     };
+
+    ScanStatusList *list;
 
 public:
     explicit ScanStatusModel(QObject *parent = nullptr);
 
-    // Basic functionality:
     int rowCount(const QModelIndex &parent = QModelIndex()) const override;
     QVariant data(const QModelIndex &index, int role = Qt::DisplayRole) const override;
-    virtual QHash<int, QByteArray> roleNames() const override;
+    QHash<int, QByteArray> roleNames() const override;
 
-    // Custom functions
-    bool append(ScanStatus);
-
-
-
-    ScanStatusList *getList() const;
+    ScanStatusList* getList() const;
     void setList(ScanStatusList *value);
-
-signals:
-    void listChanged();
-
-private:
-    ScanStatusList* list;
-
-
-
 };
 
 #endif // SCATSTATUSMODEL_H

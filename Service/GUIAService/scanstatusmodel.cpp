@@ -1,73 +1,70 @@
 #include "scanstatusmodel.h"
 
-ScanStatusModel::ScanStatusModel(QObject *parent)
-    : QAbstractListModel(parent)
-{
-    connect(this,&QAbstractListModel::dataChanged,this,&ScanStatusModel::listChanged);
+ScanStatusModel::ScanStatusModel(QObject *parent) : QAbstractListModel(parent) {
+    list = nullptr;
 }
 
-int ScanStatusModel::rowCount(const QModelIndex &parent) const
-{
-    // For list models only the root node (an invalid parent) should return the list's size. For all
-    // other (valid) parents, rowCount() should return 0 so that it does not become a tree model.
+int ScanStatusModel::rowCount(const QModelIndex &parent) const {
     if (parent.isValid())
         return 0;
 
-    return list->items().size();
+    return list->getCount();
 }
 
-QVariant ScanStatusModel::data(const QModelIndex &index, int role) const
-{
+QVariant ScanStatusModel::data(const QModelIndex &index, int role) const {
     if (!index.isValid())
         return QVariant();
-    ScanStatus scanStatus = list->items().at(index.row());
-    switch(role){
-    case ScanningRole:
-        return QVariant(scanStatus.scanning);
-    case TaskIndexRole:
-        return QVariant(scanStatus.taskIndex);
-    case TaskCountRole:
-        return QVariant(scanStatus.taskCount);
-    case LastObjectRole:
-        return QVariant(scanStatus.lastObject);
-    case ObjLeftRole:
-        return QVariant(scanStatus.objLeft);
-    case ObjScannedRole:
-        return QVariant(scanStatus.objScanned);
+    ScanStatus scanStatus = list->getStatus(index.row());
+    switch (role) {
+        case scanningRole:
+            return QVariant(scanStatus.scanning);
+        case taskIndexRole:
+            return QVariant(index.row());
+        case lastObjectRole:
+            return QVariant(scanStatus.lastObject);
+        case objLeftRole:
+            return QVariant(scanStatus.objLeft);
+        case objScannedRole:
+            return QVariant(scanStatus.objScanned);
+        case foundCountRole:
+            return QVariant(scanStatus.foundCount);
     }
-
     return QVariant();
 }
 
-QHash<int, QByteArray> ScanStatusModel::roleNames() const
-{
+QHash<int, QByteArray> ScanStatusModel::roleNames() const {
     QHash<int, QByteArray> names;
-    names[ScanningRole] = "scanning";
-    names[TaskIndexRole] = "taskIndex";
-    names[TaskCountRole] = "taskCount";
-    names[LastObjectRole] = "lastObject";
-    names[ObjLeftRole] = "objLeft";
-    names[ObjScannedRole] = "objScanned";
+    names[scanningRole] = "scanning";
+    names[taskIndexRole] = "taskIndex";
+    names[lastObjectRole] = "lastObject";
+    names[objLeftRole] = "objLeft";
+    names[objScannedRole] = "objScanned";
+    names[foundCountRole] = "foundCount";
     return names;
 }
 
-bool ScanStatusModel::append(ScanStatus scanStatus)
-{
-    int i = list->items().size();
-    beginInsertRows(QModelIndex(), i, i);
-    list->append(scanStatus);
-    endInsertRows();
-    return true;
-}
-
-ScanStatusList *ScanStatusModel::getList() const
-{
+ScanStatusList* ScanStatusModel::getList() const {
     return list;
 }
 
-void ScanStatusModel::setList(ScanStatusList *value)
-{
+void ScanStatusModel::setList(ScanStatusList *value) {
+    beginResetModel();
+    if (list)
+        list->disconnect(this);
     list = value;
+    if (list) {
+        connect(list, &ScanStatusList::beginInsertRow, this, [=](int row) {
+            beginInsertRows(QModelIndex(), row, row);
+        });
+        connect(list, &ScanStatusList::beginRemovRow, this, [=](int row) {
+            beginRemoveRows(QModelIndex(), row, row);
+        });
+        connect(list, &ScanStatusList::insertedRow, this, [=]() {
+            endInsertRows();
+        });
+        connect(list, &ScanStatusList::removedRow, this, [=]() {
+            endRemoveRows();
+        });
+    }
+    endResetModel();
 }
-
-
