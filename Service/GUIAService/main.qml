@@ -7,7 +7,9 @@ ApplicationWindow {
     visible: true
     width: 1000
     height: 600
-
+    signal page1Created(string name)
+    signal page2Created(string name)
+    signal homeCreated(string name)
 //    maximumHeight: height
 //    maximumWidth: width
 
@@ -52,6 +54,7 @@ ApplicationWindow {
 
     StackView {
         id: stackView
+        objectName: "mainStackView"
         initialItem: "HomeForm.qml"
         width: 800
         height: 600
@@ -96,24 +99,40 @@ ApplicationWindow {
 
         ItemDelegate {
             id: mainDelegate
+            objectName: "mainDelegate"
             text: qsTr("Главная")
             width: parent.width
             onClicked: {
-                stackView.push("HomeForm.qml")
+//              stackView.pop()
+                stackView.replace("HomeForm.qml")
+                window.homeCreated(objectName);
                 highlighted: true
             }
         }
         ItemDelegate {
             id: scanDelegate
+            objectName: "scanDelegate"
             text: qsTr("Сканирование файлов")
             width: parent.width
-            onClicked: stackView.push("Page1Form.qml")
+            onClicked: {
+//                stackView.pop()
+                stackView.replace("Page1Form.qml")
+                window.page1Created(objectName);
+            }
+
+
+
         }
         ItemDelegate {
             id: monitorDelegate
+            objectName: "monitorDelegate"
             text: qsTr("Файловый монитор")
             width: parent.width
-            onClicked: stackView.push("Page2Form.qml")
+            onClicked: {
+//                stackView.pop()
+                stackView.replace("Page2Form.qml")
+                window.page2Created(objectName);
+            }
         }
     }
 

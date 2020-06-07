@@ -5,6 +5,7 @@ import QtQuick.Layouts 1.14
 
 Page {
     id: page
+    objectName: "page2Form"
     width: 800
     height: 600
 

@@ -7,7 +7,7 @@ Page {
     id: page
     width: 800
     height: 600
-
+    objectName: "homeForm"
 
     title: qsTr("Главная")
 

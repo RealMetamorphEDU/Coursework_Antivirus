@@ -5,9 +5,10 @@ import QtQuick.Layouts 1.14
 
 Page {
     id: page
+    objectName: "page1Form"
     width: 800
     height: 600
-
+    signal qmlChoosebutton(string name)
     title: qsTr("Сканировать файлы...")
 
     ColumnLayout {
@@ -37,10 +38,17 @@ Page {
 
         Button {
             id: chooseButton
+            objectName: "chooseButton"
             width: 195
             text: qsTr("Открыть...")
             Layout.fillWidth: false
             icon.source: "icons/folder.png"
+            onClicked:
+            {
+                console.log(chooseButton.text)
+                qmlChoosebutton(chooseButton.objectName);
+            }
+
         }
 
         Label {
