@@ -50,17 +50,15 @@ void Scanner::scanning() {
             ScanObject *scanObject = queue.takeFirst();
             int regionCount = scanObject->getRegionsCount();
             bool infected = false;
-
             if (search != nullptr) {
                 for (int i = 0; i < regionCount; ++i) {
                     DataRegion region = scanObject->getRegion(i);
                     qint64 offset = 0;
-                    qint64 len = 0;
                     QByteArray data;
                     QVector<SignatureRecord*> records;
                     while (offset + storage->getMaxLen() < region.getRegionSize()) {
                         data = scanObject->readBlockFromRegion(i, offset, BLOCK_SIZE);
-                        len = 0;
+                        qint64 len = 0;
                         while (data.length() - len > 0) {
                             search->resetSearch();
                             records.clear();
@@ -96,19 +94,21 @@ void Scanner::scanning() {
                         }
                         if (infected)
                             break;
-
                         offset += data.length() - storage->getMaxLen() + 1;
+                        QCoreApplication::processEvents();
+                        if(!working)
+                            break;
                     }
                     if (infected)
                         break;
+                    if(!working)
+                            break;
                 }
-                search->deleteLater();
             }
             if (!infected) {
                 emit uninfected(scanObject->getFullObjectName());
             }
             scanObject->deleteLater();
-            QCoreApplication::processEvents();
         }
     }
 }

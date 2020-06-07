@@ -134,13 +134,21 @@ void Controller::receivedMessage(PipeMessage *message) {
         case MessageType::addDirToMonitor: {
             auto *add = dynamic_cast<AddDirectoryToMonitorMessage*>(message);
             QString path = add->getPath();
-            watcher->addPath(path);
+            if (watcher->addPath(path)) {
+                if (connected)
+                    pipe->sendMessage(new AddDirectoryToMonitorMessage(path, this));
+            } else {
+                if (connected)
+                    pipe->sendMessage(new RemoveDirectoryFromMonitorMessage(path, this));
+            }
         }
         break;
         case MessageType::remDirFromMonitor: {
             auto *remove = dynamic_cast<RemoveDirectoryFromMonitorMessage*>(message);
             QString path = remove->getPath();
             watcher->removePath(path);
+            if (connected)
+                pipe->sendMessage(new RemoveDirectoryFromMonitorMessage(path, this));
         }
         break;
         case MessageType::getMonitoredDirectories: {

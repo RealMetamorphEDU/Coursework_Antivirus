@@ -17,8 +17,8 @@ ScanTask::ScanTask(int taskID, int const *taskCount, SignatureStorage *storage, 
     this->seekerFinish = false;
     this->findFinish = false;
     connect(fileSeeker, &AServiceFileSeeker::foundFile, findObjects, &AServiceFindObjects::findObjects);
-    connect(findObjects, &AServiceFindObjects::foundScanObject, scanObjects, &AServiceScanObjects::scanScanObject);
     connect(findObjects, &AServiceFindObjects::foundScanObject, this, &ScanTask::foundScanObject);
+    connect(findObjects, &AServiceFindObjects::foundScanObject, scanObjects, &AServiceScanObjects::scanScanObject);
     connect(findObjects, &AServiceFindObjects::cantBuildThis, this, &ScanTask::cantBuildThis);
     connect(scanObjects, &AServiceScanObjects::infectedBy, this, &ScanTask::infectedBy);
     connect(scanObjects, &AServiceScanObjects::uninfected, this, &ScanTask::uninfected);
