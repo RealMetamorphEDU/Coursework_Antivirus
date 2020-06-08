@@ -137,6 +137,8 @@ void Controller::receivedMessage(PipeMessage *message) {
             }
             taskCount++;
             auto *task = new ScanTask(lastID, &taskCount, loader->getStorage(innerName), start->getObjectPath(), pipe);
+            connect(task, &ScanTask::sendObjectStatus, this, &Controller::sendObjectStatus);
+            connect(task, &ScanTask::sendScanStatus, this, &Controller::sendScanStatus);
             scanTasks.insert(lastID, task);
             logger->info("CONTROLLER",
                          QString("Started scan task with id: ").append(QString::number(lastID)).append("."));
