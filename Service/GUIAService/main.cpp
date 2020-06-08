@@ -7,5 +7,7 @@ int main(int argc, char *argv[])
 
     QGuiApplication app(argc, argv);
     Controller controller(&app);
+    app.setOrganizationName("somename");
+    app.setOrganizationDomain("somename");
     return app.exec();
 }

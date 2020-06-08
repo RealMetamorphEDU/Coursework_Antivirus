@@ -8,9 +8,8 @@ Page {
     width: 800
     height: 600
     objectName: "homeForm"
-
+    signal switchClicked()
     title: qsTr("Главная")
-
     ColumnLayout {
         id: columnLayout
         width: 550
@@ -44,10 +43,14 @@ Page {
 
             Switch {
                 id: stateSwitch
+                objectName: "stateSwitch"
                 text: checked ? qsTr("вкл.") : qsTr("выкл.")
                 anchors.left: parent.left
                 anchors.leftMargin: -5
                 Layout.leftMargin: -5
+                onCheckedChanged: {page.switchClicked()
+                    console.log("switched")
+                }
             }
         }
 
@@ -62,8 +65,9 @@ Page {
             icon.source: "icons/search.png"
             width: button1.width
             onClicked: {
-                stackView.push("Page1Form.qml")
-                drawer.close()
+                stackView.replace("Page1Form.qml")
+                window.page1Created();
+                gc()
             }
         }
 
@@ -74,8 +78,9 @@ Page {
             Layout.fillWidth: false
             icon.source: "icons/eye.png"
             onClicked: {
-                stackView.push("Page2Form.qml")
-                drawer.close()
+                stackView.replace("Page2Form.qml")
+                window.page2Created();
+                gc()
             }
         }
 

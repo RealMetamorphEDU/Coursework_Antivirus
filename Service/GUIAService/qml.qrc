@@ -15,5 +15,7 @@
         <file>icons/stop.png</file>
         <file>icons/cross.png</file>
         <file>icons/close.png</file>
+        <file>FileDialogForm.qml</file>
+        <file>FolderDialogForm.qml</file>
     </qresource>
 </RCC>

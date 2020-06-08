@@ -10,7 +10,8 @@ Page {
     objectName: "page1Form"
     width: 800
     height: 600
-    signal qmlChoosebutton(string name)
+    signal chooseFileButtonClicked()
+    signal chooseFolderButtonClicked()
     title: qsTr("Сканировать файлы...")
 
     ColumnLayout {
@@ -37,18 +38,35 @@ Page {
             text: qsTr("Открытие объекта для сканирования")
             font.pointSize: 16
         }
+        Row{
+            spacing: 5
+            Button {
+                id: chooseFileButton
+                objectName: "chooseFileButton"
+                width: 195
+                text: qsTr("Открыть файл...")
+                Layout.fillWidth: false
+                icon.source: "icons/file.png"
+                onClicked:
+                {
+                    console.log(chooseFileButton.text)
+                    chooseFileButtonClicked();
+                }
 
-        Button {
-            id: chooseButton
-            objectName: "chooseButton"
-            width: 195
-            text: qsTr("Открыть...")
-            Layout.fillWidth: false
-            icon.source: "icons/folder.png"
-            onClicked:
-            {
-                console.log(chooseButton.text)
-                qmlChoosebutton(chooseButton.objectName);
+            }
+            Button {
+                id: chooseFolderButton
+                objectName: "chooseFolderButton"
+                width: 195
+                text: qsTr("Открыть папку...")
+                Layout.fillWidth: false
+                icon.source: "icons/folder.png"
+                onClicked:
+                {
+                    console.log(chooseFolderButton.text)
+                    chooseFolderButtonClicked();
+                }
+
             }
 
         }

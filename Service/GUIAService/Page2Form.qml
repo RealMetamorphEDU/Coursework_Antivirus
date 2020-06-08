@@ -8,7 +8,6 @@ Page {
     objectName: "page2Form"
     width: 800
     height: 600
-
     title: qsTr("Сканировать файлы...")
     ColumnLayout{
         id: mainLayout

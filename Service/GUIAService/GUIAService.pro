@@ -1,5 +1,5 @@
 QT       += core quick
-
+greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 CONFIG += c++11
 
 # The following define makes your compiler emit warnings if you use
@@ -17,12 +17,14 @@ SOURCES += \
     controller.cpp \
     main.cpp \
     scanstatuslist.cpp \
-    scanstatusmodel.cpp
+    scanstatusmodel.cpp \
+    servicecontroller.cpp
 
 HEADERS += \
     controller.h \
     scanstatuslist.h \
-    scanstatusmodel.h
+    scanstatusmodel.h \
+    servicecontroller.h
 
 RESOURCES += \
     qml.qrc
@@ -32,11 +34,13 @@ qnx: target.path = /tmp/$${TARGET}/bin
 else: unix:!android: target.path = /opt/$${TARGET}/bin
 !isEmpty(target.path): INSTALLS += target
 
+
+
+DISTFILES +=
+
+
 win32:CONFIG(release, debug|release): LIBS += -L$$OUT_PWD/../MessagePipeAService/release/ -lMessagePipeAService
 else:win32:CONFIG(debug, debug|release): LIBS += -L$$OUT_PWD/../MessagePipeAService/debug/ -lMessagePipeAService
 
 INCLUDEPATH += $$PWD/../MessagePipeAService
 DEPENDPATH += $$PWD/../MessagePipeAService
-
-DISTFILES +=
-

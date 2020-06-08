@@ -7,14 +7,14 @@ ApplicationWindow {
     visible: true
     width: 1000
     height: 600
-    signal page1Created(string name)
-    signal page2Created(string name)
-    signal homeCreated(string name)
-//    maximumHeight: height
-//    maximumWidth: width
+    signal page1Created()
+    signal page2Created()
+    signal homeCreated()
+    maximumHeight: height
+    maximumWidth: width
 
-//    minimumHeight: height
-//    minimumWidth: width
+    minimumHeight: height
+    minimumWidth: width
     title: qsTr("Stack")
 
 //    header: ToolBar {
@@ -60,8 +60,6 @@ ApplicationWindow {
         height: 600
         anchors.right: parent.right
         anchors.bottom: parent.bottom
-
-
         //anchors.fill: parent
     }
     ToolSeparator {
@@ -102,10 +100,12 @@ ApplicationWindow {
             objectName: "mainDelegate"
             text: qsTr("Главная")
             width: parent.width
+            enabled: !stackView.processing
             onClicked: {
 //              stackView.pop()
                 stackView.replace("HomeForm.qml")
-                window.homeCreated(objectName);
+                gc()
+                window.homeCreated();
                 highlighted: true
             }
         }
@@ -114,11 +114,14 @@ ApplicationWindow {
             objectName: "scanDelegate"
             text: qsTr("Сканирование файлов")
             width: parent.width
+            enabled: !stackView.processing
             onClicked: {
 //                stackView.pop()
                 stackView.replace("Page1Form.qml")
-                window.page1Created(objectName);
+                gc()
+                window.page1Created();
             }
+
 
 
 
@@ -128,10 +131,12 @@ ApplicationWindow {
             objectName: "monitorDelegate"
             text: qsTr("Файловый монитор")
             width: parent.width
+            enabled: !stackView.processing
             onClicked: {
 //                stackView.pop()
                 stackView.replace("Page2Form.qml")
-                window.page2Created(objectName);
+                gc()
+                window.page2Created();
             }
         }
     }
