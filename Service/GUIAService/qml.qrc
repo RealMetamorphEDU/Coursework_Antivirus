@@ -17,5 +17,7 @@
         <file>icons/close.png</file>
         <file>FileDialogForm.qml</file>
         <file>FolderDialogForm.qml</file>
+        <file>ScanInfoPage.qml</file>
+        <file>WatchInfoPage.qml</file>
     </qresource>
 </RCC>
