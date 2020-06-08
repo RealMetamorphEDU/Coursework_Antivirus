@@ -9,6 +9,7 @@
 #include <QFileDialog>
 
 
+char SERVICE_NAME[]{"AService"};
 
 Controller::Controller(QObject *parent) : QObject(parent) {
 	this->pageView = nullptr;
@@ -16,6 +17,9 @@ Controller::Controller(QObject *parent) : QObject(parent) {
 	this->connected = false;
 	this->innerName = "AntivirusService";
 	this->pipe = new AServiceMessagePipe(innerName, this);
+	this->serviceController = new ServiceController(QString(SERVICE_NAME), this);
+	if (!serviceController->init())
+		qDebug() << "Unexpected service init error";
 	if (this->pipe->isBreak()) {
 		qDebug() << "Can't connect to pipe"; //TODO: print in GUI
 		return;
@@ -46,11 +50,21 @@ Controller::Controller(QObject *parent) : QObject(parent) {
 		connect(appWindow, SIGNAL(homeCreated()), this,SLOT(homeWorker()));
 		connect(pipe, &AServiceMessagePipe::connectUpdate, this, &Controller::connectUpdate);
 		connect(pipe, &AServiceMessagePipe::receivedMessage, this, &Controller::receivedMessage);
+		connect(serviceController, &ServiceController::statusChanged, this, &Controller::onConnectionStatusChanged);
 		qDebug() << "Created mainStackView";
 	}
 
 }
 
+Controller::~Controller() {
+	delete this->engine;
+	delete this->scanStatusList;
+	delete this->appWindow;
+	delete this->mainStackView;
+	delete this->pageView;
+	delete this->pipe;
+	delete this->serviceController;
+}
 
 void Controller::connectUpdate(bool connected) {
 	this->connected = connected;
@@ -63,10 +77,11 @@ void Controller::onChooseFolderButtonClicked() {
 	QObject *object = component.create();
 	connect(object, SIGNAL(choseFile(QString)), this,SLOT(onFileOpened(QString)));
 }
+
 void Controller::onChooseFileButtonClicked() {
 	QQmlComponent component(engine,
-		QUrl::fromLocalFile("FileDialogForm.qml"));
-	QObject* object = component.create();
+	                        QUrl::fromLocalFile("FileDialogForm.qml"));
+	QObject *object = component.create();
 	connect(object, SIGNAL(choseFile(QString)), this, SLOT(onFileOpened(QString)));
 }
 
@@ -101,7 +116,7 @@ void Controller::homeWorker() {
 	pageView = mainStackView->findChild<QObject*>("homeForm");
 	if (pageView) {
 		QObject *statusSwitch = pageView->findChild<QObject*>("stateSwitch");
-		statusSwitch->setProperty("checked", serviceStatus ? "true" : "false");
+		statusSwitch->setProperty("checked", serviceController->serviceStatus ? "true" : "false");
 		connect(pageView, SIGNAL(switchClicked()), this,SLOT(onSwitchClicked()));
 		qDebug() << "Created homeForm";
 	} else
@@ -109,12 +124,24 @@ void Controller::homeWorker() {
 }
 
 void Controller::onSwitchClicked() {
-	serviceStatus = !serviceStatus; //todo stopservice
-	//pageView->findChild<QObject*>("stateSwitch")->setProperty("checked", serviceStatus ? "true" : "false");
+	QObject* statusSwitch = pageView->findChild<QObject*>("stateSwitch");
+	statusSwitch->setProperty("enabled", "false");
+	
+	if (!serviceController->serviceStatus)
+		serviceController->start();
+	else
+		serviceController->stop();
+
 	qDebug() << (serviceStatus ? "checked" : "unchecked");
 
+}
+
+void Controller::onConnectionStatusChanged(bool status) {
+	QObject* statusSwitch = pageView->findChild<QObject*>("stateSwitch");
+	statusSwitch->setProperty("enabled", "true");
 }
 
 void Controller::receivedMessage(PipeMessage *message) {
 	switch (message->getType()) { }
 }
+

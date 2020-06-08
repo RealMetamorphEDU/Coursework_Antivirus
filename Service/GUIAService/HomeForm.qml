@@ -48,6 +48,7 @@ Page {
                 anchors.left: parent.left
                 anchors.leftMargin: -5
                 Layout.leftMargin: -5
+
                 onCheckedChanged: {page.switchClicked()
                     console.log("switched")
                 }

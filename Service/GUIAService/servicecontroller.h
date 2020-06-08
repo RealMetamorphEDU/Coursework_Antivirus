@@ -9,13 +9,13 @@ struct _SERVICE_STATUS_PROCESS;
 typedef _SERVICE_STATUS_PROCESS  SERVICE_STATUS_PROCESS;
 class ServiceController: public QObject {
 Q_OBJECT
-	bool connectionStatus;
-	SC_HANDLE scManager;
-	SC_HANDLE service;
+	SC_HANDLE scManager{};
+	SC_HANDLE service{};
 	SERVICE_STATUS_PROCESS* status;
 	QString SERVICE_NAME;
 	bool working;
 public:
+	bool serviceStatus;
 	explicit ServiceController(QString service_name, QObject* parent);
 	~ServiceController();
 	bool start();

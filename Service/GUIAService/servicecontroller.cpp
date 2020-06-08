@@ -6,7 +6,7 @@
 
 ServiceController::ServiceController(QString service_name, QObject *parent) : QObject(parent) {
 	this->SERVICE_NAME = service_name;
-	this->connectionStatus = false;
+	this->serviceStatus = false;
 	this->status = new SERVICE_STATUS_PROCESS;
 	this->working = false;
 	//connect(this,SIGNAL(statusChanged(bool)), this,SLOT(setConnectionStatus(bool)));
@@ -20,31 +20,37 @@ ServiceController::~ServiceController() {
 bool ServiceController::init() {
 	if (!working) {
 		working = true;
-		scManager = OpenSCManagerA(NULL, NULL,
-			SC_MANAGER_ENUMERATE_SERVICE |
-			SC_MANAGER_MODIFY_BOOT_CONFIG | SC_MANAGER_CONNECT);
-		if (NULL == scManager)
+		scManager = OpenSCManagerA(NULL, NULL, SC_MANAGER_CONNECT);
+		if (NULL == scManager) {
+			working = false;
 			return false;
+		}
+
 
 		// Open service
-		service = OpenServiceA(scManager, SERVICE_NAME.toStdString().c_str(), SERVICE_ALL_ACCESS);
+		service = OpenServiceA(scManager, SERVICE_NAME.toStdString().c_str(),
+		                       SERVICE_START | SERVICE_STOP | SERVICE_QUERY_STATUS);
+
 		if (service == NULL) {
 			CloseServiceHandle(scManager);
-			return false;
-		}
-		DWORD dwBytesNeeded;
-		if (!QueryServiceStatusEx(
-			service,
-			SC_STATUS_PROCESS_INFO,
-			(LPBYTE)status,
-			sizeof(SERVICE_STATUS_PROCESS),
-			&dwBytesNeeded)) {
-			CloseServiceHandle(service);
-			CloseServiceHandle(scManager);
+			working = false;
 			return false;
 		}
 
-		connectionStatus = status->dwCurrentState == SERVICE_RUNNING;
+		DWORD dwBytesNeeded;
+		if (!QueryServiceStatusEx(
+		                          service,
+		                          SC_STATUS_PROCESS_INFO,
+		                          (LPBYTE) status,
+		                          sizeof(SERVICE_STATUS_PROCESS),
+		                          &dwBytesNeeded)) {
+			CloseServiceHandle(service);
+			CloseServiceHandle(scManager);
+			working = false;
+			return false;
+		}
+		working = false;
+		serviceStatus = status->dwCurrentState == SERVICE_RUNNING;
 		return true;
 	}
 	return false;
@@ -53,17 +59,19 @@ bool ServiceController::init() {
 bool ServiceController::start() {
 	if (!working) {
 		working = true;
-		scManager = OpenSCManagerA(NULL, NULL,
-		                           SC_MANAGER_ENUMERATE_SERVICE |
-		                           SC_MANAGER_MODIFY_BOOT_CONFIG | SC_MANAGER_CONNECT);
-		if (NULL == scManager)
+		scManager = OpenSCManagerA(NULL, NULL, SC_MANAGER_CONNECT);
+		if (NULL == scManager) {
+			working = false;
 			return false;
+		}
 
 		// Open service
-		service = OpenServiceA(scManager, SERVICE_NAME.toStdString().c_str(), SERVICE_ALL_ACCESS);
+		service = OpenServiceA(scManager, SERVICE_NAME.toStdString().c_str(),
+		                       SERVICE_START | SERVICE_STOP | SERVICE_QUERY_STATUS);
 		if (service == NULL) {
 			CloseServiceHandle(scManager);
-			return false;
+			working = false;
+			return false;;
 		}
 		DWORD dwBytesNeeded;
 		if (!QueryServiceStatusEx(
@@ -75,12 +83,14 @@ bool ServiceController::start() {
 		{
 			CloseServiceHandle(service);
 			CloseServiceHandle(scManager);
+			working = false;
 			return false;
 		}
 
 		if (status->dwCurrentState != SERVICE_STOPPED) {
 			CloseServiceHandle(service);
 			CloseServiceHandle(scManager);
+			working = false;
 			return false;
 		}
 
@@ -91,6 +101,7 @@ bool ServiceController::start() {
 		{
 			CloseServiceHandle(service);
 			CloseServiceHandle(scManager);
+			working = false;
 			return false;
 		}
 
@@ -104,15 +115,18 @@ bool ServiceController::start() {
 bool ServiceController::stop() {
 	if (!working) {
 		working = true;
-		scManager = OpenSCManagerA(NULL, NULL,
-		                           SC_MANAGER_ENUMERATE_SERVICE | SC_MANAGER_CONNECT);
-		if (NULL == scManager)
+		scManager = OpenSCManagerA(NULL, NULL, SC_MANAGER_CONNECT);
+		if (NULL == scManager) {
+			working = false;
 			return false;
+		}
 
 		// Open service
-		service = OpenServiceA(scManager, SERVICE_NAME.toStdString().c_str(), SERVICE_ALL_ACCESS);
+		service = OpenServiceA(scManager, SERVICE_NAME.toStdString().c_str(),
+		                       SERVICE_START | SERVICE_STOP | SERVICE_QUERY_STATUS);
 		if (service == NULL) {
 			CloseServiceHandle(scManager);
+			working = false;
 			return false;
 		}
 		DWORD dwBytesNeeded;
@@ -125,21 +139,25 @@ bool ServiceController::stop() {
 		{
 			CloseServiceHandle(service);
 			CloseServiceHandle(scManager);
+			working = false;
 			return false;
 		}
 
 		if (status->dwCurrentState != SERVICE_RUNNING) {
 			CloseServiceHandle(service);
 			CloseServiceHandle(scManager);
+			working = false;
 			return false;
 		}
-
+		LPSERVICE_STATUS contrRet = new SERVICE_STATUS;
 		if (!ControlService(
 		                    service,
 		                    SERVICE_CONTROL_STOP,
-		                    NULL)) {
+		                    contrRet)) {
+			auto kek = GetLastError();
 			CloseServiceHandle(service);
 			CloseServiceHandle(scManager);
+			working = false;
 			return false;
 		}
 
@@ -155,7 +173,7 @@ void ServiceController::checkPending() {
 	if (!QueryServiceStatusEx(
 	                          service,                        // handle to service
 	                          SC_STATUS_PROCESS_INFO,         // information level
-	                          (LPBYTE) &status,               // address of structure
+	                          (LPBYTE) status,                // address of structure
 	                          sizeof(SERVICE_STATUS_PROCESS), // size of structure
 	                          &dwBytesNeeded))                // size needed if buffer is too small
 	{
@@ -170,14 +188,14 @@ void ServiceController::checkPending() {
 			break;
 		case SERVICE_RUNNING:
 			emit statusChanged(true);
-			this->connectionStatus = true;
+			this->serviceStatus = true;
 			working = false;
 			CloseServiceHandle(service);
 			CloseServiceHandle(scManager);
 			break;
 		case SERVICE_STOPPED:
 			emit statusChanged(false);
-			this->connectionStatus = false;
+			this->serviceStatus = false;
 		default:
 			working = false;
 			CloseServiceHandle(service);

@@ -22,8 +22,7 @@ class Controller : public QObject
     bool serviceStatus;
 public:
     explicit Controller(QObject* parent = nullptr);
-    bool srvStart();
-    bool srvStop();
+    ~Controller();
 public slots:
     void onChooseFileButtonClicked();
     void onChooseFolderButtonClicked();
@@ -34,6 +33,7 @@ public slots:
     void connectUpdate(bool connected);
     void onFileOpened(QString dir);
     void receivedMessage(PipeMessage* message);
+    void onConnectionStatusChanged(bool status);
 };
 
 #endif // CONTROLLER_H
