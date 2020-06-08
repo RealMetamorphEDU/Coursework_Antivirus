@@ -1,6 +1,7 @@
 #include "controller.h"
 #include <QCoreApplication>
 #include <QDirIterator>
+#include <QVariant>
 
 bool Controller::loadBase() {
     status.dwCheckPoint++;
@@ -110,6 +111,7 @@ bool Controller::isBreak() {
 }
 
 void Controller::connectUpdate(bool connected) {
+    logger->info("CONTROLLER", QString("Client connect status: ").append(QVariant(connected).toString()).append("."));
     this->connected = connected;
 }
 
@@ -119,16 +121,24 @@ void Controller::receivedMessage(PipeMessage *message) {
             if (taskCount == 0)
                 lastID = 0;
             auto *const start = dynamic_cast<StartScanMessage*>(message);
+            bool safe = true;
             while (scanTasks.contains(lastID)) {
                 lastID++;
+                if (safe && lastID < 0) {
+                    lastID = 0;
+                    safe = false;
+                }
             }
             if (lastID < 0) {
                 lastID = 0;
+                logger->warning("CONTROLLER", "Overflow scan task storage, new task don't started.");
                 break;
             }
             taskCount++;
             auto *task = new ScanTask(lastID, &taskCount, loader->getStorage(innerName), start->getObjectPath(), pipe);
             scanTasks.insert(lastID, task);
+            logger->info("CONTROLLER",
+                         QString("Started scan task with id: ").append(QString::number(lastID)).append("."));
         }
         break;
         case MessageType::stopScan: {
@@ -140,14 +150,22 @@ void Controller::receivedMessage(PipeMessage *message) {
                 if (connected) {
                     pipe->sendMessage(new StopScanMessage(stop->getTaskIndex(), this));
                 }
-            }
+                logger->info("CONTROLLER",
+                             QString("Deleted scan task with id: ").append(QString::number(stop->getTaskIndex())).
+                             append("."));
+            } else
+                logger->warning("CONTROLLER", "Unknown task id.");
         }
         break;
         case MessageType::pauseScan: {
             auto *pause = dynamic_cast<PauseScanMessage*>(message);
             if (scanTasks.contains(pause->getTaskIndex())) {
                 scanTasks.value(pause->getTaskIndex())->setPause(pause->getPause());
-            }
+                logger->info("CONTROLLER",
+                             QString("Pause scan task with id: ").append(QString::number(pause->getTaskIndex())).
+                             append(", status = ").append(QVariant(pause->getPause()).toString()).append("."));
+            } else
+                logger->warning("CONTROLLER", "Unknown task id.");
         }
         break;
         case MessageType::addDirToMonitor: {
@@ -155,9 +173,11 @@ void Controller::receivedMessage(PipeMessage *message) {
             if (watcher->addPath(add->getPath())) {
                 if (connected)
                     pipe->sendMessage(new AddDirectoryToMonitorMessage(add->getPath(), this));
+                logger->info("CONTROLLER", "Directory added to monitor successfully.");
             } else {
                 if (connected)
                     pipe->sendMessage(new RemoveDirectoryFromMonitorMessage(add->getPath(), this));
+                logger->warning("CONTROLLER", "Directory addition to monitor failed.");
             }
         }
         break;
@@ -166,12 +186,14 @@ void Controller::receivedMessage(PipeMessage *message) {
             watcher->removePath(remove->getPath());
             if (connected)
                 pipe->sendMessage(new RemoveDirectoryFromMonitorMessage(remove->getPath(), this));
+            logger->info("CONTROLLER", "Directory removed from monitor successfully.");
         }
         break;
         case MessageType::getMonitoredDirectories: {
             if (connected) {
                 pipe->sendMessage(new MonitoredDirectoriesMessage(watcher->getPaths().toList(), this));
             }
+            logger->info("CONTROLLER", "Client asked directories from monitor.");
         }
         break;
         case MessageType::startDirMonitor: {
@@ -179,6 +201,7 @@ void Controller::receivedMessage(PipeMessage *message) {
             if (connected) {
                 pipe->sendMessage(new StartDirectoryMonitoringMessage(this));
             }
+            logger->info("CONTROLLER", "Monitor started.");
         }
         break;
         case MessageType::stopDirMonitor: {
@@ -186,6 +209,7 @@ void Controller::receivedMessage(PipeMessage *message) {
             if (connected) {
                 pipe->sendMessage(new StopDirectoryMonitoringMessage(this));
             }
+            logger->info("CONTROLLER", "Monitor stopped.");
         }
         break;
         case MessageType::getResultList: {
@@ -194,20 +218,28 @@ void Controller::receivedMessage(PipeMessage *message) {
                 if (connected) {
                     pipe->sendMessage(new ResultList(-1, watcher->getResults(), this));
                 }
+                logger->info("CONTROLLER", "Sent monitor results.");
             } else if (scanTasks.contains(get->getTaskID())) {
                 if (connected) {
                     pipe->sendMessage(new ResultList(get->getTaskID(), scanTasks.value(get->getTaskID())->getResults(),
                                                      this));
                 }
-            }
+                logger->info("CONTROLLER",
+                             QString("Sent scan results with id: ").
+                             append(QString::number(get->getTaskID()).append(".")));
+            } else
+                logger->warning("CONTROLLER", "Unknown task id.");
         }
         break;
         case MessageType::getIndexes: {
             if (connected) {
                 pipe->sendMessage(new IndexesList(scanTasks.keys().toVector(), this));
             }
+            logger->info("CONTROLLER", "Client asked indexes of scan tasks.");
         }
         break;
+        default:
+            logger->warning("CONTROLLER", "Unknown type of message.");
     }
     message->deleteLater();
 }
