@@ -32,10 +32,10 @@ public:
     bool startWrite(int count);
 
     // Идёт процесс чтения, переключение в режим записи невозможно
-    bool isReading();
+    bool isReading() const;
 
     // Включен режим записи, чтение невозможно
-    bool isWriting();
+    bool isWriting() const;
 
     // Начать чтение записей, вернёт общее число записей.
     int startRead();

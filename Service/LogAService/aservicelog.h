@@ -18,7 +18,7 @@ Q_OBJECT
     QString serviceName;
     HANDLE hEventLog;
     Level currentLevel;
-    const char *strings[3]; // 0 - name, 1 - tag, 3 - message
+    const char *strings[3]{}; // 0 - name, 1 - tag, 3 - message
 
     void printLog(const QString &tag, const QString &message, Level level);
     static WORD getSystemLevel(Level level);
@@ -31,7 +31,7 @@ public:
     ~AServiceLog();
 
     static bool registerSource(const QString &source);
-    static bool unregisterSource(const QString &source);
+    static bool doUnregisteredSource(const QString &source);
 
     void setLevel(Level level);
     void info(const QString &tag, const QString &message);

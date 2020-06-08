@@ -16,9 +16,9 @@ Q_OBJECT
 public:
     AServiceScanObjects(SignatureStorage *storage, QObject *parent = nullptr);
     ~AServiceScanObjects();
-    void setPause(bool pause);
+    void setPause(bool pause) const;
 public slots:
-    void scanScanObject(ScanObject *scanObject);
+    void scanScanObject(ScanObject *scanObject) const;
 signals:
     void uninfected(QString filename);
     void infectedBy(QString filename, QString signatureName);

@@ -25,21 +25,19 @@ BElementType BListWritable::getType() {
     return BElementType::bListWritable;
 }
 
-bool BListWritable::writeElement(BElement *element) {
+bool BListWritable::writeElement(BElement *element) const {
     if (opened && !closed) {
         switch (element->getType()) {
             case BElementType::bInteger:
                 if (!inheritOpen) {
-                    BInteger *integer;
-                    integer = qobject_cast<BInteger*>(element);
+                    auto *integer = qobject_cast<BInteger*>(element);
                     file->write(integer->toBencode());
                     return true;
                 }
                 break;
             case BElementType::bString:
                 if (!inheritOpen) {
-                    BString *string;
-                    string = qobject_cast<BString*>(element);
+                    auto *string = qobject_cast<BString*>(element);
                     file->write(string->toBencode());
                     return true;
                 }
@@ -67,7 +65,7 @@ bool BListWritable::closeList() {
         closed = true;
         file->write("e", 1);
         QObject *p = parent();
-        BListWritable *pList = qobject_cast<BListWritable*>(p);
+        auto *pList = qobject_cast<BListWritable*>(p);
         if (pList != nullptr) {
             pList->inheritOpen = false;
             pList->inheritList = nullptr;
@@ -91,7 +89,7 @@ void BListReadable::setFileReadable(QFile *file, int offset) {
         opened = false;
 }
 
-qint64 BListReadable::getOffset() {
+qint64 BListReadable::getOffset() const {
     return offset;
 }
 
@@ -148,7 +146,7 @@ BElement* BListReadable::nextToken() {
                     file->read(&start, 1);
                     data.append(start);
                 }
-                BString *string = new BString(this);
+                auto *string = new BString(this);
                 string->setValue(data);
                 hasNextToken();
                 return string;
@@ -193,7 +191,7 @@ bool BListReadable::hasNextToken() {
 void BListReadable::closing() {
     closed = true;
     QObject *p = parent();
-    BListReadable *pList = qobject_cast<BListReadable*>(p);
+    auto *pList = qobject_cast<BListReadable*>(p);
     if (pList != nullptr) {
         pList->hasNextToken();
     }

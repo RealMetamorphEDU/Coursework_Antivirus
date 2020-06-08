@@ -31,7 +31,7 @@ public:
 
     BElementType getType() override;
 
-    bool writeElement(BElement *element);
+    bool writeElement(BElement *element) const;
     BListWritable* openList();
     bool closeList();
 
@@ -58,7 +58,7 @@ public:
 
     void setFileReadable(QFile *file, int offset);
 
-    qint64 getOffset();
+    qint64 getOffset() const;
 };
 
 class BString: public BElement {

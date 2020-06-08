@@ -12,14 +12,17 @@ AServiceBaseLoader::AServiceBaseLoader(QObject *parent) : QObject(parent) {
 
 bool AServiceBaseLoader::insertSignatureRecord(TSTNode *&root, SignatureRecord *record, qint64 *maxLen) {
     QByteArray str = record->getSigPrefix();
-    TSTNode *current;
     bool result = true;
     if (root == nullptr)
         root = new TSTNode(str[0], false);
-    current = root;
+    TSTNode *current = root;
     for (int i = 0; i < str.count();) {
         bool end;
-        switch (current->element == (byte) str.at(i) ? 0 : current->element > (byte) str.at(i) ? 1 : 2) {
+        switch (current->element == static_cast<byte>(str.at(i)) ?
+                    0 :
+                    current->element > static_cast<byte>(str.at(i)) ?
+                    1 :
+                    2) {
             case 0: // Equal
                 end = i == (str.count() - 1);
                 if (end) {
@@ -77,10 +80,10 @@ int AServiceBaseLoader::loadStorage(const QString &storageName, const QString &f
     if (storages.contains(storageName))
         return appendStorage(storageName, filepath);
     tokenizer->setBaseFile(filepath);
-    const int need = tokenizer->startRead();
+    int need = tokenizer->startRead();
     if (need != -1) {
         int loaded = 0;
-        SignatureStorage *storage = new SignatureStorage(this);
+        auto *storage = new SignatureStorage(this);
         TSTNode *root = nullptr;
         int num = 0;
         QVector<SignatureRecord*> accum;
@@ -112,7 +115,7 @@ int AServiceBaseLoader::loadStorage(const QString &storageName, const QString &f
 int AServiceBaseLoader::appendStorage(const QString &storageName, const QString &filepath) {
     if (storages.contains(storageName)) {
         tokenizer->setBaseFile(filepath);
-        const int need = tokenizer->startRead();
+        int need = tokenizer->startRead();
         if (need != -1) {
             int loaded = 0;
             SignatureStorage *storage = storages.value(storageName);
@@ -143,7 +146,7 @@ int AServiceBaseLoader::appendStorage(const QString &storageName, const QString 
     return loadStorage(storageName, filepath);
 }
 
-SignatureStorage* AServiceBaseLoader::getStorage(const QString &storageName) {
+SignatureStorage* AServiceBaseLoader::getStorage(const QString &storageName) const {
     if (storages.contains(storageName))
         return storages.value(storageName);
     return nullptr;

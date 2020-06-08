@@ -1,5 +1,7 @@
 #include "seeker.h"
 #include <QCoreApplication>
+#include <QDirIterator>
+#include "aserviceevents.h"
 
 
 Seeker::Seeker(HANDLE requestEvent, QObject *parent) : QObject(parent) {
@@ -8,7 +10,7 @@ Seeker::Seeker(HANDLE requestEvent, QObject *parent) : QObject(parent) {
 }
 
 bool Seeker::event(QEvent *event) {
-    switch ((events) event->type()) {
+    switch (static_cast<events>(event->type())) {
         case addRequestType:
             RequestEvent *add;
             add = dynamic_cast<RequestEvent*>(event);
@@ -17,8 +19,9 @@ bool Seeker::event(QEvent *event) {
         case stopType:
             working = false;
             return true;
+        default:
+            return QObject::event(event);
     }
-    return QObject::event(event);
 }
 
 

@@ -15,7 +15,7 @@ int BinaryScanObject::getRegionsCount() {
 
 DataRegion BinaryScanObject::getRegion(int index) {
     if (index != 0)
-        return DataRegion(0, 0);
+        return {0, 0};
     return region;
 }
 

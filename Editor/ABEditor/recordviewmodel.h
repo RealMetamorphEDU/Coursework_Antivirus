@@ -9,7 +9,6 @@ Q_OBJECT
     QVector<SignatureRecord*> records;
 public:
     explicit RecordViewModel(QObject *parent);
-    ~RecordViewModel();
 
     int rowCount(const QModelIndex &parent) const override;
     int columnCount(const QModelIndex &parent) const override;

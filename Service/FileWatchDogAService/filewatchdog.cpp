@@ -5,8 +5,8 @@
 #include <Windows.h>
 
 FileWatchDog::FileWatchDog(QObject *parent): QObject(parent) {
-    requestEvent = CreateEventA(NULL, FALSE, FALSE, NULL);
-    completeEvent = CreateEventA(NULL, FALSE, FALSE, NULL);
+    requestEvent = CreateEventA(nullptr, FALSE, FALSE, nullptr);
+    completeEvent = CreateEventA(nullptr, FALSE, FALSE, nullptr);
     thread = new QThread(this);
     watcher = new Watcher(requestEvent, completeEvent);
     watcher->moveToThread(thread);
@@ -28,7 +28,7 @@ FileWatchDog::~FileWatchDog() {
     CloseHandle(completeEvent);
 }
 
-bool FileWatchDog::addPath(const QString &path) {
+bool FileWatchDog::addPath(const QString &path) const {
     QCoreApplication::postEvent(watcher, new AddEvent(path));
     ResetEvent(completeEvent);
     SetEvent(requestEvent);
@@ -36,11 +36,11 @@ bool FileWatchDog::addPath(const QString &path) {
     return watcher->getLastStatus() == Status::succAdd;
 }
 
-const QVector<QString>& FileWatchDog::getPaths() {
+const QVector<QString>& FileWatchDog::getPaths() const {
     return watcher->getPaths();
 }
 
-bool FileWatchDog::removePath(const QString &path) {
+bool FileWatchDog::removePath(const QString &path) const {
     QCoreApplication::postEvent(watcher, new RemoveEvent(path));
     ResetEvent(completeEvent);
     SetEvent(requestEvent);
@@ -48,9 +48,8 @@ bool FileWatchDog::removePath(const QString &path) {
     return watcher->getLastStatus() == Status::succRemove;
 }
 
-bool FileWatchDog::removeAllPaths() {
-    for (int i = 0; i < watcher->getPaths().size(); ++i) {
-        QString str = watcher->getPaths().at(i);
+bool FileWatchDog::removeAllPaths() const {
+    for (const auto &str: watcher->getPaths()) {
         QCoreApplication::postEvent(watcher, new RemoveEvent(str));
     }
     ResetEvent(completeEvent);

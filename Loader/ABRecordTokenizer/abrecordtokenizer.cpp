@@ -5,6 +5,7 @@
 ABRecordTokenizer::ABRecordTokenizer(QObject *parent) : QObject(parent) {
     currentFile = nullptr;
     liteBencode = nullptr;
+    readable = nullptr;
     writable = nullptr;
     reading = false;
     writing = false;
@@ -50,11 +51,11 @@ bool ABRecordTokenizer::startWrite(const int count) {
     return false;
 }
 
-bool ABRecordTokenizer::isReading() {
+bool ABRecordTokenizer::isReading() const {
     return reading;
 }
 
-bool ABRecordTokenizer::isWriting() {
+bool ABRecordTokenizer::isWriting() const {
     return writing;
 }
 
@@ -86,13 +87,10 @@ int ABRecordTokenizer::startRead() {
 
 int ABRecordTokenizer::writeRecord(const SignatureRecord &record) {
     if (writing) {
-        BListWritable *recordList;
         BString bName;
-        BListWritable *sigList;
         BInteger bLen;
         BString bPrefix;
         BString bHash;
-        BListWritable *offsetList;
         BInteger bBeginOffset;
         BInteger bEndOffset;
         bName.setValue(record.getName().toUtf8());
@@ -101,14 +99,14 @@ int ABRecordTokenizer::writeRecord(const SignatureRecord &record) {
         bHash.setValue(record.getSigHash());
         bBeginOffset.setValue(record.getBeginOffset());
         bEndOffset.setValue(record.getEndOffset());
-        recordList = writable->openList();
+        BListWritable *recordList = writable->openList();
         recordList->writeElement(&bName);
-        sigList = recordList->openList();
+        BListWritable *sigList = recordList->openList();
         sigList->writeElement(&bLen);
         sigList->writeElement(&bPrefix);
         sigList->writeElement(&bHash);
         sigList->closeList();
-        offsetList = recordList->openList();
+        BListWritable *offsetList = recordList->openList();
         offsetList->writeElement(&bBeginOffset);
         offsetList->writeElement(&bEndOffset);
         offsetList->closeList();
@@ -136,7 +134,7 @@ SignatureRecord* ABRecordTokenizer::nextRecord(int &number) {
                 reading = false;
                 return nullptr;
             }
-            BListReadable *recordList = qobject_cast<BListReadable*>(element);
+            auto *recordList = qobject_cast<BListReadable*>(element);
             //
             if (!recordList->hasNextToken() || (element = recordList->nextToken())->getType() != BElementType::bString
             ) {
@@ -145,7 +143,7 @@ SignatureRecord* ABRecordTokenizer::nextRecord(int &number) {
                 reading = false;
                 return nullptr;
             }
-            BString *bName = qobject_cast<BString*>(element);
+            auto *bName = qobject_cast<BString*>(element);
             //
             if (!recordList->hasNextToken() || (element = recordList->nextToken())->getType() != BElementType::bList) {
                 readable->deleteLater();
@@ -153,7 +151,7 @@ SignatureRecord* ABRecordTokenizer::nextRecord(int &number) {
                 reading = false;
                 return nullptr;
             }
-            BListReadable *sigList = qobject_cast<BListReadable*>(element);
+            auto *sigList = qobject_cast<BListReadable*>(element);
             //
             if (!sigList->hasNextToken() || (element = sigList->nextToken())->getType() != BElementType::bInteger) {
                 readable->deleteLater();
@@ -161,7 +159,7 @@ SignatureRecord* ABRecordTokenizer::nextRecord(int &number) {
                 reading = false;
                 return nullptr;
             }
-            BInteger *bLen = qobject_cast<BInteger*>(element);
+            auto *bLen = qobject_cast<BInteger*>(element);
             //
             if (!sigList->hasNextToken() || (element = sigList->nextToken())->getType() != BElementType::bString) {
                 readable->deleteLater();
@@ -169,7 +167,7 @@ SignatureRecord* ABRecordTokenizer::nextRecord(int &number) {
                 reading = false;
                 return nullptr;
             }
-            BString *bPrefix = qobject_cast<BString*>(element);
+            auto *bPrefix = qobject_cast<BString*>(element);
             //
             if (!sigList->hasNextToken() || (element = sigList->nextToken())->getType() != BElementType::bString) {
                 readable->deleteLater();
@@ -177,7 +175,7 @@ SignatureRecord* ABRecordTokenizer::nextRecord(int &number) {
                 reading = false;
                 return nullptr;
             }
-            BString *bHash = qobject_cast<BString*>(element);
+            auto *bHash = qobject_cast<BString*>(element);
             //
             if (!recordList->hasNextToken() || (element = recordList->nextToken())->getType() != BElementType::bList) {
                 readable->deleteLater();
@@ -185,7 +183,7 @@ SignatureRecord* ABRecordTokenizer::nextRecord(int &number) {
                 reading = false;
                 return nullptr;
             }
-            BListReadable *offsetList = qobject_cast<BListReadable*>(element);
+            auto *offsetList = qobject_cast<BListReadable*>(element);
             //
             if (!offsetList->hasNextToken() || (element = offsetList->nextToken())->getType() != BElementType::bInteger
             ) {
@@ -194,7 +192,7 @@ SignatureRecord* ABRecordTokenizer::nextRecord(int &number) {
                 reading = false;
                 return nullptr;
             }
-            BInteger *bBeginOffset = qobject_cast<BInteger*>(element);
+            auto *bBeginOffset = qobject_cast<BInteger*>(element);
             //
             if (!offsetList->hasNextToken() || (element = offsetList->nextToken())->getType() != BElementType::bInteger
             ) {
@@ -203,9 +201,9 @@ SignatureRecord* ABRecordTokenizer::nextRecord(int &number) {
                 reading = false;
                 return nullptr;
             }
-            BInteger *bEndOffset = qobject_cast<BInteger*>(element);
+            auto *bEndOffset = qobject_cast<BInteger*>(element);
             //
-            SignatureRecord *record = new SignatureRecord(liteBencode);
+            auto *record = new SignatureRecord(liteBencode);
             record->setName(QString(bName->getValue()));
             record->setSigLength(bLen->getValue());
             record->setSigPrefix(bPrefix->getValue());

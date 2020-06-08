@@ -23,7 +23,7 @@ bool WatchTask::addPath(const QString &path) {
     return fileWatchDog->addPath(path);
 }
 
-const QVector<QString>& WatchTask::getPaths() {
+const QVector<QString>& WatchTask::getPaths() const {
     if (pause)
         return pauseList;
     return fileWatchDog->getPaths();
@@ -53,11 +53,11 @@ void WatchTask::setPause(bool pause) {
     }
 }
 
-const QVector<Result>& WatchTask::getResults() {
+const QVector<Result>& WatchTask::getResults() const {
     return storage->getResults();
 }
 
-void WatchTask::changeNotify(QString filepath, ChangeType type) {
+void WatchTask::changeNotify(const QString &filepath, ChangeType type) {
     switch (type) {
         case ChangeType::fileModified: {
             findObjects->findObjects(filepath);
@@ -67,15 +67,17 @@ void WatchTask::changeNotify(QString filepath, ChangeType type) {
             emit sendLostStatus(new LostWatchMessage(filepath, this));
         }
         break;
+        default:
+            break;
     }
 }
 
-void WatchTask::infectedBy(QString filename, QString signatureName) {
+void WatchTask::infectedBy(const QString &filename, const QString &signatureName) {
     emit sendObjectStatus(new ObjectStatusMessage(-1, true, false, filename, signatureName, this));
     storage->addResult({filename, signatureName, true, false});
 }
 
-void WatchTask::cantBuildThis(QString filepath, QString reason) {
+void WatchTask::cantBuildThis(const QString &filepath, const QString &reason) {
     emit sendObjectStatus(new ObjectStatusMessage(-1, false, true, filepath, reason, this));
     storage->addResult({filepath, reason, false, true});
 }

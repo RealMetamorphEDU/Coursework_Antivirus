@@ -37,8 +37,7 @@ void ScanTask::setPause(bool pause) {
         this->pause = pause;
         findObjects->setPause(pause);
         scanObjects->setPause(pause);
-        QString empty;
-        emit sendScanStatus(new ScanStatusMessage(pause, taskID, *taskCount, empty, leftCount, scannedCount,
+        emit sendScanStatus(new ScanStatusMessage(pause, taskID, *taskCount, "", leftCount, scannedCount,
                                                   this));
         if (pause)
             timer->stop();
@@ -47,14 +46,13 @@ void ScanTask::setPause(bool pause) {
     }
 }
 
-const QVector<Result>& ScanTask::getResults() {
+const QVector<Result>& ScanTask::getResults() const {
     return storage->getResults();
 }
 
 void ScanTask::timeout() {
     if (leftCount == 0) {
-        QString empty;
-        emit sendScanStatus(new ScanStatusMessage(false, taskID, *taskCount, empty, 0, scannedCount, this));
+        emit sendScanStatus(new ScanStatusMessage(false, taskID, *taskCount, "", 0, scannedCount, this));
         timer->stop();
     }
 }
@@ -62,12 +60,11 @@ void ScanTask::timeout() {
 void ScanTask::foundScanObject(ScanObject *scanObject) {
     leftCount++;
     timer->start();
-    QString empty;
-    emit sendScanStatus(new ScanStatusMessage(pause, taskID, *taskCount, empty, leftCount, scannedCount,
+    emit sendScanStatus(new ScanStatusMessage(pause, taskID, *taskCount, "", leftCount, scannedCount,
                                               this));
 }
 
-void ScanTask::cantBuildThis(QString filepath, QString reason) {
+void ScanTask::cantBuildThis(const QString &filepath, const QString &reason) {
     scannedCount++;
     emit sendObjectStatus(new ObjectStatusMessage(taskID, false, true, filepath, reason, this));
     emit sendScanStatus(new ScanStatusMessage(pause, taskID, *taskCount, filepath, leftCount, scannedCount,
@@ -76,11 +73,10 @@ void ScanTask::cantBuildThis(QString filepath, QString reason) {
     storage->addResult({filepath, reason, false, true});
 }
 
-void ScanTask::uninfected(QString filename) {
+void ScanTask::uninfected(const QString &filename) {
     scannedCount++;
     leftCount--;
-    QString empty;
-    emit sendObjectStatus(new ObjectStatusMessage(taskID, false, false, filename, empty, this));
+    emit sendObjectStatus(new ObjectStatusMessage(taskID, false, false, filename, "", this));
     emit sendScanStatus(new ScanStatusMessage(pause, taskID, *taskCount, filename, leftCount - scannedCount,
                                               scannedCount,
                                               this));
@@ -88,7 +84,7 @@ void ScanTask::uninfected(QString filename) {
     storage->addResult({filename, "", false, false});
 }
 
-void ScanTask::infectedBy(QString filename, QString signatureName) {
+void ScanTask::infectedBy(const QString &filename, const QString &signatureName) {
     scannedCount++;
     leftCount--;
     emit sendObjectStatus(new ObjectStatusMessage(taskID, true, false, filename, signatureName, this));

@@ -12,8 +12,7 @@ Q_OBJECT
     QHexEdit *sigEdit;
 public:
     explicit ChooseSigDialog(QFile* file, QWidget *parent = nullptr);
-    ~ChooseSigDialog();
-    const QByteArray& getSelectedData();
+    const QByteArray& getSelectedData() const;
 private slots:
     void preAccepted();
 };

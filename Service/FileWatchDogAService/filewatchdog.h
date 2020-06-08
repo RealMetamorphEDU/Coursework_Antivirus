@@ -29,10 +29,10 @@ Q_OBJECT
 public:
     explicit FileWatchDog(QObject *parent = nullptr);
     ~FileWatchDog();
-    bool addPath(const QString &path);
-    const QVector<QString>& getPaths();
-    bool removePath(const QString &path);
-    bool removeAllPaths();
+    bool addPath(const QString &path) const;
+    const QVector<QString>& getPaths() const;
+    bool removePath(const QString &path) const;
+    bool removeAllPaths() const;
 signals:
     void changeNotify(QString filepath, ChangeType type);
 };

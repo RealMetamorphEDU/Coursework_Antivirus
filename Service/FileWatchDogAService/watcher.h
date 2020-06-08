@@ -1,7 +1,6 @@
 #pragma once
 
 #include <QObject>
-#include <QEvent>
 #include <QVector>
 #include <QFileInfo>
 #include <Windows.h>
@@ -27,9 +26,9 @@ Q_OBJECT
 public:
     explicit Watcher(HANDLE updateEvent, HANDLE completeEvent, QObject *parent = nullptr);
     ~Watcher();
-    const QVector<QString>& getPaths();
+    const QVector<QString>& getPaths() const;
     bool event(QEvent *event) override;
-    Status getLastStatus();
+    Status getLastStatus() const;
 private slots:
     void watching();
 signals:

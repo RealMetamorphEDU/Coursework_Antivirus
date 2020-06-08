@@ -7,7 +7,7 @@
 #include "ui_editrecorddialog.h"
 #include "QMessageBox"
 
-bool EditRecordDialog::checkFields() {
+bool EditRecordDialog::checkFields() const {
     return !ui->nameEdit->text().isEmpty() && sigSet;
 }
 
@@ -43,7 +43,7 @@ EditRecordDialog::~EditRecordDialog() {
     delete ui;
 }
 
-SignatureRecord* EditRecordDialog::getRecord() {
+SignatureRecord* EditRecordDialog::getRecord() const {
     return record;
 }
 
@@ -67,12 +67,12 @@ void EditRecordDialog::chooseSig() {
     fileDialog.setOption(QFileDialog::DontConfirmOverwrite, true);
     fileDialog.setFilter(QDir::Readable | QDir::Executable);
     if (fileDialog.exec()) {
-        QFile *sigFile = new QFile(fileDialog.selectedFiles().at(0), this);
+        auto *sigFile = new QFile(fileDialog.selectedFiles().at(0), this);
         if (sigFile->exists()) {
             ChooseSigDialog chooseSigDialog(sigFile);
             if (chooseSigDialog.exec()) {
                 selectedData = chooseSigDialog.getSelectedData();
-                choosedSig();
+                chosenSig();
             }
         } else
             QMessageBox::warning(this, "Ошибка", "Файл не существует или его невозможно прочитать!", "Ок");
@@ -80,7 +80,7 @@ void EditRecordDialog::chooseSig() {
     }
 }
 
-void EditRecordDialog::choosedSig() {
+void EditRecordDialog::chosenSig() {
     if (selectedData.size() > 5) {
         int prefSize = ui->prefLenBox->value();
         ui->prefixEdit->setText(selectedData.left(prefSize).toHex(' '));
@@ -92,6 +92,6 @@ void EditRecordDialog::choosedSig() {
     }
 }
 
-void EditRecordDialog::changedPrefixLen(int value) {
+void EditRecordDialog::changedPrefixLen(int value) const {
     ui->prefixEdit->setText(selectedData.left(value).toHex(' '));
 }

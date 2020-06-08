@@ -4,9 +4,6 @@
 RecordViewModel::RecordViewModel(QObject *parent) : QAbstractTableModel(parent) {
 }
 
-RecordViewModel::~RecordViewModel() {
-}
-
 int RecordViewModel::rowCount(const QModelIndex &parent) const {
     return parent.isValid() ? 0 : records.size();
 }

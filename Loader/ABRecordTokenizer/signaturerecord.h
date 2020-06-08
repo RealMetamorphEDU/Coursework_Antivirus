@@ -35,7 +35,7 @@ public:
     int getEndOffset() const;
     void setEndOffset(int endOffset);
 
-    bool operator==(SignatureRecord &record);
+    bool operator==(SignatureRecord &record) const;
 };
 
 #endif // SIGNATURERECORD_H

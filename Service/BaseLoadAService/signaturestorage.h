@@ -18,7 +18,7 @@ public:
     friend int AServiceBaseLoader::appendStorage(const QString &storageName, const QString &filepath);
 
     SearchInstance* startSearch();
-    qint64 getMaxLen();
+    qint64 getMaxLen() const;
 
     ~SignatureStorage();
 };
@@ -32,9 +32,9 @@ Q_OBJECT
     friend class SignatureStorage;
 public:
     explicit SearchInstance(QObject *parent = nullptr);
-    QVector<SignatureRecord*> search(byte *data, qint64 len);
+    QVector<SignatureRecord*> search(const byte *data, qint64 len);
     void resetSearch();
-    bool isSearching();
+    bool isSearching() const;
 };
 
 #endif // SIGNATURESTORAGE_H

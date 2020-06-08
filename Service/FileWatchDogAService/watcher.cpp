@@ -30,14 +30,14 @@ Watcher::~Watcher() {
     paths.clear();
 }
 
-const QVector<QString>& Watcher::getPaths() {
+const QVector<QString>& Watcher::getPaths() const {
     return paths;
 }
 
 bool Watcher::event(QEvent *event) {
     if (onEvents) {
         QString path;
-        switch ((events) event->type()) {
+        switch (static_cast<events>(event->type())) {
             case addPathType:
                 AddEvent *add;
                 add = dynamic_cast<AddEvent*>(event);
@@ -50,21 +50,21 @@ bool Watcher::event(QEvent *event) {
                         path = fileInfo.canonicalFilePath();
                     if (!paths.contains(path)) {
                         HANDLE dir = CreateFileA(path.toStdString().c_str(), GENERIC_READ,
-                                                 FILE_SHARE_READ | FILE_SHARE_WRITE | FILE_SHARE_DELETE, NULL,
+                                                 FILE_SHARE_READ | FILE_SHARE_WRITE | FILE_SHARE_DELETE, nullptr,
                                                  OPEN_EXISTING, FILE_FLAG_BACKUP_SEMANTICS | FILE_FLAG_OVERLAPPED,
-                                                 NULL);
+                                                 nullptr);
                         if (dir == INVALID_HANDLE_VALUE)
                             return true;
-                        OVERLAPPED *overlapped = new OVERLAPPED;
+                        auto *overlapped = new OVERLAPPED;
                         overlapped->Offset = 0;
                         overlapped->OffsetHigh = 0;
-                        overlapped->hEvent = CreateEventA(NULL, FALSE, FALSE, NULL);
+                        overlapped->hEvent = CreateEventA(nullptr, FALSE, FALSE, nullptr);
                         if (overlapped->hEvent == INVALID_HANDLE_VALUE) {
                             delete overlapped;
                             CloseHandle(dir);
                             return true;
                         }
-                        DWORD *buffer = new DWORD[1024];
+                        auto *buffer = new DWORD[1024];
                         dirs.push_back(dir);
                         overs.push_back(overlapped);
                         eventHandles.push_back(overlapped->hEvent);
@@ -72,7 +72,7 @@ bool Watcher::event(QEvent *event) {
                         paths.push_back(path);
                         if (!ReadDirectoryChangesW(dir, buffer, 1024 * sizeof(DWORD),TRUE,
                                                    FILE_NOTIFY_CHANGE_FILE_NAME | FILE_NOTIFY_CHANGE_SIZE,
-                                                   NULL, overlapped, NULL)) {
+                                                   nullptr, overlapped, nullptr)) {
                             dirs.pop_back();
                             CloseHandle(dir);
                             overs.pop_back();
@@ -127,7 +127,7 @@ bool Watcher::event(QEvent *event) {
     return QObject::event(event);
 }
 
-Status Watcher::getLastStatus() {
+Status Watcher::getLastStatus() const {
     return status;
 }
 
@@ -136,8 +136,9 @@ void Watcher::watching() {
         alreadyWatching = true;
         working = true;
         while (working) {
-            DWORD selected = WaitForMultipleObjects(eventHandles.size(), eventHandles.data(), FALSE, INFINITE) -
-                             WAIT_OBJECT_0;
+            int selected = static_cast<int>(WaitForMultipleObjects(eventHandles.size(), eventHandles.data(), FALSE,
+                                                                   INFINITE) -
+                                            WAIT_OBJECT_0);
             if (selected == 0) {
                 onEvents = true;
                 QCoreApplication::processEvents(QEventLoop::AllEvents | QEventLoop::WaitForMoreEvents, 100);
@@ -150,9 +151,10 @@ void Watcher::watching() {
                 QString path = paths.at(selected - 1);
                 int offset = 0;
                 do {
-                    FILE_NOTIFY_INFORMATION *info = (FILE_NOTIFY_INFORMATION*) (((char*) buffer) + offset);
+                    auto *info = reinterpret_cast<FILE_NOTIFY_INFORMATION*>(reinterpret_cast<char*>(buffer) + offset);
                     offset = info->NextEntryOffset;
-                    QString filepath = QString::fromWCharArray(info->FileName, info->FileNameLength / 2);
+                    QString filepath = QString::fromWCharArray(info->FileName,
+                                                               static_cast<int>(info->FileNameLength) / 2);
                     fileInfo.setFile(path.append("/").append(filepath));
                     switch (info->Action) {
                         case FILE_ACTION_ADDED:
@@ -168,7 +170,7 @@ void Watcher::watching() {
                 //Возобновляем наблюдение
                 if (!ReadDirectoryChangesW(dir, buffer, 1024 * sizeof(DWORD),TRUE,
                                            FILE_NOTIFY_CHANGE_FILE_NAME | FILE_NOTIFY_CHANGE_SIZE,
-                                           NULL, overlapped, NULL)) {
+                                           nullptr, overlapped, nullptr)) {
                     dirs.remove(selected - 1);
                     CloseHandle(dir);
                     overs.remove(selected - 1);
@@ -186,5 +188,3 @@ void Watcher::watching() {
         alreadyWatching = false;
     }
 }
-
-

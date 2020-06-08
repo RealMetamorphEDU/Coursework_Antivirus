@@ -1,5 +1,8 @@
 #include "scanner.h"
 #include <QCryptographicHash>
+#include "aserviceevents.h"
+#include "signaturerecord.h"
+
 
 const int BLOCK_SIZE = (1024 * 1024 * 4);
 
@@ -19,7 +22,7 @@ Scanner::~Scanner() {
 }
 
 bool Scanner::event(QEvent *event) {
-    switch ((events) event->type()) {
+    switch (static_cast<events>(event->type())) {
         case scanObjectsType:
             ScanEvent *scan;
             scan = dynamic_cast<ScanEvent*>(event);
@@ -33,8 +36,9 @@ bool Scanner::event(QEvent *event) {
         case stopType:
             working = false;
             return true;
+        default:
+            return QObject::event(event);
     }
-    return QObject::event(event);
 }
 
 void Scanner::scanning() {
@@ -62,7 +66,8 @@ void Scanner::scanning() {
                         while (data.length() - len > 0) {
                             search->resetSearch();
                             records.clear();
-                            records.append(search->search((byte*) (data.data() + len), data.length() - len));
+                            records.append(search->search(reinterpret_cast<byte*>(data.data() + len),
+                                                          data.length() - len));
                             for (int j = 0; j < records.count(); ++j) {
                                 SignatureRecord *record = records.at(j);
                                 qint64 startOffset = region.getObjectOffset() + offset + len;
@@ -96,13 +101,13 @@ void Scanner::scanning() {
                             break;
                         offset += data.length() - storage->getMaxLen() + 1;
                         QCoreApplication::processEvents();
-                        if(!working)
+                        if (!working)
                             break;
                     }
                     if (infected)
                         break;
-                    if(!working)
-                            break;
+                    if (!working)
+                        break;
                 }
             }
             if (!infected) {

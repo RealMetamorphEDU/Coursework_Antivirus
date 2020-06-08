@@ -1,5 +1,5 @@
-#ifndef EVENTSASERVICE_H
-#define EVENTSASERVICE_H
+#ifndef ASERVICEEVENTS_H
+#define ASERVICEEVENTS_H
 
 #include <QEvent>
 #include <QString>
@@ -22,7 +22,7 @@ class AddEvent: public QEvent {
 public:
     explicit AddEvent(const QString &path);
 
-    const QString& getPath();
+    const QString& getPath() const;
 };
 
 class RemoveEvent: public QEvent {
@@ -30,7 +30,7 @@ class RemoveEvent: public QEvent {
 public:
     explicit RemoveEvent(const QString &path);
 
-    const QString& getPath();
+    const QString& getPath() const;
 };
 
 class StopEvent: public QEvent {
@@ -44,14 +44,14 @@ class FindEvent: public QEvent {
 public:
     explicit FindEvent(const QString &filepath);
 
-    const QString& getFilepath();
+    const QString& getFilepath() const;
 };
 
 class PauseEvent: public QEvent {
     bool pause;
 public:
     explicit PauseEvent(bool pause);
-    bool getPause();
+    bool getPause() const;
 };
 
 class ScanEvent: public QEvent {
@@ -59,7 +59,7 @@ class ScanEvent: public QEvent {
 public:
     explicit ScanEvent(ScanObject *scanObject);
 
-    ScanObject* getScanObject();
+    ScanObject* getScanObject() const;
 };
 
 class RequestEvent: public QEvent {
@@ -69,7 +69,7 @@ class RequestEvent: public QEvent {
 public:
     explicit RequestEvent(const QString &path, const QString &pattern, bool recursive);
 
-    const QString& getPath();
+    const QString& getPath() const;
     const QString& getPattern() const;
     bool isRecursive() const;
 };
@@ -79,7 +79,7 @@ class ControlEvent: public QEvent {
 public:
     explicit ControlEvent(unsigned long control);
 
-    unsigned long getControl();
+    unsigned long getControl() const;
 };
 
-#endif // EVENTSASERVICE_H
+#endif // ASERVICEEVENTS_H

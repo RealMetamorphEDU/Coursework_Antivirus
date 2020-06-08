@@ -2,7 +2,6 @@
 #define READER_H
 
 #include <QObject>
-#include "AServiceMessagePipe_global.h"
 #include <Windows.h>
 
 class PipeMessage;
@@ -12,7 +11,7 @@ class Reader: public QObject {
 Q_OBJECT
     AServiceMessagePipe *root;
     bool working;
-    HANDLE events[2];
+    HANDLE events[2]{};
     OVERLAPPED *overlapped;
 public:
     explicit Reader(AServiceMessagePipe *root);

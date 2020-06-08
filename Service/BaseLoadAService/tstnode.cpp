@@ -12,15 +12,10 @@ TSTNode::TSTNode(byte el, bool end) {
 }
 
 TSTNode::~TSTNode() {
-    if (left != nullptr)
-        delete left;
-    if (equal != nullptr)
-        delete equal;
-    if (right != nullptr)
-        delete right;
-    if (array != nullptr) {
-        delete[] array;
-    }
+    delete left;
+    delete equal;
+    delete right;
+    delete[] array;
 }
 
 bool TSTNode::addRecord(SignatureRecord *record) {
@@ -34,7 +29,7 @@ bool TSTNode::addRecord(SignatureRecord *record) {
         if (*array[i] == *record)
             return false;
     }
-    SignatureRecord **nArr = new SignatureRecord*[++count];
+    auto **nArr = new SignatureRecord*[++count];
     for (int i = 0; i < count - 1; ++i) {
         nArr[i] = array[i];
     }

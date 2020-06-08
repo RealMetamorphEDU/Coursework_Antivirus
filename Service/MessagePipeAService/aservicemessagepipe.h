@@ -2,7 +2,6 @@
 #define ASERVICEMESSAGEPIPE_H
 
 #include "AServiceMessagePipe_global.h"
-#include <QObject>
 #include "pipemessage.h"
 
 class Reader;
@@ -28,8 +27,8 @@ Q_OBJECT
 public:
     AServiceMessagePipe(const QString &pipeName, QObject *parent = nullptr);
     ~AServiceMessagePipe();
-    bool isConnected();
-    bool isBreak();
+    bool isConnected() const;
+    bool isBreak() const;
 public slots:
     void sendMessage(PipeMessage *message);
 signals:

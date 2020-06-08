@@ -28,12 +28,8 @@ class QDataStream;
 struct Result {
     QString objectName;
     QString infectionReason;
-    bool infected;
-    bool brek;
-
-    //friend QDataStream& operator <<(QDataStream &stream, const Result &result);
-    //friend QDataStream& operator >>(QDataStream &stream, Result &result);
-
+    bool infected{};
+    bool brek{};
 };
 
 class ASERVICEMESSAGEPIPE_EXPORT PipeMessage: public QObject {
@@ -99,7 +95,7 @@ public:
     explicit PauseScanMessage(int taskIndex, bool pause, QObject *parent = nullptr);
 
     int getTaskIndex() const;
-    bool getPause();
+    bool getPause() const;
     MessageType getType() override;
     QByteArray toByteArray() override;
 };
@@ -180,7 +176,7 @@ public:
     explicit ObjectStatusMessage(int taskID, bool infected, bool brek, const QString &path, const QString &infection,
                                  QObject *parent = nullptr);
 
-    int getTaskId();
+    int getTaskId() const;
     bool isInfected() const;
     bool isBreak() const;
     const QString& getPath() const;
@@ -206,7 +202,7 @@ Q_OBJECT
 public:
     explicit GetResultList(int taskID, QObject *parent = nullptr);
 
-    int getTaskID();
+    int getTaskID() const;
     MessageType getType() override;
     QByteArray toByteArray() override;
 };
@@ -218,7 +214,7 @@ Q_OBJECT
 public:
     explicit ResultList(int taskID, const QVector<Result> &results, QObject *parent = nullptr);
 
-    int getTaskID();
+    int getTaskID() const;
     const QVector<Result>& getResults() const;
     MessageType getType() override;
     QByteArray toByteArray() override;

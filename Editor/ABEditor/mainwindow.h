@@ -31,7 +31,7 @@ Q_OBJECT
     QLabel *statusSaveLabel;
     QProgressBar *statusProgressBar;
 
-    void disableButtons(bool yes);
+    void disableButtons(bool yes) const;
 public:
     explicit MainWindow(QWidget *parent = nullptr);
     ~MainWindow();

@@ -1,6 +1,3 @@
 #include "abstractscanbuilder.h"
 
-AbstractScanBuilder::AbstractScanBuilder(QObject *parent) : QObject(parent)
-{
-
-}
+AbstractScanBuilder::AbstractScanBuilder(QObject *parent) : QObject(parent) {}

@@ -9,8 +9,6 @@ class Controller : public QObject
 public:
     explicit Controller(QObject *parent = nullptr);
 
-signals:
-
 };
 
 #endif // CONTROLLER_H

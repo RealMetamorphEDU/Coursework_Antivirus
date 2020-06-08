@@ -2,6 +2,7 @@
 #include <QCoreApplication>
 #include <QDirIterator>
 #include <QVariant>
+#include "aserviceevents.h"
 
 bool Controller::loadBase() {
     status.dwCheckPoint++;
@@ -85,8 +86,8 @@ Controller::~Controller() {
 }
 
 bool Controller::event(QEvent *event) {
-    if ((events) event->type() == controlType) {
-        ControlEvent *control = dynamic_cast<ControlEvent*>(event);
+    if (static_cast<events>(event->type()) == controlType) {
+        auto *control = dynamic_cast<ControlEvent*>(event);
         switch (control->getControl()) {
             case SERVICE_CONTROL_STOP: {
                 logger->info("CONTROLLER", "Controller stopping.");
@@ -106,7 +107,7 @@ bool Controller::event(QEvent *event) {
     return QObject::event(event);
 }
 
-bool Controller::isBreak() {
+bool Controller::isBreak() const {
     return brek;
 }
 
@@ -120,7 +121,7 @@ void Controller::receivedMessage(PipeMessage *message) {
         case MessageType::startScan: {
             if (taskCount == 0)
                 lastID = 0;
-            auto *const start = dynamic_cast<StartScanMessage*>(message);
+            auto *start = dynamic_cast<StartScanMessage*>(message);
             bool safe = true;
             while (scanTasks.contains(lastID)) {
                 lastID++;
@@ -213,7 +214,7 @@ void Controller::receivedMessage(PipeMessage *message) {
         }
         break;
         case MessageType::getResultList: {
-            GetResultList *get = dynamic_cast<GetResultList*>(message);
+            auto *get = dynamic_cast<GetResultList*>(message);
             if (get->getTaskID() == -1) {
                 if (connected) {
                     pipe->sendMessage(new ResultList(-1, watcher->getResults(), this));
@@ -244,14 +245,14 @@ void Controller::receivedMessage(PipeMessage *message) {
     message->deleteLater();
 }
 
-void Controller::sendObjectStatus(ObjectStatusMessage *message) {
+void Controller::sendObjectStatus(ObjectStatusMessage *message) const {
     pipe->sendMessage(message);
 }
 
-void Controller::sendLostStatus(LostWatchMessage *message) {
+void Controller::sendLostStatus(LostWatchMessage *message) const {
     pipe->sendMessage(message);
 }
 
-void Controller::sendScanStatus(ScanStatusMessage *message) {
+void Controller::sendScanStatus(ScanStatusMessage *message) const {
     pipe->sendMessage(message);
 }

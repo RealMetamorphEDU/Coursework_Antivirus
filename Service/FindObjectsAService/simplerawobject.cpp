@@ -1,5 +1,4 @@
 #include "simplerawobject.h"
-#include <QFile>
 #include <QFileInfo>
 #include "qfileinputstream.h"
 #include <iostream>

@@ -6,10 +6,7 @@
 
 AServiceLog::AServiceLog(const QString &serviceName, QObject *parent): QObject(parent) {
     currentLevel = Level::INFO;
-    strings[0] = nullptr;
-    strings[1] = nullptr;
-    strings[2] = nullptr;
-    hEventLog = RegisterEventSourceA(NULL, serviceName.toStdString().c_str());
+    hEventLog = RegisterEventSourceA(nullptr, serviceName.toStdString().c_str());
 }
 
 AServiceLog::~AServiceLog() {
@@ -29,11 +26,11 @@ void AServiceLog::printLog(const QString &tag, const QString &message, Level lev
                       sysLevel,                        // event type
                       tag.toLower() == "scan" ? 1 : 0, // event category
                       getEventIdentifier(sysLevel),    // event identifier
-                      0,                               // security identifier
+                      nullptr,                         // security identifier
                       3,                               // size of strings array
                       0,                               // no binary data
                       strings,                         // array of strings
-                      NULL))                           // no binary data
+                      nullptr))                        // no binary data
     emit catchError(GetLastError());
 }
 
@@ -48,6 +45,7 @@ WORD AServiceLog::getSystemLevel(Level level) {
         case Level::CRITICAL:
             return EVENTLOG_ERROR_TYPE;
     }
+    return 0;
 }
 
 DWORD AServiceLog::getEventIdentifier(WORD level) {
@@ -58,6 +56,8 @@ DWORD AServiceLog::getEventIdentifier(WORD level) {
             return WARNING_MESSAGE;
         case EVENTLOG_ERROR_TYPE:
             return ERROR_MESSAGE;
+        default:
+            return 0;
     }
 }
 
@@ -72,35 +72,36 @@ const char* AServiceLog::getLevelName(Level level) {
         case Level::CRITICAL:
             return "CRITICAL";
     }
+    return nullptr;
 }
 
 
 bool AServiceLog::registerSource(const QString &source) {
 
-    QString regPath = "SYSTEM\\CurrentControlSet\\Services\\Eventlog\\";
+    QString regPath = R"(SYSTEM\CurrentControlSet\Services\Eventlog\)";
     regPath.append(source);
     regPath.append("\\");
     regPath.append(source);
     DWORD dwResult = 0;
-    HKEY hKey = NULL;
-    LONG lRet = RegCreateKeyExA(HKEY_LOCAL_MACHINE, regPath.toStdString().c_str(), 0, NULL,
-                                REG_OPTION_NON_VOLATILE, KEY_ALL_ACCESS, NULL, &hKey, &dwResult);
+    HKEY hKey = nullptr;
+    LONG lRet = RegCreateKeyExA(HKEY_LOCAL_MACHINE, regPath.toStdString().c_str(), 0, nullptr,
+                                REG_OPTION_NON_VOLATILE, KEY_ALL_ACCESS, nullptr, &hKey, &dwResult);
 
     if (lRet == ERROR_SUCCESS) {
 
         QFileInfo info("AMessageLogger.dll");
 
         RegSetValueExA(hKey, "EventMessageFile", 0, REG_SZ,
-                       (byte*) info.canonicalFilePath().toStdString().c_str(),
+                       reinterpret_cast<const BYTE*>(info.canonicalFilePath().toStdString().c_str()),
                        info.canonicalFilePath().toStdString().length());
         DWORD dwSupportedTypes = EVENTLOG_ERROR_TYPE |
                                  EVENTLOG_WARNING_TYPE |
                                  EVENTLOG_INFORMATION_TYPE;
         DWORD catCount = 2;
         RegSetValueExA(hKey, "TypesSupported", 0, REG_DWORD,
-                       (const BYTE*) &dwSupportedTypes, sizeof(DWORD));
+                       reinterpret_cast<const BYTE*>(&dwSupportedTypes), sizeof(DWORD));
         RegSetValueExA(hKey, "CategoryCount", 0, REG_DWORD,
-                       (const BYTE*) &catCount, sizeof(DWORD));
+                       reinterpret_cast<const BYTE*>(&catCount), sizeof(DWORD));
 
         RegCloseKey(hKey);
         return true;
@@ -108,10 +109,9 @@ bool AServiceLog::registerSource(const QString &source) {
     return false;
 }
 
-bool AServiceLog::unregisterSource(const QString &source) {
-    QString regPath = "SYSTEM\\CurrentControlSet\\Services\\Eventlog\\";
+bool AServiceLog::doUnregisteredSource(const QString &source) {
+    QString regPath = R"(SYSTEM\CurrentControlSet\Services\Eventlog\)";
     regPath.append(source);
-    DWORD dwResult = 0;
     LONG lRet = RegDeleteKeyA(HKEY_LOCAL_MACHINE, regPath.toStdString().c_str());
     if (lRet == ERROR_SUCCESS)
         return true;

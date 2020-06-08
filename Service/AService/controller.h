@@ -9,8 +9,6 @@
 #include "scantask.h"
 #include <Windows.h>
 #include <QHash>
-#include "aserviceevents.h"
-
 
 class Controller: public QObject {
 Q_OBJECT
@@ -34,13 +32,13 @@ public:
 
     bool event(QEvent *event) override;
 
-    bool isBreak();
+    bool isBreak() const;
 private slots:
     void connectUpdate(bool connected);
     void receivedMessage(PipeMessage *message);
-    void sendObjectStatus(ObjectStatusMessage *message);
-    void sendLostStatus(LostWatchMessage *message);
-    void sendScanStatus(ScanStatusMessage *message);
+    void sendObjectStatus(ObjectStatusMessage *message) const;
+    void sendLostStatus(LostWatchMessage *message) const;
+    void sendScanStatus(ScanStatusMessage *message) const;
 };
 
 #endif // CONTROLLER_H

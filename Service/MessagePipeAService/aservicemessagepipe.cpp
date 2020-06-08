@@ -8,11 +8,11 @@ void AServiceMessagePipe::reinit() {
         CloseHandle(writePipe);
         writePipe = CreateNamedPipeA(writeName.toStdString().c_str(),PIPE_ACCESS_OUTBOUND | FILE_FLAG_OVERLAPPED,
                                      PIPE_TYPE_MESSAGE | PIPE_READMODE_MESSAGE,
-                                     1, 8192, 8192, 5000, NULL);
+                                     1, 8192, 8192, 5000, nullptr);
         if (writePipe == INVALID_HANDLE_VALUE) {
             writePipe = CreateNamedPipeA(readName.toStdString().c_str(), PIPE_ACCESS_OUTBOUND | FILE_FLAG_OVERLAPPED,
                                          PIPE_TYPE_MESSAGE | PIPE_READMODE_MESSAGE,
-                                         1, 8192, 8192, 5000, NULL);
+                                         1, 8192, 8192, 5000, nullptr);
             first = false;
         } else {
             first = true;
@@ -21,10 +21,10 @@ void AServiceMessagePipe::reinit() {
 }
 
 AServiceMessagePipe::AServiceMessagePipe(const QString &pipeName, QObject *parent) : QObject(parent) {
-    requestEvent = CreateEventA(NULL, FALSE, FALSE, NULL);
+    requestEvent = CreateEventA(nullptr, FALSE, FALSE, nullptr);
     writeName = "";
     readName = "";
-    readPipe = NULL;
+    readPipe = nullptr;
     brek = false;
     writeName.append(R"(\\.\pipe\ASMP_)").append(pipeName).append("_1");
     readName.append(R"(\\.\pipe\ASMP_)").append(pipeName).append("_2");
@@ -32,11 +32,11 @@ AServiceMessagePipe::AServiceMessagePipe(const QString &pipeName, QObject *paren
     connected = false;
     writePipe = CreateNamedPipeA(writeName.toStdString().c_str(),PIPE_ACCESS_OUTBOUND | FILE_FLAG_OVERLAPPED,
                                  PIPE_TYPE_MESSAGE | PIPE_READMODE_MESSAGE,
-                                 1, 8192, 8192, 5000, NULL);
+                                 1, 8192, 8192, 5000, nullptr);
     if (writePipe == INVALID_HANDLE_VALUE) {
         writePipe = CreateNamedPipeA(readName.toStdString().c_str(), PIPE_ACCESS_OUTBOUND | FILE_FLAG_OVERLAPPED,
                                      PIPE_TYPE_MESSAGE | PIPE_READMODE_MESSAGE,
-                                     1, 8192, 8192, 5000, NULL);
+                                     1, 8192, 8192, 5000, nullptr);
         if (writePipe == INVALID_HANDLE_VALUE) {
             brek = true;
             return;
@@ -68,11 +68,11 @@ AServiceMessagePipe::~AServiceMessagePipe() {
     CloseHandle(requestEvent);
 }
 
-bool AServiceMessagePipe::isConnected() {
+bool AServiceMessagePipe::isConnected() const {
     return connected;
 }
 
-bool AServiceMessagePipe::isBreak() {
+bool AServiceMessagePipe::isBreak() const {
     return brek;
 }
 
@@ -80,7 +80,7 @@ void AServiceMessagePipe::sendMessage(PipeMessage *message) {
     if (reader != nullptr && connected) {
         QByteArray msg = message->toByteArray();
         DWORD bytesWritten;
-        boolean status = WriteFile(writePipe, msg.data(), msg.size(), &bytesWritten, NULL);
+        boolean status = WriteFile(writePipe, msg.data(), msg.size(), &bytesWritten, nullptr);
         if (!status) {
             emit catchError(GetLastError());
         } else

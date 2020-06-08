@@ -11,10 +11,10 @@ DataRegion::DataRegion(qint64 regionSize, int objectOffset) {
     this->objectOffset = objectOffset;
 }
 
-qint64 DataRegion::getRegionSize() {
+qint64 DataRegion::getRegionSize() const {
     return regionSize;
 }
 
-int DataRegion::getObjectOffset() {
+int DataRegion::getObjectOffset() const {
     return objectOffset;
 }

@@ -3,10 +3,7 @@
 
 #include <QObject>
 #include <Windows.h>
-#include <QEvent>
-#include <QDirIterator>
 #include <QDebug>
-#include "aserviceevents.h"
 
 struct FindRequest {
     QString path;

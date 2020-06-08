@@ -8,7 +8,7 @@
 #include "ui_mainwindow.h"
 #include <QtConcurrent/QtConcurrent>
 
-void MainWindow::disableButtons(bool yes) {
+void MainWindow::disableButtons(bool yes) const {
     ui->addButton->setDisabled(yes);
     ui->editButton->setDisabled(yes);
     ui->delButton->setDisabled(yes);
@@ -119,7 +119,7 @@ void MainWindow::showOpenDialog() {
     fileDialog.setNameFilter("ADB file (*.adb)");
     if (fileDialog.exec()) {
         QStringList list = fileDialog.selectedFiles();
-        if (list.size() == 0)
+        if (list.empty())
             return;
         recordView->clear();
         tokenizer.close();

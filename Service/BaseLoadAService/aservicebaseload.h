@@ -27,7 +27,7 @@ public:
 
     int loadStorage(const QString &storageName, const QString &filepath);
     int appendStorage(const QString &storageName,const QString &filepath);
-    SignatureStorage* getStorage(const QString &storageName);
+    SignatureStorage* getStorage(const QString &storageName) const;
     void removeStorage(const QString &storageName);
 };
 

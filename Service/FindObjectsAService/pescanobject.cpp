@@ -16,7 +16,7 @@ int PEScanObject::getRegionsCount() {
 
 DataRegion PEScanObject::getRegion(int index) {
 	if (regions.size() <= index || index < 0)
-		return DataRegion(0, 0);
+		return {0, 0};
 	return regions.at(index);
 }
 

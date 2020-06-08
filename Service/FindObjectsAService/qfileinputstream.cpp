@@ -5,7 +5,7 @@ std::basic_streambuf<char>::int_type QFileInputStream::pbackfail(int_type input)
     if (file->seek(file->pos() - 1)) {
         if(file->peek(&c, 1) != 1)
             return traits_type::eof();
-        if(((int_type)c) != input)
+        if(static_cast<int_type>(c) != input)
             return traits_type::eof();
         return input;
     }

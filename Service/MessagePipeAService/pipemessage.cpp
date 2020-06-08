@@ -248,7 +248,7 @@ int PauseScanMessage::getTaskIndex() const {
     return taskIndex;
 }
 
-bool PauseScanMessage::getPause() {
+bool PauseScanMessage::getPause() const {
     return pause;
 }
 
@@ -344,7 +344,7 @@ ObjectStatusMessage::ObjectStatusMessage(int taskID, bool infected, bool brek, c
     this->infection = infection;
 }
 
-int ObjectStatusMessage::getTaskId() {
+int ObjectStatusMessage::getTaskId() const {
     return taskID;
 }
 
@@ -390,7 +390,7 @@ GetResultList::GetResultList(int taskID, QObject *parent) : PipeMessage(parent) 
     this->taskID = taskID;
 }
 
-int GetResultList::getTaskID() {
+int GetResultList::getTaskID() const {
     return taskID;
 }
 
@@ -406,7 +406,7 @@ ResultList::ResultList(int taskID, const QVector<Result> &results, QObject *pare
     this->taskID = taskID;
 }
 
-int ResultList::getTaskID() {
+int ResultList::getTaskID() const {
     return taskID;
 }
 

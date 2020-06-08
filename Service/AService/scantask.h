@@ -29,13 +29,13 @@ public:
                       QObject *parent = nullptr);
 
     void setPause(bool pause);
-    const QVector<Result>& getResults();
+    const QVector<Result>& getResults() const;
 private slots:
     void timeout();
     void foundScanObject(ScanObject *scanObject);
-    void cantBuildThis(QString filepath, QString reason);
-    void uninfected(QString filename);
-    void infectedBy(QString filename, QString signatureName);
+    void cantBuildThis(const QString &filepath, const QString &reason);
+    void uninfected(const QString &filename);
+    void infectedBy(const QString &filename, const QString &signatureName);
 signals:
     void sendObjectStatus(ObjectStatusMessage *message);
     void sendScanStatus(ScanStatusMessage *message);

@@ -1,9 +1,11 @@
 #include "aservicefindobjects.h"
 #include "builder.h"
 #include <QThread>
+#include "aserviceevents.h"
+
 
 AServiceFindObjects::AServiceFindObjects(QObject *parent) : QObject(parent) {
-    requestEvent = CreateEventA(NULL, FALSE, FALSE, NULL);
+    requestEvent = CreateEventA(nullptr, FALSE, FALSE, nullptr);
     thread = new QThread(this);
     builder = new Builder(requestEvent);
     builder->moveToThread(thread);
@@ -23,16 +25,16 @@ AServiceFindObjects::~AServiceFindObjects() {
     CloseHandle(requestEvent);
 }
 
-void AServiceFindObjects::findObjects(QString filepath) {
+void AServiceFindObjects::findObjects(const QString &filepath) const {
     QCoreApplication::postEvent(builder, new FindEvent(filepath));
     SetEvent(requestEvent);
 }
 
-void AServiceFindObjects::setPause(bool pause) {
+void AServiceFindObjects::setPause(bool pause) const {
     QCoreApplication::postEvent(builder, new PauseEvent(pause));
     SetEvent(requestEvent);
 }
 
-void AServiceFindObjects::updateEvents() {
+void AServiceFindObjects::updateEvents() const {
     SetEvent(requestEvent);
 }

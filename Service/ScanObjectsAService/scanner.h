@@ -2,13 +2,10 @@
 #define SCANNER_H
 
 #include <QObject>
-#include <QEvent>
 #include <Windows.h>
 #include "scanobject.h"
 #include "signaturestorage.h"
-#include "signaturerecord.h"
 #include <QCoreApplication>
-#include "aserviceevents.h"
 
 class Scanner: public QObject {
 Q_OBJECT

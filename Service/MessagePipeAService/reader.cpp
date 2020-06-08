@@ -10,7 +10,7 @@ Reader::Reader(AServiceMessagePipe *root) : QObject(nullptr) {
     overlapped = new OVERLAPPED;
     overlapped->Offset = 0;
     overlapped->OffsetHigh = 0;
-    overlapped->hEvent = CreateEventA(NULL,FALSE,FALSE,NULL);
+    overlapped->hEvent = CreateEventA(nullptr,FALSE,FALSE, nullptr);
     events[1] = overlapped->hEvent;
     working = true;
 }
@@ -30,15 +30,15 @@ void Reader::reading() {
                 if (root->connected) {
                     emit connectUpdate(root->connected);
                     QCoreApplication::processEvents();
-                    root->readPipe = CreateFileA(root->readName.toStdString().c_str(), GENERIC_READ, 0, NULL,
+                    root->readPipe = CreateFileA(root->readName.toStdString().c_str(), GENERIC_READ, 0, nullptr,
                                                  OPEN_EXISTING,
                                                  0,
-                                                 NULL);
+                                                 nullptr);
                 }
             } else {
-                root->readPipe = CreateFileA(root->writeName.toStdString().c_str(), GENERIC_READ, 0, NULL,
+                root->readPipe = CreateFileA(root->writeName.toStdString().c_str(), GENERIC_READ, 0, nullptr,
                                              OPEN_EXISTING, 0,
-                                             NULL);
+                                             nullptr);
                 ConnectNamedPipe(root->writePipe, overlapped);
                 root->connected = WaitForMultipleObjects(2, events, FALSE, INFINITE) - WAIT_OBJECT_0;
                 if (root->connected) {
@@ -49,7 +49,7 @@ void Reader::reading() {
             }
             continue;
         }
-        ReadFile(root->readPipe, NULL, 0, NULL, NULL);
+        ReadFile(root->readPipe, nullptr, 0, nullptr, nullptr);
         if (GetLastError() == ERROR_BROKEN_PIPE) {
             root->connected = false;
             DisconnectNamedPipe(root->writePipe);
@@ -61,11 +61,11 @@ void Reader::reading() {
             continue;
         }
         DWORD messageSize = 0;
-        PeekNamedPipe(root->readPipe, NULL, NULL, NULL, NULL, &messageSize);
+        PeekNamedPipe(root->readPipe, nullptr, 0, nullptr, nullptr, &messageSize);
         if (messageSize > 0) {
             QByteArray ba(messageSize, 0);
             DWORD bytesRead = 0;
-            bool status = ReadFile(root->readPipe, ba.data(), messageSize, &bytesRead, NULL);
+            bool status = ReadFile(root->readPipe, ba.data(), messageSize, &bytesRead, nullptr);
             if (status) {
                 PipeMessage *message = PipeMessage::parseByteArray(ba, this);
                 if (message != nullptr) {

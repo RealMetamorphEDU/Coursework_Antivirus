@@ -13,7 +13,7 @@ public:
     explicit ScanResultStorage(QObject *parent = nullptr);
 
     void addResult(const Result &result);
-    const QVector<Result>& getResults();
+    const QVector<Result>& getResults() const;
 };
 
 #endif // SCANRESULTSTORAGE_H

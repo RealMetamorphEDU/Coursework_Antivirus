@@ -1,12 +1,12 @@
 #include "aservicefileseeker.h"
 #include "seeker.h"
-#include "QEvent"
 #include <Windows.h>
 #include <QCoreApplication>
 #include <QThread>
+#include "aserviceevents.h"
 
 AServiceFileSeeker::AServiceFileSeeker(QObject *parent): QObject(parent) {
-    requestEvent = CreateEventA(NULL, FALSE, FALSE, NULL);
+    requestEvent = CreateEventA(nullptr, FALSE, FALSE, nullptr);
     seeker = new Seeker(requestEvent);
     thread = new QThread(this);
     seeker->moveToThread(thread);
@@ -25,7 +25,7 @@ AServiceFileSeeker::~AServiceFileSeeker() {
     CloseHandle(requestEvent);
 }
 
-void AServiceFileSeeker::findFiles(QString dirpath, QString pattern, bool recursive) {
+void AServiceFileSeeker::findFiles(const QString &dirpath, const QString &pattern, bool recursive) const {
     QCoreApplication::postEvent(seeker, new RequestEvent(dirpath, pattern, recursive));
     SetEvent(requestEvent);
 }

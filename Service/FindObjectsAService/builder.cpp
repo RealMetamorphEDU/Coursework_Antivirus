@@ -1,4 +1,5 @@
 #include "builder.h"
+#include "aserviceevents.h"
 #include "simplerawobject.h"
 #include "zipscanbuilder.h"
 #include "pescanbuilder.h"
@@ -18,11 +19,12 @@ void Builder::initBuilders() {
 Builder::Builder(HANDLE updateEvent, QObject *parent) : QObject(parent) {
     this->updateEvent = updateEvent;
     working = false;
+    pause = false;
     initBuilders();
 }
 
 bool Builder::event(QEvent *event) {
-    switch ((events) event->type()) {
+    switch (static_cast<events>(event->type())) {
         case findObjectsType:
             FindEvent *find;
             find = dynamic_cast<FindEvent*>(event);
@@ -36,8 +38,9 @@ bool Builder::event(QEvent *event) {
         case stopType:
             working = false;
             return true;
+        default:
+            return QObject::event(event);
     }
-    return QObject::event(event);
 }
 
 void Builder::building() {
@@ -78,5 +81,3 @@ void Builder::building() {
 void Builder::addRawObject(RawObject *rawObject) {
     rawObjects.push_back(rawObject);
 }
-
-

@@ -24,10 +24,10 @@ public:
     AServiceFindObjects(QObject *parent = nullptr);
     ~AServiceFindObjects();
 public slots:
-    void findObjects(QString filepath);
-    void setPause(bool pause);
+    void findObjects(const QString &filepath) const;
+    void setPause(bool pause) const;
 private slots:
-    void updateEvents();
+    void updateEvents() const;
 signals:
     void foundScanObject(ScanObject *scanObject);
     void cantBuildThis(QString filepath, QString reason);

@@ -21,12 +21,12 @@ void ZipScanBuilder::buildThis(std::shared_ptr<RawObject> &rawObject) {
     if (stream == nullptr)
         return;
     ZipArchive::Ptr archive = ZipArchive::Create(stream, false);
-    size_t count = archive->GetEntriesCount();
+    int count = archive->GetEntriesCount();
     if (count > 0) {
         for (int i = 0; i < count; ++i) {
             ZipArchiveEntry::Ptr entry = archive->GetEntry(i);
-            ZipRawObject *raw = new ZipRawObject(rawObject, rawObject->getFullName(), archive, entry,
-                                                 rawObject.get());
+            auto *raw = new ZipRawObject(rawObject, rawObject->getFullName(), archive, entry,
+                                         rawObject.get());
             emit builtRawObject(raw);
         }
     }

@@ -20,14 +20,14 @@ Q_OBJECT
 public:
     explicit WatchTask(SignatureStorage *storage, QObject *parent = nullptr);
     bool addPath(const QString &path);
-    const QVector<QString>& getPaths();
+    const QVector<QString>& getPaths() const;
     bool removePath(const QString &path);
     void setPause(bool pause);
-    const QVector<Result>& getResults();
+    const QVector<Result>& getResults() const;
 private slots:
-    void changeNotify(QString filepath, ChangeType type);
-    void infectedBy(QString filename, QString signatureName);
-    void cantBuildThis(QString filepath, QString reason);
+    void changeNotify(const QString &filepath, ChangeType type);
+    void infectedBy(const QString &filename, const QString &signatureName);
+    void cantBuildThis(const QString &filepath, const QString &reason);
 signals:
     void sendObjectStatus(ObjectStatusMessage *message);
     void sendLostStatus(LostWatchMessage *message);

@@ -1,9 +1,10 @@
 #include "aservicescanobjects.h"
 #include "scanner.h"
 #include <QThread>
+#include "aserviceevents.h"
 
 AServiceScanObjects::AServiceScanObjects(SignatureStorage *storage, QObject *parent): QObject(parent) {
-    requestEvent = CreateEventA(NULL, FALSE, FALSE, NULL);
+    requestEvent = CreateEventA(nullptr, FALSE, FALSE, nullptr);
     thread = new QThread(this);
     scanner = new Scanner(requestEvent, storage, storage->startSearch());
     scanner->moveToThread(thread);
@@ -24,12 +25,12 @@ AServiceScanObjects::~AServiceScanObjects() {
     CloseHandle(requestEvent);
 }
 
-void AServiceScanObjects::setPause(bool pause) {
+void AServiceScanObjects::setPause(bool pause) const {
     QCoreApplication::postEvent(scanner, new PauseEvent(pause));
     SetEvent(requestEvent);
 }
 
-void AServiceScanObjects::scanScanObject(ScanObject *scanObject) {
+void AServiceScanObjects::scanScanObject(ScanObject *scanObject) const {
     QCoreApplication::postEvent(scanner, new ScanEvent(scanObject));
     SetEvent(requestEvent);
 }

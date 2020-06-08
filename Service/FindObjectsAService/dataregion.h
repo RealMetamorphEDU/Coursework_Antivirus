@@ -10,8 +10,8 @@ public:
     DataRegion();
     DataRegion(qint64 regionSize, int objectOffset);
 
-    qint64 getRegionSize();
-    int getObjectOffset();
+    qint64 getRegionSize() const;
+    int getObjectOffset() const;
 };
 
 #endif // DATAREGION_H

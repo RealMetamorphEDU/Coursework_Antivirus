@@ -19,7 +19,7 @@ public:
 	~AServiceFileSeeker();
 
 public slots:
-	void findFiles(QString dirpath, QString pattern, bool recursive);
+	void findFiles(const QString &dirpath, const QString &pattern, bool recursive) const;
 signals:
 	void foundFile(QString filepath);
 };

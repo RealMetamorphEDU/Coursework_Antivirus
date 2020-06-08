@@ -4,6 +4,7 @@
 #include <QCoreApplication>
 #include "aservicelog.h"
 #include "controller.h"
+#include "aserviceevents.h"
 
 char SERVICE_NAME[]{"AService"};
 char DISPLAY_NAME[]{"AntivirusService"};
@@ -28,8 +29,8 @@ void main(int argc, char *argv[]) {
     } else {
         // Создаём точку входа сервиса
         SERVICE_TABLE_ENTRYA entryTable[2]; // entry point for service
-        entryTable[0] = {SERVICE_NAME, (LPSERVICE_MAIN_FUNCTIONA) serviceMain};
-        entryTable[1] = {NULL, NULL};
+        entryTable[0] = {SERVICE_NAME, LPSERVICE_MAIN_FUNCTIONA(serviceMain)};
+        entryTable[1] = {nullptr, nullptr};
         // Start control dispatcher
         logger = new AServiceLog(SERVICE_NAME);
         logger->setLevel(Level::INFO);
@@ -58,8 +59,8 @@ void WINAPI serviceMain(int argc, char *argv[]) {
     AServiceBaseLoader::initLoader(nullptr);
     controller = new Controller(logger, statusHandle, &app);
     if (!controller->isBreak()) {
-        app.connect(&app, &QCoreApplication::aboutToQuit, controller, &Controller::deleteLater);
-        app.exec();
+        QCoreApplication::connect(&app, &QCoreApplication::aboutToQuit, controller, &Controller::deleteLater);
+        QCoreApplication::exec();
     } else {
         delete controller;
     }
@@ -74,14 +75,14 @@ void WINAPI controlHandler(DWORD control) {
 
 void srvInstall() {
     QByteArray arr(MAX_PATH, 0);
-    GetModuleFileNameA(NULL, arr.data(), MAX_PATH);
+    GetModuleFileNameA(nullptr, arr.data(), MAX_PATH);
     QFileInfo info(arr);
     std::string path = QString("\"").append(info.canonicalFilePath()).append("\"").toStdString();
 
     // Get a handle to the SCM database. 
-    SC_HANDLE scManager = OpenSCManagerA(NULL, NULL,SC_MANAGER_CREATE_SERVICE | SC_MANAGER_MODIFY_BOOT_CONFIG);
+    SC_HANDLE scManager = OpenSCManagerA(nullptr, nullptr,SC_MANAGER_CREATE_SERVICE | SC_MANAGER_MODIFY_BOOT_CONFIG);
 
-    if (NULL == scManager) {
+    if (nullptr == scManager) {
         std::cerr << "OpenSCManager failed " << GetLastError() << ".\n";
         return;
     }
@@ -89,9 +90,9 @@ void srvInstall() {
     // Create the service
     SC_HANDLE service = CreateServiceA(scManager, SERVICE_NAME, DISPLAY_NAME, SERVICE_ALL_ACCESS,
                                        SERVICE_WIN32_OWN_PROCESS, SERVICE_DEMAND_START, SERVICE_ERROR_NORMAL,
-                                       path.c_str(), NULL, NULL,NULL,NULL,NULL);
+                                       path.c_str(), nullptr, nullptr, nullptr, nullptr, nullptr);
 
-    if (service == NULL) {
+    if (service == nullptr) {
         std::cerr << "CreateService failed with " << GetLastError() << ".\n";
         CloseServiceHandle(scManager);
         return;
@@ -106,7 +107,7 @@ void srvInstall() {
 
 void srvUninstall() {
     // Get a handle to the SCM database. 
-    SC_HANDLE scManager = OpenSCManagerA(NULL, NULL,
+    SC_HANDLE scManager = OpenSCManagerA(nullptr, nullptr,
                                          SC_MANAGER_CREATE_SERVICE | SC_MANAGER_ENUMERATE_SERVICE |
                                          SC_MANAGER_MODIFY_BOOT_CONFIG);
 
@@ -119,7 +120,7 @@ void srvUninstall() {
         std::cout << "service was successfully deleted." << std::endl;
     else
         std::cerr << "Error deleting the service" << std::endl;
-    if (AServiceLog::unregisterSource(SERVICE_NAME))
+    if (AServiceLog::doUnregisteredSource(SERVICE_NAME))
         std::cout << "Log was successfully unregistered." << std::endl;
     CloseHandle(service);
     CloseHandle(scManager);
