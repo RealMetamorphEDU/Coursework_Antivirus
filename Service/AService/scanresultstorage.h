@@ -4,14 +4,16 @@
 #include <QObject>
 #include <QStringList>
 
+#include <pipemessage.h>
+
 class ScanResultStorage: public QObject {
 Q_OBJECT
-    QStringList results;
+    QVector<Result> results;
 public:
     explicit ScanResultStorage(QObject *parent = nullptr);
 
-    void addResultString(QString &result);
-    QStringList getResults();
+    void addResult(const Result &result);
+    const QVector<Result>& getResults();
 };
 
 #endif // SCANRESULTSTORAGE_H

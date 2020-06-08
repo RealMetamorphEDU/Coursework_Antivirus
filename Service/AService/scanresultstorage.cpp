@@ -1,11 +1,11 @@
 #include "scanresultstorage.h"
 
-ScanResultStorage::ScanResultStorage(QObject *parent) : QObject(parent) {}
+ScanResultStorage::ScanResultStorage(QObject *parent) : QObject(parent) { }
 
-void ScanResultStorage::addResultString(QString &result) {
+void ScanResultStorage::addResult(const Result &result) {
     results.append(result);
 }
 
-QStringList ScanResultStorage::getResults() {
+const QVector<Result>& ScanResultStorage::getResults() {
     return results;
 }

@@ -31,6 +31,18 @@ Controller::Controller(AServiceLog *logger, SERVICE_STATUS_HANDLE handle, QObjec
     SetServiceStatus(statusHandle, &status);
     innerName = "AntivirusService";
     this->pipe = new AServiceMessagePipe(innerName, this);
+    if (pipe->isBreak()) {
+        brek = true;
+        status.dwCurrentState = SERVICE_STOP_PENDING;
+        status.dwControlsAccepted = 0;
+        status.dwWaitHint = 20000;
+        status.dwWin32ExitCode = -1;
+        status.dwServiceSpecificExitCode = -1;
+        status.dwCheckPoint++;
+        SetServiceStatus(statusHandle, &status);
+        logger->critical("CONTROLLER", "Can't create pipe.");
+        return;
+    }
     loader = AServiceBaseLoader::getInstance();
     status.dwWaitHint = 15000;
     if (!loadBase()) {
@@ -53,6 +65,7 @@ Controller::Controller(AServiceLog *logger, SERVICE_STATUS_HANDLE handle, QObjec
     connect(watcher, &WatchTask::sendObjectStatus, this, &Controller::sendObjectStatus);
     this->connected = pipe->isConnected();
     taskCount = 0;
+    lastID = 0;
     logger->info("CONTROLLER", "Initialization completed.");
     status.dwCheckPoint = 0;
     status.dwCurrentState = SERVICE_RUNNING;
@@ -103,21 +116,27 @@ void Controller::connectUpdate(bool connected) {
 void Controller::receivedMessage(PipeMessage *message) {
     switch (message->getType()) {
         case MessageType::startScan: {
-            auto start = dynamic_cast<StartScanMessage*>(message);
-            QString obj = start->getObjectPath();
-            auto *task = new ScanTask(taskCount++, &taskCount, loader->getStorage(innerName), obj, pipe);
-            scanTasks.append(task);
+            if (taskCount == 0)
+                lastID = 0;
+            auto *const start = dynamic_cast<StartScanMessage*>(message);
+            while (scanTasks.contains(lastID)) {
+                lastID++;
+            }
+            if (lastID < 0) {
+                lastID = 0;
+                break;
+            }
+            taskCount++;
+            auto *task = new ScanTask(lastID, &taskCount, loader->getStorage(innerName), start->getObjectPath(), pipe);
+            scanTasks.insert(lastID, task);
         }
         break;
         case MessageType::stopScan: {
             auto *stop = dynamic_cast<StopScanMessage*>(message);
-            if (stop->getTaskIndex() > -1 || stop->getTaskIndex() < scanTasks.count()) {
-                ScanTask *task = scanTasks.takeAt(stop->getTaskIndex());
-                for (int i = stop->getTaskIndex(); i < scanTasks.count(); ++i) {
-                    scanTasks.at(i)->setTaskID(i);
-                }
-                taskCount--;
+            if (scanTasks.contains(stop->getTaskIndex())) {
+                ScanTask *task = scanTasks.take(stop->getTaskIndex());
                 delete task;
+                taskCount--;
                 if (connected) {
                     pipe->sendMessage(new StopScanMessage(stop->getTaskIndex(), this));
                 }
@@ -126,8 +145,8 @@ void Controller::receivedMessage(PipeMessage *message) {
         break;
         case MessageType::pauseScan: {
             auto *pause = dynamic_cast<PauseScanMessage*>(message);
-            if (pause->getTaskIndex() > -1 || pause->getTaskIndex() < scanTasks.count()) {
-                scanTasks.at(pause->getTaskIndex())->setPause(pause->getPause());
+            if (scanTasks.contains(pause->getTaskIndex())) {
+                scanTasks.value(pause->getTaskIndex())->setPause(pause->getPause());
             }
         }
         break;
@@ -174,17 +193,21 @@ void Controller::receivedMessage(PipeMessage *message) {
         break;
         case MessageType::getResultList: {
             GetResultList *get = dynamic_cast<GetResultList*>(message);
-            QStringList list;
             if (get->getTaskID() == -1) {
                 if (connected) {
-                    list = watcher->getResults();
-                    pipe->sendMessage(new ResultList(-1, list, this));
+                    pipe->sendMessage(new ResultList(-1, watcher->getResults(), this));
                 }
-            } else if (get->getTaskID() > -1 || get->getTaskID() < scanTasks.count()) {
+            } else if (scanTasks.contains(get->getTaskID())) {
                 if (connected) {
-                    list = scanTasks.at(get->getTaskID())->getResults();
-                    pipe->sendMessage(new ResultList(get->getTaskID(), list, this));
+                    pipe->sendMessage(new ResultList(get->getTaskID(), scanTasks.value(get->getTaskID())->getResults(),
+                                                     this));
                 }
+            }
+        }
+        break;
+        case MessageType::getIndexes: {
+            if (connected) {
+                pipe->sendMessage(new IndexesList(scanTasks.keys().toVector(), this));
             }
         }
         break;

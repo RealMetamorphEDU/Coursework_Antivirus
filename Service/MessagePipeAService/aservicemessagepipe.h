@@ -20,6 +20,7 @@ Q_OBJECT
     QThread *thread;
     bool first;
     bool connected;
+    bool brek;
 
     void reinit();
 
@@ -28,6 +29,7 @@ public:
     AServiceMessagePipe(QString &pipeName, QObject *parent = nullptr);
     ~AServiceMessagePipe();
     bool isConnected();
+    bool isBreak();
 public slots:
     void sendMessage(PipeMessage *message);
 signals:

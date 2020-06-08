@@ -2,9 +2,11 @@
 #define SCANSTATUSLIST_H
 
 #include <QObject>
+#include <QHash>
 
 struct ScanStatus {
     bool scanning;
+    int taskID;
     QString lastObject;
     int objLeft;
     int objScanned;
@@ -13,14 +15,16 @@ struct ScanStatus {
 
 class ScanStatusList: public QObject {
 Q_OBJECT
-    QVector<ScanStatus> statuses;
+    QHash<int, ScanStatus> statuses;
+    QVector<int> keys;
 public:
     explicit ScanStatusList(QObject *parent = nullptr);
 
-    void updateScanStatus(int taskID, const ScanStatus &status);
+    void updateScanStatus(const ScanStatus &status);
     void removeScanStatus(int taskID);
-    const ScanStatus& getStatus(int row);
-    int getCount();
+    ScanStatus getStatus(int taskID) const;
+    ScanStatus getRow(int row) const;
+    int getCount() const;
 signals:
     void beginInsertRow(int row);
     void beginRemovRow(int row);

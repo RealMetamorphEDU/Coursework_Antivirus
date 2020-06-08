@@ -2,6 +2,16 @@
 #include <QBuffer>
 #include <QDataStream>
 
+QDataStream& operator <<(QDataStream &stream, const Result &result) {
+    stream << result.objectName << result.infectionReason << result.infected << result.brek;
+    return stream;
+}
+
+QDataStream& operator >>(QDataStream &stream, Result &result) {
+    stream >> result.objectName >> result.infectionReason >> result.infected >> result.brek;
+    return stream;
+}
+
 PipeMessage::PipeMessage(QObject *parent) : QObject(parent) {}
 
 PipeMessage* PipeMessage::parseByteArray(QByteArray array, QObject *parent) {
@@ -20,10 +30,9 @@ PipeMessage* PipeMessage::parseByteArray(QByteArray array, QObject *parent) {
             return new ScanStatusMessage(scanning, taskIndex, taskCount, lastObject, objLeft, objScanned, parent);
         }
         case MessageType::startScan: {
-            QString objectPath;
-            bool file;
-            stream >> objectPath >> file;
-            return new StartScanMessage(objectPath, file, parent);
+            QStringList objectPath;
+            stream >> objectPath;
+            return new StartScanMessage(objectPath, parent);
         }
         case MessageType::stopScan: {
             int taskIndex;
@@ -78,9 +87,17 @@ PipeMessage* PipeMessage::parseByteArray(QByteArray array, QObject *parent) {
         }
         case MessageType::resultList: {
             int taskID;
-            QStringList results;
+            QVector<Result> results;
             stream >> taskID >> results;
             return new ResultList(taskID, results, parent);
+        }
+        case MessageType::getIndexes: {
+            return new GetIndexes(parent);
+        }
+        case MessageType::indexesList: {
+            QVector<int> results;
+            stream >> results;
+            return new IndexesList(results);
         }
         default:
             return nullptr;
@@ -143,6 +160,14 @@ MessageType ResultList::getType() {
     return MessageType::resultList;
 }
 
+MessageType GetIndexes::getType() {
+    return MessageType::getIndexes;
+}
+
+MessageType IndexesList::getType() {
+    return MessageType::indexesList;
+}
+
 ScanStatusMessage::ScanStatusMessage(bool scanning, int taskIndex, int taskCount, const QString &lastObject,
                                      int objLeft, int objScanned, QObject *parent): PipeMessage(parent) {
     this->scanning = scanning;
@@ -184,24 +209,19 @@ int ScanStatusMessage::getTaskCount() const {
     return taskCount;
 }
 
-StartScanMessage::StartScanMessage(const QString &objectPath, bool file, QObject *parent) : PipeMessage(parent) {
+StartScanMessage::StartScanMessage(const QStringList &objectPath, QObject *parent) : PipeMessage(parent) {
     this->objectPath = objectPath;
-    this->file = file;
 }
 
 QByteArray StartScanMessage::toByteArray() {
     QByteArray array;
     QDataStream stream(&array, QIODevice::WriteOnly);
-    stream << getType() << objectPath << file;
+    stream << getType() << objectPath;
     return array;
 }
 
-QString StartScanMessage::getObjectPath() const {
+const QStringList& StartScanMessage::getObjectPath() const {
     return objectPath;
-}
-
-bool StartScanMessage::isFile() const {
-    return file;
 }
 
 StopScanMessage::StopScanMessage(int taskIndex, QObject *parent) : PipeMessage(parent) {
@@ -314,7 +334,8 @@ QByteArray StopDirectoryMonitoringMessage::toByteArray() {
     return array;
 }
 
-ObjectStatusMessage::ObjectStatusMessage(int taskID, bool infected, bool brek, QString &path, QString &infection,
+ObjectStatusMessage::ObjectStatusMessage(int taskID, bool infected, bool brek, const QString &path,
+                                         const QString &infection,
                                          QObject *parent) : PipeMessage(parent) {
     this->taskID = taskID;
     this->infected = infected;
@@ -350,7 +371,7 @@ QByteArray ObjectStatusMessage::toByteArray() {
     return array;
 }
 
-LostWatchMessage::LostWatchMessage(QString &path, QObject *parent) : PipeMessage(parent) {
+LostWatchMessage::LostWatchMessage(const QString &path, QObject *parent) : PipeMessage(parent) {
     this->path = path;
 }
 
@@ -380,7 +401,7 @@ QByteArray GetResultList::toByteArray() {
     return array;
 }
 
-ResultList::ResultList(int taskID, QStringList &results, QObject *parent) : PipeMessage(parent) {
+ResultList::ResultList(int taskID, const QVector<Result> &results, QObject *parent) : PipeMessage(parent) {
     this->results = results;
     this->taskID = taskID;
 }
@@ -389,7 +410,7 @@ int ResultList::getTaskID() {
     return taskID;
 }
 
-const QStringList& ResultList::getResults() const {
+const QVector<Result>& ResultList::getResults() const {
     return results;
 }
 
@@ -397,5 +418,29 @@ QByteArray ResultList::toByteArray() {
     QByteArray array;
     QDataStream stream(&array, QIODevice::WriteOnly);
     stream << getType() << taskID << results;
+    return array;
+}
+
+GetIndexes::GetIndexes(QObject *parent) : PipeMessage(parent) {}
+
+QByteArray GetIndexes::toByteArray() {
+    QByteArray array;
+    QDataStream stream(&array, QIODevice::WriteOnly);
+    stream << getType();
+    return array;
+}
+
+IndexesList::IndexesList(const QVector<int> &results, QObject *parent) : PipeMessage(parent) {
+    this->results = results;
+}
+
+const QVector<int>& IndexesList::getIndexes() const {
+    return results;
+}
+
+QByteArray IndexesList::toByteArray() {
+    QByteArray array;
+    QDataStream stream(&array, QIODevice::WriteOnly);
+    stream << getType() << results;
     return array;
 }

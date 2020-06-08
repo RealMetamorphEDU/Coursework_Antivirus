@@ -25,12 +25,11 @@ Q_OBJECT
     int scannedCount;
     bool pause;
 public:
-    explicit ScanTask(int taskID, int const *taskCount, SignatureStorage *storage, QString &filepath,
+    explicit ScanTask(int taskID, int const *taskCount, SignatureStorage *storage, const QStringList &files,
                       QObject *parent = nullptr);
 
     void setPause(bool pause);
-    void setTaskID(int taskID);
-    QStringList getResults();
+    const QVector<Result>& getResults();
 private slots:
     void timeout();
     void foundScanObject(ScanObject *scanObject);

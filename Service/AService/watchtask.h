@@ -23,7 +23,7 @@ public:
     const QVector<QString>& getPaths();
     bool removePath(QString &path);
     void setPause(bool pause);
-    QStringList getResults();
+    const QVector<Result>& getResults();
 private slots:
     void changeNotify(QString filepath, ChangeType type);
     void infectedBy(QString filename, QString signatureName);

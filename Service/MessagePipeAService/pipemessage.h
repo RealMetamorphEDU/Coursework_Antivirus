@@ -18,7 +18,22 @@ enum class MessageType {
     objectStatus,
     lostWatch,
     getResultList,
-    resultList
+    resultList,
+    getIndexes,
+    indexesList
+};
+
+class QDataStream;
+
+struct Result {
+    QString objectName;
+    QString infectionReason;
+    bool infected;
+    bool brek;
+
+    //friend QDataStream& operator <<(QDataStream &stream, const Result &result);
+    //friend QDataStream& operator >>(QDataStream &stream, Result &result);
+
 };
 
 class ASERVICEMESSAGEPIPE_EXPORT PipeMessage: public QObject {
@@ -56,15 +71,13 @@ public:
 
 class ASERVICEMESSAGEPIPE_EXPORT StartScanMessage: public PipeMessage {
 Q_OBJECT
-    QString objectPath;
-    bool file; // true if file, false if dir
+    QStringList objectPath;
 public:
-    explicit StartScanMessage(const QString &objectPath, bool file, QObject *parent = nullptr);
+    explicit StartScanMessage(const QStringList &objectPath, QObject *parent = nullptr);
 
     MessageType getType() override;
     QByteArray toByteArray() override;
-    QString getObjectPath() const;
-    bool isFile() const;
+    const QStringList& getObjectPath() const;
 };
 
 class ASERVICEMESSAGEPIPE_EXPORT StopScanMessage: public PipeMessage {
@@ -164,7 +177,7 @@ public:
     // brek -- break, ошибка сканирования объекта.
     // path -- путь к объекту.
     // infection -- название вируса или пояснение ошибки.
-    explicit ObjectStatusMessage(int taskID, bool infected, bool brek, QString &path, QString &infection,
+    explicit ObjectStatusMessage(int taskID, bool infected, bool brek, const QString &path, const QString &infection,
                                  QObject *parent = nullptr);
 
     int getTaskId();
@@ -180,7 +193,7 @@ class ASERVICEMESSAGEPIPE_EXPORT LostWatchMessage: public PipeMessage {
 Q_OBJECT
     QString path;
 public:
-    explicit LostWatchMessage(QString &path, QObject *parent = nullptr);
+    explicit LostWatchMessage(const QString &path, QObject *parent = nullptr);
 
     const QString& getPath() const;
     MessageType getType() override;
@@ -201,12 +214,32 @@ public:
 class ASERVICEMESSAGEPIPE_EXPORT ResultList: public PipeMessage {
 Q_OBJECT
     int taskID;
-    QStringList results;
+    QVector<Result> results;
 public:
-    explicit ResultList(int taskID, QStringList &results, QObject *parent = nullptr);
+    explicit ResultList(int taskID, const QVector<Result> &results, QObject *parent = nullptr);
 
     int getTaskID();
-    const QStringList& getResults() const;
+    const QVector<Result>& getResults() const;
+    MessageType getType() override;
+    QByteArray toByteArray() override;
+};
+
+class ASERVICEMESSAGEPIPE_EXPORT GetIndexes: public PipeMessage {
+Q_OBJECT
+public:
+    explicit GetIndexes(QObject *parent = nullptr);
+
+    MessageType getType() override;
+    QByteArray toByteArray() override;
+};
+
+class ASERVICEMESSAGEPIPE_EXPORT IndexesList: public PipeMessage {
+Q_OBJECT
+    QVector<int> results;
+public:
+    explicit IndexesList(const QVector<int> &results, QObject *parent = nullptr);
+
+    const QVector<int>& getIndexes() const;
     MessageType getType() override;
     QByteArray toByteArray() override;
 };

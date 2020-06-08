@@ -7,19 +7,18 @@ ScanStatusModel::ScanStatusModel(QObject *parent) : QAbstractListModel(parent) {
 int ScanStatusModel::rowCount(const QModelIndex &parent) const {
     if (parent.isValid())
         return 0;
-
     return list->getCount();
 }
 
 QVariant ScanStatusModel::data(const QModelIndex &index, int role) const {
     if (!index.isValid())
         return QVariant();
-    ScanStatus scanStatus = list->getStatus(index.row());
+    ScanStatus scanStatus = list->getRow(index.row());
     switch (role) {
         case scanningRole:
             return QVariant(scanStatus.scanning);
         case taskIndexRole:
-            return QVariant(index.row());
+            return QVariant(scanStatus.taskID);
         case lastObjectRole:
             return QVariant(scanStatus.lastObject);
         case objLeftRole:

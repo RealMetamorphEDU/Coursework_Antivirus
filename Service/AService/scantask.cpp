@@ -1,7 +1,7 @@
 #include "scantask.h"
 #include <QFileInfo>
 
-ScanTask::ScanTask(int taskID, int const *taskCount, SignatureStorage *storage, QString &filepath,
+ScanTask::ScanTask(int taskID, int const *taskCount, SignatureStorage *storage, const QStringList &files,
                    QObject *parent) : QObject(parent) {
     this->fileSeeker = new AServiceFileSeeker(this);
     this->scanObjects = new AServiceScanObjects(storage, fileSeeker);
@@ -23,11 +23,13 @@ ScanTask::ScanTask(int taskID, int const *taskCount, SignatureStorage *storage, 
     connect(scanObjects, &AServiceScanObjects::infectedBy, this, &ScanTask::infectedBy);
     connect(scanObjects, &AServiceScanObjects::uninfected, this, &ScanTask::uninfected);
     connect(timer, &QTimer::timeout, this, &ScanTask::timeout);
-    QFileInfo info(filepath);
-    if (info.isDir())
-        fileSeeker->findFiles(filepath, "*", true);
-    else
-        findObjects->findObjects(filepath);
+    for (int i = 0; i < files.count(); ++i) {
+        QFileInfo info(files.at(i));
+        if (info.isDir())
+            fileSeeker->findFiles(files.at(i), "*", true);
+        else
+            findObjects->findObjects(files.at(i));
+    }
 }
 
 void ScanTask::setPause(bool pause) {
@@ -45,11 +47,7 @@ void ScanTask::setPause(bool pause) {
     }
 }
 
-void ScanTask::setTaskID(int taskID) {
-    this->taskID = taskID;
-}
-
-QStringList ScanTask::getResults() {
+const QVector<Result>& ScanTask::getResults() {
     return storage->getResults();
 }
 
@@ -75,7 +73,7 @@ void ScanTask::cantBuildThis(QString filepath, QString reason) {
     emit sendScanStatus(new ScanStatusMessage(pause, taskID, *taskCount, filepath, leftCount, scannedCount,
                                               this));
     timer->start();
-    storage->addResultString(filepath.append('\n').append(reason).append("\nBROKEN"));
+    storage->addResult({filepath, reason, false, true});
 }
 
 void ScanTask::uninfected(QString filename) {
@@ -87,7 +85,7 @@ void ScanTask::uninfected(QString filename) {
                                               scannedCount,
                                               this));
     timer->start();
-    storage->addResultString(filename);
+    storage->addResult({filename, "", false, false});
 }
 
 void ScanTask::infectedBy(QString filename, QString signatureName) {
@@ -98,5 +96,5 @@ void ScanTask::infectedBy(QString filename, QString signatureName) {
                                               scannedCount,
                                               this));
     timer->start();
-    storage->addResultString(filename.append('\n').append(signatureName));
+    storage->addResult({filename, signatureName, true, false});
 }

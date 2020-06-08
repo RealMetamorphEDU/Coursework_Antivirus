@@ -8,6 +8,7 @@
 #include "watchtask.h"
 #include "scantask.h"
 #include <Windows.h>
+#include <QHash>
 #include "eventsaservice.h"
 
 
@@ -20,8 +21,9 @@ Q_OBJECT
     AServiceBaseLoader *loader;
     AServiceMessagePipe *pipe;
     WatchTask *watcher;
-    QVector<ScanTask*> scanTasks;
+    QHash<int, ScanTask*> scanTasks;
     int taskCount;
+    int lastID;
     bool connected;
     bool brek;
 

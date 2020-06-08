@@ -53,7 +53,7 @@ void WatchTask::setPause(bool pause) {
     }
 }
 
-QStringList WatchTask::getResults() {
+const QVector<Result>& WatchTask::getResults() {
     return storage->getResults();
 }
 
@@ -72,10 +72,10 @@ void WatchTask::changeNotify(QString filepath, ChangeType type) {
 
 void WatchTask::infectedBy(QString filename, QString signatureName) {
     emit sendObjectStatus(new ObjectStatusMessage(-1, true, false, filename, signatureName, this));
-    storage->addResultString(filename.append('\n').append(signatureName));
+    storage->addResult({filename, signatureName, true, false});
 }
 
 void WatchTask::cantBuildThis(QString filepath, QString reason) {
     emit sendObjectStatus(new ObjectStatusMessage(-1, false, true, filepath, reason, this));
-    storage->addResultString(filepath.append('\n').append(reason).append("\nBROKEN"));
+    storage->addResult({filepath, reason, false, true});
 }

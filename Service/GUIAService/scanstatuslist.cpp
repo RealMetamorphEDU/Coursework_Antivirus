@@ -2,28 +2,38 @@
 
 ScanStatusList::ScanStatusList(QObject *parent) : QObject(parent) {}
 
-void ScanStatusList::updateScanStatus(int taskID, const ScanStatus &status) {
-    emit beginInsertRow(taskID);
-    if (taskID >= statuses.count()) {
-        statuses.insert(taskID, status);
-    } else {
-        statuses.replace(taskID, status);
-    }
+void ScanStatusList::updateScanStatus(const ScanStatus &status) {
+    int index = keys.count();
+    if (keys.contains(status.taskID))
+        index = keys.indexOf(status.taskID);
+    emit beginInsertRow(index);
+    statuses.insert(status.taskID, status);
+    keys = statuses.keys().toVector();
+    std::sort(keys.begin(), keys.end());
     emit insertedRow();
 }
 
 void ScanStatusList::removeScanStatus(int taskID) {
-    if (taskID > -1 && taskID < statuses.count()) {
-        emit beginRemovRow(taskID);
+    if (statuses.contains(taskID)) {
+        emit beginRemovRow(keys.indexOf(taskID));
         statuses.remove(taskID);
+        keys = statuses.keys().toVector();
+        std::sort(keys.begin(), keys.end());
         emit removedRow();
     }
 }
 
-const ScanStatus& ScanStatusList::getStatus(int row) {
-    return statuses.at(row);
+ScanStatus ScanStatusList::getStatus(int taskID) const {
+    return statuses.value(taskID, {false, -1, "", 0, 0, 0});
 }
 
-int ScanStatusList::getCount() {
+ScanStatus ScanStatusList::getRow(int row) const {
+    if (row > -1 && row < statuses.count()) {
+        return statuses.value(keys.at(row));
+    }
+    return {false, -1, "", 0, 0, 0};
+}
+
+int ScanStatusList::getCount() const {
     return statuses.count();
 }

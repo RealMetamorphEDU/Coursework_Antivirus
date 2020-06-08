@@ -25,6 +25,7 @@ AServiceMessagePipe::AServiceMessagePipe(QString &pipeName, QObject *parent) : Q
     writeName = "";
     readName = "";
     readPipe = NULL;
+    brek = false;
     writeName.append(R"(\\.\pipe\ASMP_)").append(pipeName).append("_1");
     readName.append(R"(\\.\pipe\ASMP_)").append(pipeName).append("_2");
     reader = nullptr;
@@ -36,8 +37,10 @@ AServiceMessagePipe::AServiceMessagePipe(QString &pipeName, QObject *parent) : Q
         writePipe = CreateNamedPipeA(readName.toStdString().c_str(), PIPE_ACCESS_OUTBOUND | FILE_FLAG_OVERLAPPED,
                                      PIPE_TYPE_MESSAGE | PIPE_READMODE_MESSAGE,
                                      1, 8192, 8192, 5000, NULL);
-        if (writePipe == INVALID_HANDLE_VALUE)
+        if (writePipe == INVALID_HANDLE_VALUE) {
+            brek = true;
             return;
+        }
         first = false;
         reader = new Reader(this);
     } else {
@@ -67,6 +70,10 @@ AServiceMessagePipe::~AServiceMessagePipe() {
 
 bool AServiceMessagePipe::isConnected() {
     return connected;
+}
+
+bool AServiceMessagePipe::isBreak() {
+    return brek;
 }
 
 void AServiceMessagePipe::sendMessage(PipeMessage *message) {
