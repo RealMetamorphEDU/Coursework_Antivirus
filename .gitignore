@@ -11,4 +11,8 @@ Makefile*
 *.filters
 *.vcxproj
 *.bat
-*/ui_*.h
+ui_*.h
+*.pro.qtds
+*.ui.qml.*
+*.qrc.*
+*.autosave
