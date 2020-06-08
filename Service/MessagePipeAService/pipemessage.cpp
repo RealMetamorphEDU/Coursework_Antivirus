@@ -14,7 +14,7 @@ QDataStream& operator >>(QDataStream &stream, Result &result) {
 
 PipeMessage::PipeMessage(QObject *parent) : QObject(parent) {}
 
-PipeMessage* PipeMessage::parseByteArray(QByteArray array, QObject *parent) {
+PipeMessage* PipeMessage::parseByteArray(const QByteArray &array, QObject *parent) {
     QDataStream stream(array);
     MessageType type;
     stream >> type;

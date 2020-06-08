@@ -26,7 +26,7 @@ Q_OBJECT
 
     friend class Reader;
 public:
-    AServiceMessagePipe(QString &pipeName, QObject *parent = nullptr);
+    AServiceMessagePipe(const QString &pipeName, QObject *parent = nullptr);
     ~AServiceMessagePipe();
     bool isConnected();
     bool isBreak();

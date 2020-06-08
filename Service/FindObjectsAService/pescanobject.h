@@ -9,7 +9,7 @@ class PEScanObject: public ScanObject {
     std::shared_ptr<RawObject> rawObject;
     QVector<DataRegion> regions;
 public:
-    PEScanObject(std::shared_ptr<RawObject> &rawObject, QVector<DataRegion>& regions, QObject *parent);
+    PEScanObject(std::shared_ptr<RawObject> &rawObject, const QVector<DataRegion>& regions, QObject *parent);
     QString getFullObjectName() override;
     int getRegionsCount() override;
     DataRegion getRegion(int index) override;

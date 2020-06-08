@@ -6,7 +6,7 @@
 #include <QEvent>
 #include <QDirIterator>
 #include <QDebug>
-#include "eventsaservice.h"
+#include "aserviceevents.h"
 
 struct FindRequest {
     QString path;

@@ -4,8 +4,11 @@
 #include <QFileInfo>
 
 
-AServiceLog::AServiceLog(QString serviceName, QObject *parent): QObject(parent) {
+AServiceLog::AServiceLog(const QString &serviceName, QObject *parent): QObject(parent) {
     currentLevel = Level::INFO;
+    strings[0] = nullptr;
+    strings[1] = nullptr;
+    strings[2] = nullptr;
     hEventLog = RegisterEventSourceA(NULL, serviceName.toStdString().c_str());
 }
 
@@ -13,7 +16,7 @@ AServiceLog::~AServiceLog() {
     DeregisterEventSource(hEventLog);
 }
 
-void AServiceLog::printLog(QString &tag, QString &message, Level level) {
+void AServiceLog::printLog(const QString &tag, const QString &message, Level level) {
     if (level > this->currentLevel)
         return;
     strings[0] = getLevelName(level);
@@ -72,7 +75,7 @@ const char* AServiceLog::getLevelName(Level level) {
 }
 
 
-bool AServiceLog::registerSource(QString source) {
+bool AServiceLog::registerSource(const QString &source) {
 
     QString regPath = "SYSTEM\\CurrentControlSet\\Services\\Eventlog\\";
     regPath.append(source);
@@ -105,7 +108,7 @@ bool AServiceLog::registerSource(QString source) {
     return false;
 }
 
-bool AServiceLog::unregisterSource(QString source) {
+bool AServiceLog::unregisterSource(const QString &source) {
     QString regPath = "SYSTEM\\CurrentControlSet\\Services\\Eventlog\\";
     regPath.append(source);
     DWORD dwResult = 0;
@@ -120,18 +123,18 @@ void AServiceLog::setLevel(Level level) {
     currentLevel = level;
 }
 
-void AServiceLog::info(QString tag, QString message) {
+void AServiceLog::info(const QString &tag, const QString &message) {
     printLog(tag, message, Level::INFO);
 }
 
-void AServiceLog::warning(QString tag, QString message) {
+void AServiceLog::warning(const QString &tag, const QString &message) {
     printLog(tag, message, Level::WARNING);
 }
 
-void AServiceLog::error(QString tag, QString message) {
+void AServiceLog::error(const QString &tag, const QString &message) {
     printLog(tag, message, Level::ERROR_);
 }
 
-void AServiceLog::critical(QString tag, QString message) {
+void AServiceLog::critical(const QString &tag, const QString &message) {
     printLog(tag, message, Level::CRITICAL);
 }

@@ -14,8 +14,8 @@ Q_OBJECT
 public:
     explicit SignatureStorage(QObject *parent = nullptr);
 
-    friend int AServiceBaseLoader::loadStorage(QString &storageName, QString &filepath);
-    friend int AServiceBaseLoader::appendStorage(QString &storageName, QString &filepath);
+    friend int AServiceBaseLoader::loadStorage(const QString &storageName, const QString &filepath);
+    friend int AServiceBaseLoader::appendStorage(const QString &storageName, const QString &filepath);
 
     SearchInstance* startSearch();
     qint64 getMaxLen();

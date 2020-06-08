@@ -73,7 +73,7 @@ AServiceBaseLoader* AServiceBaseLoader::getInstance() {
     return instance;
 }
 
-int AServiceBaseLoader::loadStorage(QString &storageName, QString &filepath) {
+int AServiceBaseLoader::loadStorage(const QString &storageName, const QString &filepath) {
     if (storages.contains(storageName))
         return appendStorage(storageName, filepath);
     tokenizer->setBaseFile(filepath);
@@ -109,7 +109,7 @@ int AServiceBaseLoader::loadStorage(QString &storageName, QString &filepath) {
     return -1;
 }
 
-int AServiceBaseLoader::appendStorage(QString &storageName, QString &filepath) {
+int AServiceBaseLoader::appendStorage(const QString &storageName, const QString &filepath) {
     if (storages.contains(storageName)) {
         tokenizer->setBaseFile(filepath);
         const int need = tokenizer->startRead();
@@ -143,13 +143,13 @@ int AServiceBaseLoader::appendStorage(QString &storageName, QString &filepath) {
     return loadStorage(storageName, filepath);
 }
 
-SignatureStorage* AServiceBaseLoader::getStorage(QString &storageName) {
+SignatureStorage* AServiceBaseLoader::getStorage(const QString &storageName) {
     if (storages.contains(storageName))
         return storages.value(storageName);
     return nullptr;
 }
 
-void AServiceBaseLoader::removeStorage(QString &storageName) {
+void AServiceBaseLoader::removeStorage(const QString &storageName) {
     if (storages.contains(storageName)) {
         storages.value(storageName)->deleteLater();
         storages.remove(storageName);

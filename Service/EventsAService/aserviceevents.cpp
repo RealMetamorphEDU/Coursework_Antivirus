@@ -1,7 +1,7 @@
-#include "eventsaservice.h"
+#include "aserviceevents.h"
 
 
-AddEvent::AddEvent(QString &path) : QEvent((Type) addPathType) {
+AddEvent::AddEvent(const QString &path) : QEvent((Type) addPathType) {
     this->path = path;
 }
 
@@ -9,7 +9,7 @@ const QString& AddEvent::getPath() {
     return path;
 }
 
-RemoveEvent::RemoveEvent(QString &path) : QEvent((Type) removePathType) {
+RemoveEvent::RemoveEvent(const QString &path) : QEvent((Type) removePathType) {
     this->path = path;
 }
 
@@ -19,7 +19,7 @@ const QString& RemoveEvent::getPath() {
 
 StopEvent::StopEvent() : QEvent((Type) stopType) {}
 
-FindEvent::FindEvent(QString filepath) : QEvent((Type) findObjectsType) {
+FindEvent::FindEvent(const QString &filepath) : QEvent((Type) findObjectsType) {
     this->filepath = filepath;
 }
 
@@ -43,7 +43,8 @@ ScanObject* ScanEvent::getScanObject() {
     return scanObject;
 }
 
-RequestEvent::RequestEvent(QString &path, QString &pattern, bool recursive) : QEvent((Type) addRequestType) {
+RequestEvent::RequestEvent(const QString &path, const QString &pattern,
+                           bool recursive) : QEvent((Type) addRequestType) {
     this->path = path;
     this->pattern = pattern;
     this->recursive = recursive;

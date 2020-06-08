@@ -16,7 +16,7 @@ Q_OBJECT
     std::shared_ptr<ZipArchiveEntry> entry;
     std::istream *source;
 public:
-    ZipRawObject(std::shared_ptr<RawObject> &parentRaw, QString filename, std::shared_ptr<ZipArchive> &archive,
+    ZipRawObject(std::shared_ptr<RawObject> &parentRaw, const QString &filename, std::shared_ptr<ZipArchive> &archive,
                  std::shared_ptr<ZipArchiveEntry> &entry,
                  QObject *parent = nullptr);
 

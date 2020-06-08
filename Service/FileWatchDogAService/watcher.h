@@ -5,7 +5,7 @@
 #include <QVector>
 #include <QFileInfo>
 #include <Windows.h>
-#include "eventsaservice.h"
+#include "aserviceevents.h"
 
 enum class ChangeType;
 

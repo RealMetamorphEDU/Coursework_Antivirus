@@ -44,7 +44,7 @@ public:
     virtual MessageType getType() = 0;
     virtual QByteArray toByteArray() = 0;
 
-    static PipeMessage* parseByteArray(QByteArray array, QObject *parent = nullptr);
+    static PipeMessage* parseByteArray(const QByteArray &array, QObject *parent = nullptr);
 };
 
 class ASERVICEMESSAGEPIPE_EXPORT ScanStatusMessage: public PipeMessage {

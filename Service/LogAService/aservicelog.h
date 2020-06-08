@@ -20,24 +20,24 @@ Q_OBJECT
     Level currentLevel;
     const char *strings[3]; // 0 - name, 1 - tag, 3 - message
 
-    void printLog(QString &tag, QString &message, Level level);
+    void printLog(const QString &tag, const QString &message, Level level);
     static WORD getSystemLevel(Level level);
     static const char* getLevelName(Level level);
 
     static DWORD getEventIdentifier(WORD level);
 
 public:
-    AServiceLog(QString serviceName, QObject *parent = nullptr);
+    AServiceLog(const QString &serviceName, QObject *parent = nullptr);
     ~AServiceLog();
 
-    static bool registerSource(QString source);
-    static bool unregisterSource(QString source);
+    static bool registerSource(const QString &source);
+    static bool unregisterSource(const QString &source);
 
     void setLevel(Level level);
-    void info(QString tag, QString message);
-    void warning(QString tag, QString message);
-    void error(QString tag, QString message);
-    void critical(QString tag, QString message);
+    void info(const QString &tag, const QString &message);
+    void warning(const QString &tag, const QString &message);
+    void error(const QString &tag, const QString &message);
+    void critical(const QString &tag, const QString &message);
 
 signals:
     void catchError(int code);

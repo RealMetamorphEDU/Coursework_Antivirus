@@ -41,7 +41,7 @@ public:
     int startRead();
 
     // Записать следующую запись, возвращает номер записи
-    int writeRecord(SignatureRecord &record);
+    int writeRecord(const SignatureRecord &record);
     SignatureRecord* nextRecord(int &number);
 
     // Закрывает открытый файл

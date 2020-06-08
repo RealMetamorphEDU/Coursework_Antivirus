@@ -84,7 +84,7 @@ int ABRecordTokenizer::startRead() {
     return -1;
 }
 
-int ABRecordTokenizer::writeRecord(SignatureRecord &record) {
+int ABRecordTokenizer::writeRecord(const SignatureRecord &record) {
     if (writing) {
         BListWritable *recordList;
         BString bName;

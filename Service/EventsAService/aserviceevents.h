@@ -20,7 +20,7 @@ enum events {
 class AddEvent: public QEvent {
     QString path;
 public:
-    explicit AddEvent(QString &path);
+    explicit AddEvent(const QString &path);
 
     const QString& getPath();
 };
@@ -28,7 +28,7 @@ public:
 class RemoveEvent: public QEvent {
     QString path;
 public:
-    explicit RemoveEvent(QString &path);
+    explicit RemoveEvent(const QString &path);
 
     const QString& getPath();
 };
@@ -42,7 +42,7 @@ public:
 class FindEvent: public QEvent {
     QString filepath;
 public:
-    explicit FindEvent(QString filepath);
+    explicit FindEvent(const QString &filepath);
 
     const QString& getFilepath();
 };
@@ -67,7 +67,7 @@ class RequestEvent: public QEvent {
     QString pattern;
     bool recursive;
 public:
-    explicit RequestEvent(QString &path, QString &pattern, bool recursive);
+    explicit RequestEvent(const QString &path, const QString &pattern, bool recursive);
 
     const QString& getPath();
     const QString& getPattern() const;

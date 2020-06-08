@@ -9,7 +9,7 @@
 #include "scantask.h"
 #include <Windows.h>
 #include <QHash>
-#include "eventsaservice.h"
+#include "aserviceevents.h"
 
 
 class Controller: public QObject {

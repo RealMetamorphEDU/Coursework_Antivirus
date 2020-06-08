@@ -4,7 +4,7 @@
 #include "qfileinputstream.h"
 #include <iostream>
 
-SimpleRawObject::SimpleRawObject(QString filename, QObject *parent) : RawObject(parent) {
+SimpleRawObject::SimpleRawObject(const QString &filename, QObject *parent) : RawObject(parent) {
     source = new QFile(filename, this);
     source->open(QIODevice::ReadOnly);
     stream = new std::istream(new QFileInputStream(source));

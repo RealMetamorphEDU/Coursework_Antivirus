@@ -8,7 +8,7 @@
 #include "signaturestorage.h"
 #include "signaturerecord.h"
 #include <QCoreApplication>
-#include "eventsaservice.h"
+#include "aserviceevents.h"
 
 class Scanner: public QObject {
 Q_OBJECT

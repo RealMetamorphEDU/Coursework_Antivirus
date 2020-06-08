@@ -8,7 +8,7 @@ class SimpleRawObject: public RawObject {
     QFile *source;
     std::istream *stream;
 public:
-    SimpleRawObject(QString filename, QObject *parent = nullptr);
+    SimpleRawObject(const QString &filename, QObject *parent = nullptr);
     ~SimpleRawObject();
 
     QString getFullName() override;

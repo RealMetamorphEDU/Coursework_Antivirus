@@ -20,7 +20,7 @@ void AServiceMessagePipe::reinit() {
     }
 }
 
-AServiceMessagePipe::AServiceMessagePipe(QString &pipeName, QObject *parent) : QObject(parent) {
+AServiceMessagePipe::AServiceMessagePipe(const QString &pipeName, QObject *parent) : QObject(parent) {
     requestEvent = CreateEventA(NULL, FALSE, FALSE, NULL);
     writeName = "";
     readName = "";

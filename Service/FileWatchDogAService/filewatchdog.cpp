@@ -28,7 +28,7 @@ FileWatchDog::~FileWatchDog() {
     CloseHandle(completeEvent);
 }
 
-bool FileWatchDog::addPath(QString &path) {
+bool FileWatchDog::addPath(const QString &path) {
     QCoreApplication::postEvent(watcher, new AddEvent(path));
     ResetEvent(completeEvent);
     SetEvent(requestEvent);
@@ -40,7 +40,7 @@ const QVector<QString>& FileWatchDog::getPaths() {
     return watcher->getPaths();
 }
 
-bool FileWatchDog::removePath(QString &path) {
+bool FileWatchDog::removePath(const QString &path) {
     QCoreApplication::postEvent(watcher, new RemoveEvent(path));
     ResetEvent(completeEvent);
     SetEvent(requestEvent);

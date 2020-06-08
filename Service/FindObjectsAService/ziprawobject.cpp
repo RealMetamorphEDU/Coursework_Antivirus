@@ -1,7 +1,7 @@
 #include "ziprawobject.h"
 #include "ZipArchive.h"
 
-ZipRawObject::ZipRawObject(std::shared_ptr<RawObject> &parentRaw, QString filename,
+ZipRawObject::ZipRawObject(std::shared_ptr<RawObject> &parentRaw, const QString &filename,
                            std::shared_ptr<ZipArchive> &archive,
                            std::shared_ptr<ZipArchiveEntry> &entry,
                            QObject *parent) : RawObject(parent) {

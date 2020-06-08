@@ -12,7 +12,7 @@ WatchTask::WatchTask(SignatureStorage *storage, QObject *parent) : QObject(paren
     connect(fileWatchDog, &FileWatchDog::changeNotify, this, &WatchTask::changeNotify);
 }
 
-bool WatchTask::addPath(QString &path) {
+bool WatchTask::addPath(const QString &path) {
     if (pause) {
         if (!pauseList.contains(path)) {
             pauseList.append(path);
@@ -29,7 +29,7 @@ const QVector<QString>& WatchTask::getPaths() {
     return fileWatchDog->getPaths();
 }
 
-bool WatchTask::removePath(QString &path) {
+bool WatchTask::removePath(const QString &path) {
     if (pause)
         return pauseList.removeOne(path);
     return fileWatchDog->removePath(path);

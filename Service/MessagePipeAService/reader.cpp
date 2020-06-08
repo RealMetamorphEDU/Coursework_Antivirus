@@ -1,6 +1,7 @@
 #include "reader.h"
 #include "pipemessage.h"
 #include "aservicemessagepipe.h"
+#include <QCoreApplication>
 
 
 Reader::Reader(AServiceMessagePipe *root) : QObject(nullptr) {
@@ -21,12 +22,14 @@ Reader::~Reader() {
 
 void Reader::reading() {
     while (working) {
+        QCoreApplication::processEvents();
         if (!root->connected) {
             if (root->first) {
                 ConnectNamedPipe(root->writePipe, overlapped);
                 root->connected = WaitForMultipleObjects(2, events, FALSE, INFINITE) - WAIT_OBJECT_0;
                 if (root->connected) {
                     emit connectUpdate(root->connected);
+                    QCoreApplication::processEvents();
                     root->readPipe = CreateFileA(root->readName.toStdString().c_str(), GENERIC_READ, 0, NULL,
                                                  OPEN_EXISTING,
                                                  0,
@@ -40,6 +43,7 @@ void Reader::reading() {
                 root->connected = WaitForMultipleObjects(2, events, FALSE, INFINITE) - WAIT_OBJECT_0;
                 if (root->connected) {
                     emit connectUpdate(root->connected);
+                    QCoreApplication::processEvents();
                 } else
                     CloseHandle(root->readPipe);
             }
@@ -51,6 +55,7 @@ void Reader::reading() {
             DisconnectNamedPipe(root->writePipe);
             CloseHandle(root->readPipe);
             emit connectUpdate(root->connected);
+            QCoreApplication::processEvents();
             if (!root->first)
                 root->reinit();
             continue;
@@ -65,6 +70,7 @@ void Reader::reading() {
                 PipeMessage *message = PipeMessage::parseByteArray(ba, this);
                 if (message != nullptr) {
                     emit receivedMessage(message);
+                    QCoreApplication::processEvents();
                 }
             }
         }

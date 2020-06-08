@@ -7,9 +7,7 @@
 #include "scanobject.h"
 #include <QCoreApplication>
 #include <Windows.h>
-#include "eventsaservice.h"
-
-
+#include "aserviceevents.h"
 
 class Builder: public QObject {
 Q_OBJECT

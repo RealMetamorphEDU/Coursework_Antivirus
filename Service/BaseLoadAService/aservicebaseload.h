@@ -25,10 +25,10 @@ public:
     static void initLoader(QObject *parent);
     static AServiceBaseLoader* getInstance();
 
-    int loadStorage(QString &storageName, QString &filepath);
-    int appendStorage(QString &storageName, QString &filepath);
-    SignatureStorage* getStorage(QString &storageName);
-    void removeStorage(QString &storageName);
+    int loadStorage(const QString &storageName, const QString &filepath);
+    int appendStorage(const QString &storageName,const QString &filepath);
+    SignatureStorage* getStorage(const QString &storageName);
+    void removeStorage(const QString &storageName);
 };
 
 #endif // ASERVICEBASELOAD_H

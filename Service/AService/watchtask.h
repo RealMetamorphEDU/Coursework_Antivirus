@@ -19,9 +19,9 @@ Q_OBJECT
     QVector<QString> pauseList;
 public:
     explicit WatchTask(SignatureStorage *storage, QObject *parent = nullptr);
-    bool addPath(QString &path);
+    bool addPath(const QString &path);
     const QVector<QString>& getPaths();
-    bool removePath(QString &path);
+    bool removePath(const QString &path);
     void setPause(bool pause);
     const QVector<Result>& getResults();
 private slots:

@@ -79,17 +79,13 @@ void Storage::initTestCase() {
 
 void Storage::test_read() {
     AServiceBaseLoader *loader = AServiceBaseLoader::getInstance();
-    QString name = "test";
-    QString path = "test.adb";
-    QCOMPARE(loader->loadStorage(name, path), 8);
+    QCOMPARE(loader->loadStorage("test", "test.adb"), 8);
 
 }
 
 void Storage::test_append() {
     AServiceBaseLoader *loader = AServiceBaseLoader::getInstance();
-    QString name = "test";
-    QString path = "test2.adb";
-    QCOMPARE(loader->appendStorage(name, path), 3);
+    QCOMPARE(loader->loadStorage("test", "test2.adb"), 3);
 }
 
 void Storage::test_search() {
