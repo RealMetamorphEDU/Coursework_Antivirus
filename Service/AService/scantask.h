@@ -12,22 +12,19 @@
 
 class ScanTask: public QObject {
 Q_OBJECT
-    int taskID;
-    int const *taskCount;
+    int taskIndex;
     AServiceFileSeeker *fileSeeker;
     AServiceFindObjects *findObjects;
     AServiceScanObjects *scanObjects;
     ScanResultStorage *storage;
     QTimer *timer;
-    bool seekerFinish;
-    bool findFinish;
+    bool finished;
     int leftCount;
     int scannedCount;
     bool pause;
 public:
-    explicit ScanTask(int taskID, int const *taskCount, SignatureStorage *storage, const QStringList &files,
+    explicit ScanTask(int taskID, SignatureStorage *storage, const QStringList &files,
                       QObject *parent = nullptr);
-
     void setPause(bool pause);
     const QVector<Result>& getResults() const;
 private slots:
@@ -37,8 +34,7 @@ private slots:
     void uninfected(const QString &filename);
     void infectedBy(const QString &filename, const QString &signatureName);
 signals:
-    void sendObjectStatus(ObjectStatusMessage *message);
-    void sendScanStatus(ScanStatusMessage *message);
+    void sendMessage(PipeMessage *message);
 };
 
 #endif // SCANTASK_H

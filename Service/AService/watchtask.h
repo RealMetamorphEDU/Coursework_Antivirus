@@ -29,8 +29,7 @@ private slots:
     void infectedBy(const QString &filename, const QString &signatureName);
     void cantBuildThis(const QString &filepath, const QString &reason);
 signals:
-    void sendObjectStatus(ObjectStatusMessage *message);
-    void sendLostStatus(LostWatchMessage *message);
+    void sendMessage(PipeMessage *message);
 };
 
 #endif // WATCHTASK_H

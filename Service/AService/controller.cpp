@@ -63,11 +63,10 @@ Controller::Controller(AServiceLog *logger, SERVICE_STATUS_HANDLE handle, QObjec
     this->watcher = new WatchTask(loader->getStorage(innerName), pipe);
     connect(pipe, &AServiceMessagePipe::connectUpdate, this, &Controller::connectUpdate);
     connect(pipe, &AServiceMessagePipe::receivedMessage, this, &Controller::receivedMessage);
-    connect(watcher, &WatchTask::sendLostStatus, this, &Controller::sendLostStatus);
-    connect(watcher, &WatchTask::sendObjectStatus, this, &Controller::sendObjectStatus);
+    connect(watcher, &WatchTask::sendMessage, pipe, &AServiceMessagePipe::sendMessage);
+    connect(watcher, &WatchTask::sendMessage, pipe, &AServiceMessagePipe::sendMessage);
     this->connected = pipe->isConnected();
-    taskCount = 0;
-    lastID = 0;
+    lastIndex = 0;
     logger->info("CONTROLLER", "Initialization completed.");
     status.dwCheckPoint = 0;
     status.dwCurrentState = SERVICE_RUNNING;
@@ -77,6 +76,11 @@ Controller::Controller(AServiceLog *logger, SERVICE_STATUS_HANDLE handle, QObjec
 }
 
 Controller::~Controller() {
+    pipe->disconnect(watcher);
+    for (ScanTask *task: scanTasks.values()) {
+        pipe->disconnect(task);
+        task->setPause(true);
+    }
     logger->info("CONTROLLER", "Controller stopped.");
     status.dwCurrentState = SERVICE_STOP_PENDING;
     status.dwControlsAccepted = 0;
@@ -119,37 +123,37 @@ void Controller::connectUpdate(bool connected) {
 void Controller::receivedMessage(PipeMessage *message) {
     switch (message->getType()) {
         case MessageType::startScan: {
-            if (taskCount == 0)
-                lastID = 0;
+            if (scanTasks.count() == 0)
+                lastIndex = 0;
             auto *start = dynamic_cast<StartScanMessage*>(message);
             bool safe = true;
-            while (scanTasks.contains(lastID)) {
-                lastID++;
-                if (safe && lastID < 0) {
-                    lastID = 0;
+            while (scanTasks.contains(lastIndex)) {
+                lastIndex++;
+                if (safe && lastIndex < 0) {
+                    lastIndex = 0;
                     safe = false;
                 }
             }
-            if (lastID < 0) {
-                lastID = 0;
+            if (lastIndex < 0) {
+                lastIndex = 0;
                 logger->warning("CONTROLLER", "Overflow scan task storage, new task don't started.");
                 break;
             }
-            taskCount++;
-            auto *task = new ScanTask(lastID, &taskCount, loader->getStorage(innerName), start->getObjectPath(), pipe);
-            connect(task, &ScanTask::sendObjectStatus, this, &Controller::sendObjectStatus);
-            connect(task, &ScanTask::sendScanStatus, this, &Controller::sendScanStatus);
-            scanTasks.insert(lastID, task);
+            auto *task = new ScanTask(lastIndex, loader->getStorage(innerName), start->getObjectPath(), pipe);
+            connect(task, &ScanTask::sendMessage, pipe, &AServiceMessagePipe::sendMessage);
+            connect(task, &ScanTask::sendMessage, pipe, &AServiceMessagePipe::sendMessage);
+            scanTasks.insert(lastIndex, task);
             logger->info("CONTROLLER",
-                         QString("Started scan task with id: ").append(QString::number(lastID)).append("."));
+                         QString("Started scan task with id: ").append(QString::number(lastIndex)).append("."));
         }
         break;
         case MessageType::stopScan: {
             auto *stop = dynamic_cast<StopScanMessage*>(message);
             if (scanTasks.contains(stop->getTaskIndex())) {
                 ScanTask *task = scanTasks.take(stop->getTaskIndex());
+                pipe->disconnect(task);
+                task->setPause(true);
                 delete task;
-                taskCount--;
                 if (connected) {
                     pipe->sendMessage(new StopScanMessage(stop->getTaskIndex(), this));
                 }
@@ -245,16 +249,4 @@ void Controller::receivedMessage(PipeMessage *message) {
             logger->warning("CONTROLLER", "Unknown type of message.");
     }
     message->deleteLater();
-}
-
-void Controller::sendObjectStatus(ObjectStatusMessage *message) const {
-    pipe->sendMessage(message);
-}
-
-void Controller::sendLostStatus(LostWatchMessage *message) const {
-    pipe->sendMessage(message);
-}
-
-void Controller::sendScanStatus(ScanStatusMessage *message) const {
-    pipe->sendMessage(message);
 }

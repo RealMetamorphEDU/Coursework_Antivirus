@@ -47,7 +47,9 @@ void WatchTask::setPause(bool pause) {
     } else {
         while (!pauseList.isEmpty()) {
             QString path = pauseList.takeFirst();
-            fileWatchDog->addPath(path);
+            if(!fileWatchDog->addPath(path)) {
+                emit sendMessage(new RemoveDirectoryFromMonitorMessage(path, this));
+            }
         }
         pauseList.clear();
     }
@@ -64,7 +66,7 @@ void WatchTask::changeNotify(const QString &filepath, ChangeType type) {
         }
         break;
         case ChangeType::dirCantWatch: {
-            emit sendLostStatus(new LostWatchMessage(filepath, this));
+            emit sendMessage(new LostWatchMessage(filepath, this));
         }
         break;
         default:
@@ -73,11 +75,11 @@ void WatchTask::changeNotify(const QString &filepath, ChangeType type) {
 }
 
 void WatchTask::infectedBy(const QString &filename, const QString &signatureName) {
-    emit sendObjectStatus(new ObjectStatusMessage(-1, true, false, filename, signatureName, this));
+    emit sendMessage(new ObjectStatusMessage(-1, true, false, filename, signatureName, this));
     storage->addResult({filename, signatureName, true, false});
 }
 
 void WatchTask::cantBuildThis(const QString &filepath, const QString &reason) {
-    emit sendObjectStatus(new ObjectStatusMessage(-1, false, true, filepath, reason, this));
+    emit sendMessage(new ObjectStatusMessage(-1, false, true, filepath, reason, this));
     storage->addResult({filepath, reason, false, true});
 }

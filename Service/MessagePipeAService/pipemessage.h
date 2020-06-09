@@ -6,6 +6,8 @@
 
 enum class MessageType {
     scanStatus,
+    scanPauseStatus,
+    scanLeftStatus,
     startScan,
     stopScan,
     pauseScan,
@@ -46,23 +48,49 @@ public:
 class ASERVICEMESSAGEPIPE_EXPORT ScanStatusMessage: public PipeMessage {
 Q_OBJECT
     bool scanning;
+    bool pause;
     int taskIndex;
     QString lastObject;
     int objLeft;
     int objScanned;
-    int taskCount;
 public:
-    explicit ScanStatusMessage(bool scanning, int taskIndex, int taskCount, const QString &lastObject, int objLeft,
+    explicit ScanStatusMessage(bool scanning, bool pause, int taskIndex, const QString &lastObject, int objLeft,
                                int objScanned, QObject *parent = nullptr);
 
     bool isScanning() const;
+    bool isPause() const;
     MessageType getType() override;
     QByteArray toByteArray() override;
     int getTaskIndex() const;
     QString getCurObject() const;
     int getObjLeft() const;
     int getObjScanned() const;
-    int getTaskCount() const;
+};
+
+class ASERVICEMESSAGEPIPE_EXPORT ScanPauseStatusMessage: public PipeMessage {
+Q_OBJECT
+    bool pause;
+    int taskIndex;
+public:
+    explicit ScanPauseStatusMessage( bool pause, int taskIndex, QObject *parent = nullptr);
+
+    bool isPause() const;
+    MessageType getType() override;
+    QByteArray toByteArray() override;
+    int getTaskIndex() const;
+};
+
+class ASERVICEMESSAGEPIPE_EXPORT ScanLeftStatusMessage: public PipeMessage {
+Q_OBJECT
+    int taskIndex;
+    int objLeft;
+public:
+    explicit ScanLeftStatusMessage(int taskIndex, int objLeft, QObject *parent = nullptr);
+
+    MessageType getType() override;
+    QByteArray toByteArray() override;
+    int getTaskIndex() const;
+    int getObjLeft() const;
 };
 
 class ASERVICEMESSAGEPIPE_EXPORT StartScanMessage: public PipeMessage {
@@ -168,7 +196,7 @@ Q_OBJECT
     QString path;
     QString infection;
 public:
-    // taskID -- номер задачи, -1 если смотритель директории
+    // taskIndex -- номер задачи, -1 если смотритель директории
     // infected -- заражен объект или нет.
     // brek -- break, ошибка сканирования объекта.
     // path -- путь к объекту.

@@ -20,8 +20,7 @@ Q_OBJECT
     AServiceMessagePipe *pipe;
     WatchTask *watcher;
     QHash<int, ScanTask*> scanTasks;
-    int taskCount;
-    int lastID;
+    int lastIndex;
     bool connected;
     bool brek;
 
@@ -36,9 +35,6 @@ public:
 private slots:
     void connectUpdate(bool connected);
     void receivedMessage(PipeMessage *message);
-    void sendObjectStatus(ObjectStatusMessage *message) const;
-    void sendLostStatus(LostWatchMessage *message) const;
-    void sendScanStatus(ScanStatusMessage *message) const;
 };
 
 #endif // CONTROLLER_H

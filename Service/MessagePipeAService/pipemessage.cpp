@@ -21,13 +21,25 @@ PipeMessage* PipeMessage::parseByteArray(const QByteArray &array, QObject *paren
     switch (type) {
         case MessageType::scanStatus: {
             bool scanning;
+            bool pause;
             int taskIndex;
-            int taskCount;
             QString lastObject;
             int objLeft;
             int objScanned;
-            stream >> scanning >> taskIndex >> taskCount >> lastObject >> objLeft >> objScanned;
-            return new ScanStatusMessage(scanning, taskIndex, taskCount, lastObject, objLeft, objScanned, parent);
+            stream >> scanning >> pause >> taskIndex >> lastObject >> objLeft >> objScanned;
+            return new ScanStatusMessage(scanning, pause, taskIndex, lastObject, objLeft, objScanned, parent);
+        }
+        case MessageType::scanPauseStatus: {
+            bool pause;
+            int taskIndex;
+            stream >> pause >> taskIndex;
+            return new ScanPauseStatusMessage(pause, taskIndex, parent);
+        }
+        case MessageType::scanLeftStatus: {
+            int taskIndex;
+            int objLeft;
+            stream >> taskIndex >> objLeft;
+            return new ScanLeftStatusMessage(taskIndex, objLeft, parent);
         }
         case MessageType::startScan: {
             QStringList objectPath;
@@ -108,6 +120,14 @@ MessageType ScanStatusMessage::getType() {
     return MessageType::scanStatus;
 }
 
+MessageType ScanPauseStatusMessage::getType() {
+    return MessageType::scanPauseStatus;
+}
+
+MessageType ScanLeftStatusMessage::getType() {
+    return MessageType::scanLeftStatus;
+}
+
 MessageType StartScanMessage::getType() {
     return MessageType::startScan;
 }
@@ -168,11 +188,11 @@ MessageType IndexesList::getType() {
     return MessageType::indexesList;
 }
 
-ScanStatusMessage::ScanStatusMessage(bool scanning, int taskIndex, int taskCount, const QString &lastObject,
+ScanStatusMessage::ScanStatusMessage(bool scanning, bool pause, int taskIndex, const QString &lastObject,
                                      int objLeft, int objScanned, QObject *parent): PipeMessage(parent) {
     this->scanning = scanning;
+    this->pause = pause;
     this->taskIndex = taskIndex;
-    this->taskCount = taskCount;
     this->lastObject = lastObject;
     this->objLeft = objLeft;
     this->objScanned = objScanned;
@@ -181,12 +201,16 @@ ScanStatusMessage::ScanStatusMessage(bool scanning, int taskIndex, int taskCount
 QByteArray ScanStatusMessage::toByteArray() {
     QByteArray array;
     QDataStream stream(&array, QIODevice::WriteOnly);
-    stream << getType() << scanning << taskIndex << taskCount << lastObject << objLeft << objScanned;
+    stream << getType() << scanning << pause << taskIndex << lastObject << objLeft << objScanned;
     return array;
 }
 
 bool ScanStatusMessage::isScanning() const {
     return scanning;
+}
+
+bool ScanStatusMessage::isPause() const {
+    return pause;
 }
 
 int ScanStatusMessage::getTaskIndex() const {
@@ -205,8 +229,44 @@ int ScanStatusMessage::getObjScanned() const {
     return objScanned;
 }
 
-int ScanStatusMessage::getTaskCount() const {
-    return taskCount;
+ScanPauseStatusMessage::ScanPauseStatusMessage(bool pause, int taskIndex, QObject *parent) : PipeMessage(parent) {
+    this->pause = pause;
+    this->taskIndex = taskIndex;
+}
+
+bool ScanPauseStatusMessage::isPause() const {
+    return pause;
+}
+
+QByteArray ScanPauseStatusMessage::toByteArray() {
+    QByteArray array;
+    QDataStream stream(&array, QIODevice::WriteOnly);
+    stream << getType() << pause << taskIndex;
+    return array;
+}
+
+int ScanPauseStatusMessage::getTaskIndex() const {
+    return taskIndex;
+}
+
+ScanLeftStatusMessage::ScanLeftStatusMessage(int taskIndex, int objLeft, QObject *parent) : PipeMessage(parent) {
+    this->taskIndex = taskIndex;
+    this->objLeft = objLeft;
+}
+
+QByteArray ScanLeftStatusMessage::toByteArray() {
+    QByteArray array;
+    QDataStream stream(&array, QIODevice::WriteOnly);
+    stream << getType() << taskIndex << objLeft;
+    return array;
+}
+
+int ScanLeftStatusMessage::getTaskIndex() const {
+    return taskIndex;
+}
+
+int ScanLeftStatusMessage::getObjLeft() const {
+    return objLeft;
 }
 
 StartScanMessage::StartScanMessage(const QStringList &objectPath, QObject *parent) : PipeMessage(parent) {
