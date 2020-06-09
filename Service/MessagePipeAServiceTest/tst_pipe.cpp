@@ -41,7 +41,7 @@ Pipe::~Pipe() {}
 void Pipe::initTestCase() {
     pipe1 = new AServiceMessagePipe(pipeName, this);
     pipe2 = new AServiceMessagePipe(pipeName, this);
-    scanStatus = new ScanStatusMessage(true, 69, 80, "C:\\Papka\\File.exe", 0, 0, this);
+    scanStatus = new ScanStatusMessage(true, true, 80, "C:\\Papka\\File.exe", 0, 0, this);
     QStringList data;
     data << "C:\\Papka\\DrugoyFile.zip";
     startScan = new StartScanMessage(data, this);
@@ -78,11 +78,10 @@ void Pipe::test_send_recieve_1msg() {
     QCOMPARE(recievedMsg->getCurObject(), QString("C:\\Papka\\File.exe"));
     QCOMPARE(recievedMsg->getObjLeft(), 0);
     QCOMPARE(recievedMsg->getObjScanned(), 0);
-    QCOMPARE(recievedMsg->getTaskCount(), 80);
 }
 
 void Pipe::test_send_recieve_1msg_otherway() {
-    scanStatus = new ScanStatusMessage(true, 69, 80, "C:\\Papka\\File.exe", 0, 0, this);
+    scanStatus = new ScanStatusMessage(true, true, 80, "C:\\Papka\\File.exe", 0, 0, this);
     pipe2->sendMessage(scanStatus);
     spy1->wait(1000);
     ScanStatusMessage *recievedMsg = qvariant_cast<ScanStatusMessage*>(spy1->takeFirst().at(0));
@@ -91,11 +90,10 @@ void Pipe::test_send_recieve_1msg_otherway() {
     QCOMPARE(recievedMsg->getCurObject(), QString("C:\\Papka\\File.exe"));
     QCOMPARE(recievedMsg->getObjLeft(), 0);
     QCOMPARE(recievedMsg->getObjScanned(), 0);
-    QCOMPARE(recievedMsg->getTaskCount(), 80);
 }
 
 void Pipe::test_send_recieve_allmsgs() {
-    scanStatus = new ScanStatusMessage(true, 69, 80, "C:\\Papka\\File.exe", 0, 0, this);
+    scanStatus = new ScanStatusMessage(true, true, 80, "C:\\Papka\\File.exe", 0, 0, this);
     pipe2->sendMessage(scanStatus);
     spy1->wait(4000);
     pipe2->sendMessage(startScan);
@@ -118,7 +116,6 @@ void Pipe::test_send_recieve_allmsgs() {
     QCOMPARE(rScanMsg->getCurObject(), QString("C:\\Papka\\File.exe"));
     QCOMPARE(rScanMsg->getObjLeft(), 0);
     QCOMPARE(rScanMsg->getObjScanned(), 0);
-    QCOMPARE(rScanMsg->getTaskCount(), 80);
     QCOMPARE(rStartMsg->getObjectPath(), QStringList("C:\\Papka\\DrugoyFile.zip"));
     QCOMPARE(rPauseMsg->getType(), MessageType::pauseScan); //
     QCOMPARE(rAddDirMsg->getPath(), QString("C:\\monitoretypapkypazhalasta"));
