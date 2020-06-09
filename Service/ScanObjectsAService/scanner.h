@@ -15,10 +15,12 @@ Q_OBJECT
     SignatureStorage *storage;
     SearchInstance *search;
     QVector<ScanObject*> queue;
+    bool waiting;
 public:
     explicit Scanner(HANDLE updateEvent, SignatureStorage *storage, SearchInstance *search, QObject *parent = nullptr);
     ~Scanner();
     bool event(QEvent *event) override;
+    bool isEmptyQueue() const;
 public slots:
     void scanning();
 signals:

@@ -25,6 +25,10 @@ AServiceFileSeeker::~AServiceFileSeeker() {
     CloseHandle(requestEvent);
 }
 
+bool AServiceFileSeeker::isEmptyQueue() const {
+    return seeker->isEmptyQueue();
+}
+
 void AServiceFileSeeker::findFiles(const QString &dirpath, const QString &pattern, bool recursive) const {
     QCoreApplication::postEvent(seeker, new RequestEvent(dirpath, pattern, recursive));
     SetEvent(requestEvent);

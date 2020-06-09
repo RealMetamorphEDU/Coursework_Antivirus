@@ -13,6 +13,7 @@ Scanner::Scanner(HANDLE updateEvent, SignatureStorage *storage, SearchInstance *
     this->working = false;
     this->pause = false;
     this->search = search;
+    waiting = false;
 }
 
 Scanner::~Scanner() {
@@ -41,16 +42,22 @@ bool Scanner::event(QEvent *event) {
     }
 }
 
+bool Scanner::isEmptyQueue() const {
+    return waiting && queue.isEmpty();
+}
+
 void Scanner::scanning() {
     if (working)
         return;
     working = true;
     while (working) {
+        waiting = true;
         WaitForSingleObject(updateEvent, INFINITE);
         QCoreApplication::processEvents();
         if (!working)
             break;
         while (!queue.isEmpty() && !pause) {
+            waiting = false;
             ScanObject *scanObject = queue.takeFirst();
             int regionCount = scanObject->getRegionsCount();
             bool infected = false;

@@ -16,9 +16,11 @@ Q_OBJECT
     bool working;
     HANDLE requestEvent;
     QVector<FindRequest> requests;
+    bool waiting;
 public:
     explicit Seeker(HANDLE requestEvent, QObject *parent = nullptr);
     bool event(QEvent *event) override;
+    bool isEmptyQueue() const;
 public slots:
     void searching();
 signals:

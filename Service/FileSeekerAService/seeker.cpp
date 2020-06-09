@@ -7,6 +7,7 @@
 Seeker::Seeker(HANDLE requestEvent, QObject *parent) : QObject(parent) {
     this->requestEvent = requestEvent;
     working = true;
+    waiting = false;
 }
 
 bool Seeker::event(QEvent *event) {
@@ -24,14 +25,20 @@ bool Seeker::event(QEvent *event) {
     }
 }
 
+bool Seeker::isEmptyQueue() const {
+    return waiting && requests.isEmpty();
+}
+
 
 void Seeker::searching() {
     while (working) {
+        waiting = true;
         WaitForSingleObject(requestEvent, INFINITE);
         QCoreApplication::processEvents(QEventLoop::AllEvents);
         while (!requests.isEmpty()) {
             if (!working)
                 break;
+            waiting = false;
             FindRequest request = requests.takeFirst();
             QDirIterator::IteratorFlags flags = request.recursive ?
                                                     QDirIterator::Subdirectories :

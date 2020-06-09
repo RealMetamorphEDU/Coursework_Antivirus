@@ -30,6 +30,10 @@ void AServiceScanObjects::setPause(bool pause) const {
     SetEvent(requestEvent);
 }
 
+bool AServiceScanObjects::isEmptyQueue() const {
+    return scanner->isEmptyQueue();
+}
+
 void AServiceScanObjects::scanScanObject(ScanObject *scanObject) const {
     QCoreApplication::postEvent(scanner, new ScanEvent(scanObject));
     SetEvent(requestEvent);

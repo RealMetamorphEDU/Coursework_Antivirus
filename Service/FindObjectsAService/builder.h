@@ -16,11 +16,13 @@ Q_OBJECT
     QVector<QString> requests;
     QVector<RawObject*> rawObjects;
     QVector<AbstractScanBuilder*> builders;
+    bool waiting;
 
     void initBuilders();
 public:
     explicit Builder(HANDLE updateEvent, QObject *parent = nullptr);
     bool event(QEvent *event) override;
+    bool isEmptyQueue() const;
 private slots:
     void building();
     void addRawObject(RawObject *rawObject);
@@ -28,8 +30,6 @@ signals:
     void foundScanObject(ScanObject *scanObject);
     void cantBuildThis(QString filepath, QString reason);
 };
-
-
 
 
 #endif // BUILDER_H

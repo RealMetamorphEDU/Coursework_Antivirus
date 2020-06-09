@@ -7,7 +7,6 @@
 #include "aservicefindobjects.h"
 #include "aservicescanobjects.h"
 #include "pipemessage.h"
-#include "QTimer"
 #include "scanresultstorage.h"
 
 class ScanTask: public QObject {
@@ -17,11 +16,13 @@ Q_OBJECT
     AServiceFindObjects *findObjects;
     AServiceScanObjects *scanObjects;
     ScanResultStorage *storage;
-    QTimer *timer;
     bool finished;
     int leftCount;
     int scannedCount;
     bool pause;
+    bool planned;
+
+    void planStopCheck();
 public:
     explicit ScanTask(int taskID, SignatureStorage *storage, const QStringList &files,
                       QObject *parent = nullptr);

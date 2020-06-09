@@ -23,6 +23,7 @@ Q_OBJECT
 public:
     AServiceFindObjects(QObject *parent = nullptr);
     ~AServiceFindObjects();
+    bool isEmptyQueue() const;
 public slots:
     void findObjects(const QString &filepath) const;
     void setPause(bool pause) const;

@@ -20,6 +20,7 @@ Builder::Builder(HANDLE updateEvent, QObject *parent) : QObject(parent) {
     this->updateEvent = updateEvent;
     working = false;
     pause = false;
+    waiting = false;
     initBuilders();
 }
 
@@ -43,16 +44,22 @@ bool Builder::event(QEvent *event) {
     }
 }
 
+bool Builder::isEmptyQueue() const {
+    return waiting && requests.isEmpty() && rawObjects.isEmpty();
+}
+
 void Builder::building() {
     if (working)
         return;
     working = true;
     while (working) {
+        waiting = true;
         WaitForSingleObject(updateEvent, INFINITE);
         QCoreApplication::processEvents();
         if (!working)
             break;
         while (!requests.isEmpty() && !pause) {
+            waiting = false;
             rawObjects.append(new SimpleRawObject(requests.takeFirst(), this));
             while (!rawObjects.isEmpty() && !pause) {
                 std::shared_ptr<RawObject> raw(rawObjects.takeFirst(), RawObject::deleter);

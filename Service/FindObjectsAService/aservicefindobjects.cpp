@@ -25,6 +25,10 @@ AServiceFindObjects::~AServiceFindObjects() {
     CloseHandle(requestEvent);
 }
 
+bool AServiceFindObjects::isEmptyQueue() const {
+    return builder->isEmptyQueue();
+}
+
 void AServiceFindObjects::findObjects(const QString &filepath) const {
     QCoreApplication::postEvent(builder, new FindEvent(filepath));
     SetEvent(requestEvent);
