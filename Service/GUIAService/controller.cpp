@@ -7,6 +7,8 @@
 #include <QQuickView>
 #include <QQmlComponent>
 #include <QFileDialog>
+#include <QUrl>
+#include "objectstatusmodel.h"
 
 
 char SERVICE_NAME[]{"AService"};
@@ -28,9 +30,14 @@ Controller::Controller(QObject *parent) : QObject(parent) {
 	qmlRegisterType<ScanStatusModel>("ScanStatus", 1, 0, "ScanStatusModel");
 	qmlRegisterUncreatableType<ScanStatusList>("ScanStatus", 1, 0, "ScanStatusList",
 	                                           QStringLiteral("ScanStatusList should not be created in QML"));
+	qmlRegisterType<ObjectStatusModel>("ScanStatus", 1, 0, "ObjectStatusModel");
+	qmlRegisterUncreatableType<ObjectStatusList>("ScanStatus", 1, 0, "ObjectStatusList",
+	                                             QStringLiteral("ObjectStatusList should not be created in QML"));
+
 	engine = new QQmlApplicationEngine(this);
 	scanStatusList = new ScanStatusList(this);
 	engine->rootContext()->setContextProperty("StatusList", scanStatusList);
+
 
 	const QUrl url(QStringLiteral("qrc:/main.qml"));
 
@@ -56,15 +63,7 @@ Controller::Controller(QObject *parent) : QObject(parent) {
 
 }
 
-Controller::~Controller() {
-	delete this->engine;
-	delete this->scanStatusList;
-	delete this->appWindow;
-	delete this->mainStackView;
-	delete this->pageView;
-	delete this->pipe;
-	delete this->serviceController;
-}
+Controller::~Controller() {}
 
 void Controller::connectUpdate(bool connected) {
 	this->connected = connected;
@@ -78,6 +77,13 @@ void Controller::onChooseFolderButtonClicked() {
 	connect(object, SIGNAL(choseFile(QString)), this,SLOT(onFileOpened(QString)));
 }
 
+void Controller::onObjectInfoClicked(int taskID) {
+	engine->rootContext()->setContextProperty("ObjectList", scanStatusList->getStatus(taskID).objectStatuses);
+	QQmlComponent component(engine,
+	                        QUrl::fromLocalFile("ScanInfoPage.qml"));
+	QObject *object = component.create();
+}
+
 void Controller::onChooseFileButtonClicked() {
 	QQmlComponent component(engine,
 	                        QUrl::fromLocalFile("FileDialogForm.qml"));
@@ -87,7 +93,9 @@ void Controller::onChooseFileButtonClicked() {
 
 void Controller::onFileOpened(QString dir) {
 	qDebug() << dir;
-	scanStatusList->updateScanStatus(ScanStatus{true, 1, "kek", 5, 5, 5});
+	QUrl url(dir);
+	pipe->sendMessage(new StartScanMessage(QStringList(url.toLocalFile())));
+
 }
 
 void Controller::page1Worker() {
@@ -97,6 +105,7 @@ void Controller::page1Worker() {
 		qDebug() << "Created page1Form";
 		connect(pageView, SIGNAL(chooseFileButtonClicked()), this,SLOT(onChooseFileButtonClicked()));
 		connect(pageView, SIGNAL(chooseFolderButtonClicked()), this,SLOT(onChooseFolderButtonClicked()));
+		connect(pageView, SIGNAL(objectInfoClicked(int)), this,SLOT(onObjectInfoClicked(int)));
 
 	} else
 		qDebug() << "page error";
@@ -124,9 +133,9 @@ void Controller::homeWorker() {
 }
 
 void Controller::onSwitchClicked() {
-	QObject* statusSwitch = pageView->findChild<QObject*>("stateSwitch");
+	QObject *statusSwitch = pageView->findChild<QObject*>("stateSwitch");
 	statusSwitch->setProperty("enabled", "false");
-	
+
 	if (!serviceController->serviceStatus)
 		serviceController->start();
 	else
@@ -137,11 +146,54 @@ void Controller::onSwitchClicked() {
 }
 
 void Controller::onConnectionStatusChanged(bool status) {
-	QObject* statusSwitch = pageView->findChild<QObject*>("stateSwitch");
+	QObject *statusSwitch = pageView->findChild<QObject*>("stateSwitch");
 	statusSwitch->setProperty("enabled", "true");
 }
 
 void Controller::receivedMessage(PipeMessage *message) {
-	switch (message->getType()) { }
+	switch (message->getType()) {
+		case MessageType::scanStatus: {
+			auto *msg = dynamic_cast<ScanStatusMessage*>(message);
+			auto status = scanStatusList->getStatus(msg->getTaskIndex()).objectStatuses;
+			scanStatusList->updateScanStatus(ScanStatus{
+				                                 msg->isScanning(), msg->getTaskIndex(), msg->getCurObject(),
+				                                 msg->getObjLeft(), msg->getObjScanned(), 0, status ?
+					                                                                             status :
+					                                                                             new ObjectStatusList()
+			                                 });
+		}
+		break;
+		case MessageType::stopScan: {
+			auto *msg = dynamic_cast<StopScanMessage*>(message);
+			scanStatusList->removeScanStatus(msg->getTaskIndex());
+		}
+		break;
+		case MessageType::addDirToMonitor:
+			break;
+		case MessageType::remDirFromMonitor:
+			break;
+		case MessageType::monitoredDirectories:
+			break;
+		case MessageType::startDirMonitor:
+			break;
+		case MessageType::stopDirMonitor:
+			break;
+		case MessageType::objectStatus: {
+			auto *msg = dynamic_cast<ObjectStatusMessage*>(message);
+			auto currentStatus = scanStatusList->getStatus(msg->getTaskId());
+			currentStatus.objectStatuses->addObjectStatus(ObjectStatus{
+				                                              msg->isInfected(), msg->isBreak(), msg->getPath(),
+				                                              msg->getInfection()
+			                                              });
+		}
+		break;
+		case MessageType::lostWatch:
+			break;
+		case MessageType::resultList:
+			break;
+		case MessageType::indexesList:
+			break;
+		default: ;
+	}
+	message->deleteLater();
 }
-

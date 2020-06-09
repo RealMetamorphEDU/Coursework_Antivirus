@@ -37,7 +37,7 @@ void ScanTask::setPause(bool pause) {
         this->pause = pause;
         findObjects->setPause(pause);
         scanObjects->setPause(pause);
-        emit sendScanStatus(new ScanStatusMessage(pause, taskID, *taskCount, "", leftCount, scannedCount,
+        emit sendScanStatus(new ScanStatusMessage(!pause, taskID, *taskCount, "", leftCount, scannedCount,
                                                   this));
         if (pause)
             timer->stop();
@@ -60,14 +60,14 @@ void ScanTask::timeout() {
 void ScanTask::foundScanObject(ScanObject *scanObject) {
     leftCount++;
     timer->start();
-    emit sendScanStatus(new ScanStatusMessage(pause, taskID, *taskCount, "", leftCount, scannedCount,
+    emit sendScanStatus(new ScanStatusMessage(!pause, taskID, *taskCount, "", leftCount, scannedCount,
                                               this));
 }
 
 void ScanTask::cantBuildThis(const QString &filepath, const QString &reason) {
     scannedCount++;
     emit sendObjectStatus(new ObjectStatusMessage(taskID, false, true, filepath, reason, this));
-    emit sendScanStatus(new ScanStatusMessage(pause, taskID, *taskCount, filepath, leftCount, scannedCount,
+    emit sendScanStatus(new ScanStatusMessage(!pause, taskID, *taskCount, filepath, leftCount, scannedCount,
                                               this));
     timer->start();
     storage->addResult({filepath, reason, false, true});
@@ -77,7 +77,7 @@ void ScanTask::uninfected(const QString &filename) {
     scannedCount++;
     leftCount--;
     emit sendObjectStatus(new ObjectStatusMessage(taskID, false, false, filename, "", this));
-    emit sendScanStatus(new ScanStatusMessage(pause, taskID, *taskCount, filename, leftCount - scannedCount,
+    emit sendScanStatus(new ScanStatusMessage(!pause, taskID, *taskCount, filename, leftCount,
                                               scannedCount,
                                               this));
     timer->start();
@@ -88,7 +88,7 @@ void ScanTask::infectedBy(const QString &filename, const QString &signatureName)
     scannedCount++;
     leftCount--;
     emit sendObjectStatus(new ObjectStatusMessage(taskID, true, false, filename, signatureName, this));
-    emit sendScanStatus(new ScanStatusMessage(pause, taskID, *taskCount, filename, leftCount - scannedCount,
+    emit sendScanStatus(new ScanStatusMessage(!pause, taskID, *taskCount, filename, leftCount,
                                               scannedCount,
                                               this));
     timer->start();

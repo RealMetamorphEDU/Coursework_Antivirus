@@ -3,6 +3,7 @@
 
 #include <QObject>
 #include <QHash>
+#include "objectstatuslist.h"
 
 struct ScanStatus {
     bool scanning;
@@ -11,6 +12,7 @@ struct ScanStatus {
     int objLeft;
     int objScanned;
     int foundCount;
+    ObjectStatusList* objectStatuses;
 };
 
 class ScanStatusList: public QObject {
@@ -26,8 +28,9 @@ public:
     ScanStatus getRow(int row) const;
     int getCount() const;
 signals:
+    void changedRow(int row);
     void beginInsertRow(int row);
-    void beginRemovRow(int row);
+    void beginRemoveRow(int row);
     void insertedRow();
     void removedRow();
 };

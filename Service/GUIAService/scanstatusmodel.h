@@ -14,7 +14,8 @@ Q_OBJECT
         lastObjectRole,
         objLeftRole,
         objScannedRole,
-        foundCountRole
+        foundCountRole,
+		//objectStatusRole
     };
 
     ScanStatusList *list;

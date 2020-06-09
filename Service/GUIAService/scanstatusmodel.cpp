@@ -27,6 +27,7 @@ QVariant ScanStatusModel::data(const QModelIndex &index, int role) const {
             return QVariant(scanStatus.objScanned);
         case foundCountRole:
             return QVariant(scanStatus.foundCount);
+
     }
     return QVariant();
 }
@@ -55,7 +56,7 @@ void ScanStatusModel::setList(ScanStatusList *value) {
         connect(list, &ScanStatusList::beginInsertRow, this, [=](int row) {
             beginInsertRows(QModelIndex(), row, row);
         });
-        connect(list, &ScanStatusList::beginRemovRow, this, [=](int row) {
+        connect(list, &ScanStatusList::beginRemoveRow, this, [=](int row) {
             beginRemoveRows(QModelIndex(), row, row);
         });
         connect(list, &ScanStatusList::insertedRow, this, [=]() {
@@ -63,6 +64,9 @@ void ScanStatusModel::setList(ScanStatusList *value) {
         });
         connect(list, &ScanStatusList::removedRow, this, [=]() {
             endRemoveRows();
+        });
+    	connect(list, &ScanStatusList::changedRow, this, [=](int row) {
+            dataChanged(index(row,0),index(row,0));
         });
     }
     endResetModel();

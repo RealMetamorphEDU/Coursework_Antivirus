@@ -12,6 +12,7 @@ Page {
     height: 600
     signal chooseFileButtonClicked()
     signal chooseFolderButtonClicked()
+    signal objectInfoClicked(int taskID)
     title: qsTr("Сканировать файлы...")
 
     ColumnLayout {
@@ -159,6 +160,7 @@ Page {
                 Button{
                     id: moreButton
                     text: "Подробности"
+                    onClicked: objectInfoClicked(taskIndex)
                 }
                 Text{
                     text: qsTr("Найдено угроз: " + foundCount)

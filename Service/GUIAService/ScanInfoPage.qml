@@ -2,9 +2,12 @@ import QtQuick 2.12
 import QtQuick.Controls 2.5
 import QtQuick.Controls.Universal 2.12
 import QtQuick.Layouts 1.14
-
+import QtQuick.Dialogs 1.2
 import ScanStatus 1.0
 
+Dialog {
+    visible: true
+    title: "Blue sky dialog"
 Page {
     id: page
     width: 800
@@ -67,25 +70,8 @@ Page {
             anchors.topMargin: 15
             spacing: 10
             clip: true
-            model: ListModel{
-                ListElement{
-                    fileName: "File.exe"
-                    infectionReason: ""
-                    infected: false
-                    brek: false
-                }
-                ListElement{
-                    fileName: "Minecraft.exe"
-                    infectionReason: "вы сейчас в него играете"
-                    infected: false
-                    brek: true
-                }
-                ListElement{
-                    fileName: "Photoshop CRACK 100% WORKS 100% NOT A VIRUS.exe"
-                    infectionReason: "virus"
-                    infected: true
-                    brek: false
-                }
+            model: ObjectStatusModel{
+            statusList: ObjectList
             }
 
 
@@ -127,4 +113,5 @@ Page {
 
 
 
+}
 }

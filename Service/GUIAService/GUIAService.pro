@@ -16,12 +16,16 @@ DEFINES += QT_DEPRECATED_WARNINGS
 SOURCES += \
     controller.cpp \
     main.cpp \
+    objectstatuslist.cpp \
+    objectstatusmodel.cpp \
     scanstatuslist.cpp \
     scanstatusmodel.cpp \
     servicecontroller.cpp
 
 HEADERS += \
     controller.h \
+    objectstatuslist.h \
+    objectstatusmodel.h \
     scanstatuslist.h \
     scanstatusmodel.h \
     servicecontroller.h

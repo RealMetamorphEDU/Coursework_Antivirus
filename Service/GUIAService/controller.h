@@ -26,6 +26,7 @@ public:
 public slots:
     void onChooseFileButtonClicked();
     void onChooseFolderButtonClicked();
+    void onObjectInfoClicked(int taskID);
     void page1Worker();
     void page2Worker();
     void homeWorker();
@@ -34,6 +35,7 @@ public slots:
     void onFileOpened(QString dir);
     void receivedMessage(PipeMessage* message);
     void onConnectionStatusChanged(bool status);
+	
 };
 
 #endif // CONTROLLER_H
