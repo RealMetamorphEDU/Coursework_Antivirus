@@ -17,8 +17,10 @@ QVariant ScanStatusModel::data(const QModelIndex &index, int role) const {
     switch (role) {
         case scanningRole:
             return QVariant(scanStatus.scanning);
+    	case pauseRole:
+            return QVariant(scanStatus.pause);
         case taskIndexRole:
-            return QVariant(scanStatus.taskID);
+            return QVariant(scanStatus.taskIndex);
         case lastObjectRole:
             return QVariant(scanStatus.lastObject);
         case objLeftRole:
@@ -35,6 +37,7 @@ QVariant ScanStatusModel::data(const QModelIndex &index, int role) const {
 QHash<int, QByteArray> ScanStatusModel::roleNames() const {
     QHash<int, QByteArray> names;
     names[scanningRole] = "scanning";
+    names[pauseRole] = "pause";
     names[taskIndexRole] = "taskIndex";
     names[lastObjectRole] = "lastObject";
     names[objLeftRole] = "objLeft";

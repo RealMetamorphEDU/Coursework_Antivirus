@@ -6,8 +6,8 @@ ObjectStatusList::ObjectStatusList(QObject *parent) : QObject(parent)
 }
 
 void ObjectStatusList::addObjectStatus(const ObjectStatus& status) {
-	
-	emit beginInsertRow(statuses.length());
+	auto len = !statuses.isEmpty() ? statuses.length() : 0;
+	emit beginInsertRow(len);
 	statuses.append(status);
 	emit insertedRow();
 }

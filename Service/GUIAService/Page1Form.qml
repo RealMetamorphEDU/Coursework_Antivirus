@@ -105,8 +105,8 @@ Page {
             height: 50
             state: completed ? "" : "expanded"
             //state: "expanded"
-            property bool completed : !scanning && objLeft === 0 && lastObject === ""
-            property bool paused : !scanning && objLeft > 0
+            //property bool completed : !scanning && objLeft === 0 && lastObject === ""
+            //property bool paused : !scanning && objLeft > 0
 
             Row {
                 id: row
@@ -125,7 +125,7 @@ Page {
                     anchors.topMargin: 8
                     Text {
                         text: qsTr("Сканирование #" + taskIndex.toString() + " - " +
-                                   (completed ? "Готово" : paused ? "Приостановлено" : "В процессе"))
+                                   (!scanning ? "Готово" : pause ? "Приостановлено" : "В процессе"))
                         anchors.left: parent.left
                         anchors.leftMargin: parent.width + 10
                         anchors.top: parent.top
@@ -133,7 +133,7 @@ Page {
 
                         font.pointSize: 14
                         BusyIndicator {
-                            visible: !completed && !paused
+                            visible: scanning
                             anchors.left: parent.left
                             anchors.leftMargin: parent.width + 10
                             anchors.top: parent.top
@@ -197,13 +197,13 @@ Page {
                         }
 
                         Text{
-                            text: qsTr(objScanned.toString() + " из " + (objScanned+objLeft).toString())
+                            text: qsTr(objScanned + " из " + objScanned+objLeft)
                             font.pointSize: 12
                         }
                         Button{
-                            text: qsTr(!paused ? "Пауза" : "Продолжить")
+                            text: qsTr(!pause ? "Пауза" : "Продолжить")
                             anchors.verticalCenter: lastFileText.verticalCenter
-                            icon.source: !paused ? "icons/pause.png" : "icons/play-button.png"
+                            icon.source: !pause ? "icons/pause.png" : "icons/play-button.png"
                         }
                     }
                     Row{
@@ -242,9 +242,9 @@ Page {
                 State{
                     name: "expanded"
 
-                    PropertyChanges { target: completedRow; visible: completed }
-                    PropertyChanges { target: runningRow; visible: !completed }
-                    PropertyChanges { target: itemDelegate; height: completed ? 95 : 135}
+                    PropertyChanges { target: completedRow; visible: !scanning }
+                    PropertyChanges { target: runningRow; visible: scanning }
+                    PropertyChanges { target: itemDelegate; height: !scanning ? 95 : 135}
                     PropertyChanges { target: deleteButton; visible: true}
                 }
 

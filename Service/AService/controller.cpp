@@ -64,7 +64,6 @@ Controller::Controller(AServiceLog *logger, SERVICE_STATUS_HANDLE handle, QObjec
     connect(pipe, &AServiceMessagePipe::connectUpdate, this, &Controller::connectUpdate);
     connect(pipe, &AServiceMessagePipe::receivedMessage, this, &Controller::receivedMessage);
     connect(watcher, &WatchTask::sendMessage, pipe, &AServiceMessagePipe::sendMessage);
-    connect(watcher, &WatchTask::sendMessage, pipe, &AServiceMessagePipe::sendMessage);
     this->connected = pipe->isConnected();
     lastIndex = 0;
     logger->info("CONTROLLER", "Initialization completed.");
@@ -140,7 +139,6 @@ void Controller::receivedMessage(PipeMessage *message) {
                 break;
             }
             auto *task = new ScanTask(lastIndex, loader->getStorage(innerName), start->getObjectPath(), pipe);
-            connect(task, &ScanTask::sendMessage, pipe, &AServiceMessagePipe::sendMessage);
             connect(task, &ScanTask::sendMessage, pipe, &AServiceMessagePipe::sendMessage);
             scanTasks.insert(lastIndex, task);
             logger->info("CONTROLLER",

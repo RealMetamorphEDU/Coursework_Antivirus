@@ -10,6 +10,7 @@ Q_OBJECT
 
     enum {
         scanningRole = Qt::UserRole,
+        pauseRole,
         taskIndexRole,
         lastObjectRole,
         objLeftRole,

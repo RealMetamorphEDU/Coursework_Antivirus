@@ -154,13 +154,35 @@ void Controller::receivedMessage(PipeMessage *message) {
 	switch (message->getType()) {
 		case MessageType::scanStatus: {
 			auto *msg = dynamic_cast<ScanStatusMessage*>(message);
-			auto status = scanStatusList->getStatus(msg->getTaskIndex()).objectStatuses;
+			auto status = scanStatusList->getStatus(msg->getTaskIndex());
+			if (!status.objectStatuses)
+				status.objectStatuses = new ObjectStatusList;
 			scanStatusList->updateScanStatus(ScanStatus{
-				                                 msg->isScanning(), msg->getTaskIndex(), msg->getCurObject(),
-				                                 msg->getObjLeft(), msg->getObjScanned(), 0, status ?
-					                                                                             status :
-					                                                                             new ObjectStatusList()
+				                                 msg->isScanning(), msg->isPause(), msg->getTaskIndex(),
+				                                 msg->getCurObject(),
+				                                 msg->getObjLeft(), msg->getObjScanned(), status.foundCount,
+				                                 status.objectStatuses
 			                                 });
+		}
+		break;
+		case MessageType::scanPauseStatus: {
+			auto *msg = dynamic_cast<ScanPauseStatusMessage*>(message);
+			auto status = scanStatusList->getStatus(msg->getTaskIndex());
+			if (!status.objectStatuses)
+				status.objectStatuses = new ObjectStatusList;
+			status.taskIndex = msg->getTaskIndex();
+			status.pause = msg->isPause();
+			scanStatusList->updateScanStatus(status);
+		}
+		break;
+		case MessageType::scanLeftStatus: {
+			auto *msg = dynamic_cast<ScanLeftStatusMessage*>(message);
+			auto status = scanStatusList->getStatus(msg->getTaskIndex());
+			if (!status.objectStatuses)
+				status.objectStatuses = new ObjectStatusList;
+			status.taskIndex = msg->getTaskIndex();
+			status.objLeft = msg->getObjLeft();
+			scanStatusList->updateScanStatus(status);
 		}
 		break;
 		case MessageType::stopScan: {
@@ -179,6 +201,7 @@ void Controller::receivedMessage(PipeMessage *message) {
 		case MessageType::stopDirMonitor:
 			break;
 		case MessageType::objectStatus: {
+			// if infected foundcount++
 			auto *msg = dynamic_cast<ObjectStatusMessage*>(message);
 			auto currentStatus = scanStatusList->getStatus(msg->getTaskId());
 			currentStatus.objectStatuses->addObjectStatus(ObjectStatus{

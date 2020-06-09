@@ -4,28 +4,37 @@ import QtQuick.Controls.Universal 2.12
 import QtQuick.Layouts 1.14
 import QtQuick.Dialogs 1.2
 import ScanStatus 1.0
+import QtQuick.Window 2.12
 
-Dialog {
+Window {
     visible: true
-    title: "Blue sky dialog"
-Page {
-    id: page
+    title: "Подробности о сканировании"
     width: 800
     height: 600
-    objectName: "homeForm"
+    maximumHeight: height
+    maximumWidth: width
 
-    title: qsTr("Главная")
+    minimumHeight: height
+    minimumWidth: width
 
-//    ColumnLayout {
-//        id: columnLayout
-//        width: 550
-//        height: 0
-//        anchors.left: parent.left
-//        anchors.leftMargin: 25
-//        anchors.top: parent.top
-//        anchors.topMargin: 30
+    Page {
+        id: page
+        width: parent.width
+        height: parent.height
+        objectName: "homeForm"
 
-//        spacing: 20
+        title: qsTr("Главная")
+
+        //    ColumnLayout {
+        //        id: columnLayout
+        //        width: 550
+        //        height: 0
+        //        anchors.left: parent.left
+        //        anchors.leftMargin: 25
+        //        anchors.top: parent.top
+        //        anchors.topMargin: 30
+
+        //        spacing: 20
 
         Label {
             id: pseudoLogo
@@ -44,7 +53,7 @@ Page {
 
         Label {
             id: amountLabel
-            text: qsTr("Проверено файлов: " + "amount")
+            text: qsTr("Проверено файлов: " + listView.model.rowCount())
             font.pointSize: 16
             anchors.left: pseudoLogo.left
             anchors.top: pseudoLogo.bottom
@@ -71,7 +80,7 @@ Page {
             spacing: 10
             clip: true
             model: ObjectStatusModel{
-            statusList: ObjectList
+                statusList: ObjectList
             }
 
 
@@ -94,12 +103,12 @@ Page {
                     height: parent.height
                 }
                 Text{
-                    text: "Файл: " + fileName
+                    text: "Файл: " + path
                     font.pointSize: 12
                     anchors.verticalCenter: fileIcon.verticalCenter
                 }
                 Text{
-                    text: infected ? "Заражен: " + infectionReason : (brek ? "ОШИБКА: " + infectionReason: "")
+                    text: infected ? "Заражен: " + infection : (brek ? "ОШИБКА: " + infection: "")
                     font.pointSize: 12
                     anchors.verticalCenter: fileIcon.verticalCenter
                     color: infected  ? "#ff4444" : "Orange"
@@ -113,5 +122,5 @@ Page {
 
 
 
-}
+    }
 }

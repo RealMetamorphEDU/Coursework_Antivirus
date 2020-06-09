@@ -7,7 +7,8 @@
 
 struct ScanStatus {
     bool scanning;
-    int taskID;
+    bool pause;
+    int taskIndex;
     QString lastObject;
     int objLeft;
     int objScanned;
@@ -23,8 +24,8 @@ public:
     explicit ScanStatusList(QObject *parent = nullptr);
 
     void updateScanStatus(const ScanStatus &status);
-    void removeScanStatus(int taskID);
-    ScanStatus getStatus(int taskID) const;
+    void removeScanStatus(int taskIndex);
+    ScanStatus getStatus(int taskIndex) const;
     ScanStatus getRow(int row) const;
     int getCount() const;
 signals:
