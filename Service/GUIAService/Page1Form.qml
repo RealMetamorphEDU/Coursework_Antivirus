@@ -232,6 +232,7 @@ Page {
                     Button{
                         id: ppButton
                         text: qsTr(!pause ? "Пауза" : "Продолжить")
+                        enabled: enabledState
                         icon.source: !pause ? "icons/pause.png" : "icons/play-button.png"
                         onClicked: !pause ? pauseClicked(taskIndex) : continueClicked(taskIndex)
                     }
@@ -280,6 +281,7 @@ Page {
                 id: deleteButton
                 visible: false
                 text: qsTr("")
+                enabled: enabledState
                 anchors.right: parent.right
                 anchors.rightMargin: 10
                 anchors.bottom: parent.bottom

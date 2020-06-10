@@ -29,6 +29,8 @@ QVariant ScanStatusModel::data(const QModelIndex &index, int role) const {
             return QVariant(scanStatus.objScanned);
         case foundCountRole:
             return QVariant(scanStatus.foundCount);
+    	case enabledStateRole:
+            return QVariant(list->getState(scanStatus.taskIndex));
 
     }
     return QVariant();
@@ -43,6 +45,7 @@ QHash<int, QByteArray> ScanStatusModel::roleNames() const {
     names[objLeftRole] = "objLeft";
     names[objScannedRole] = "objScanned";
     names[foundCountRole] = "foundCount";
+    names[enabledStateRole] = "enabledState";
     return names;
 }
 

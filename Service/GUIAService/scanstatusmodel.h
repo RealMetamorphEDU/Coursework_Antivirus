@@ -16,6 +16,7 @@ Q_OBJECT
         objLeftRole,
         objScannedRole,
         foundCountRole,
+        enabledStateRole,
 		//objectStatusRole
     };
 

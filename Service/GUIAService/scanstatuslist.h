@@ -20,8 +20,11 @@ class ScanStatusList: public QObject {
 Q_OBJECT
     QHash<int, ScanStatus> statuses;
     QVector<int> keys;
+    QVector<bool> states;
 public:
-    explicit ScanStatusList(QObject *parent = nullptr);
+bool getState(int taskIndex);
+void updateState(int taskIndex,bool state);
+explicit ScanStatusList(QObject *parent = nullptr);
 
     void updateScanStatus(const ScanStatus &status);
     void removeScanStatus(int taskIndex);

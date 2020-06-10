@@ -30,6 +30,7 @@ class Controller: public QObject {
 	ServiceController *serviceController;
 	bool connected;
 	bool serviceStatus;
+	quint64 totalthreats;
 
 
 	bool page2FirstLoad;

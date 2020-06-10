@@ -23,6 +23,7 @@ Controller::Controller(QObject *parent) : QObject(parent) {
 	this->pipe = new AServiceMessagePipe(innerName, this);
 	this->serviceController = new ServiceController(QString(SERVICE_NAME), this);
 	this->foundObjects = new ObjectStatusList(this);
+	totalthreats = 0;
 	if (!serviceController->init())
 		qDebug() << "Unexpected service init error";
 	if (this->pipe->isBreak()) {
@@ -136,16 +137,17 @@ void Controller::onFileOpened(QString dir) {
 void Controller::onPauseClicked(int taskIndex) {
 	//TODO: добавить изменение кнопки при получении ответа
 	pipe->sendMessage(new PauseScanMessage(taskIndex, true));
+	scanStatusList->updateState(taskIndex, false);
 }
 
 void Controller::onStopClicked(int taskIndex) {
 	pipe->sendMessage(new StopScanMessage(taskIndex));
 	scanStatusList->removeScanStatus(taskIndex);
-
 }
 
 void Controller::onContinueClicked(int taskIndex) {
 	pipe->sendMessage(new PauseScanMessage(taskIndex, false));
+	scanStatusList->updateState(taskIndex, false);
 }
 
 void Controller::page2Worker() {
@@ -260,6 +262,7 @@ void Controller::receivedMessage(PipeMessage *message) {
 			status.taskIndex = msg->getTaskIndex();
 			status.pause = msg->isPause();
 			scanStatusList->updateScanStatus(status);
+			scanStatusList->updateState(status.taskIndex, true);
 		}
 		break;
 		case MessageType::scanLeftStatus: {
@@ -318,16 +321,19 @@ void Controller::receivedMessage(PipeMessage *message) {
 			auto *msg = dynamic_cast<ObjectStatusMessage*>(message);
 			if (msg->getTaskId() != -1) {
 				auto currentStatus = scanStatusList->getStatus(msg->getTaskId());
+				if (msg->isInfected()) {
+					currentStatus.foundCount++;
+				}
 				currentStatus.objectStatuses->addObjectStatus(ObjectStatus{
 					                                              msg->isInfected(), msg->isBreak(), msg->getPath(),
 					                                              msg->getInfection()
 				                                              });
-			}
-			else
+				scanStatusList->updateScanStatus(currentStatus);
+			} else
 				foundObjects->addObjectStatus(ObjectStatus{
-																  msg->isInfected(), msg->isBreak(), msg->getPath(),
-																  msg->getInfection()
-					});
+					                              msg->isInfected(), msg->isBreak(), msg->getPath(),
+					                              msg->getInfection()
+				                              });
 		}
 		break;
 		case MessageType::lostWatch:
