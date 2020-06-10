@@ -22,12 +22,12 @@ ScanTask::ScanTask(int taskID, SignatureStorage *storage, const QStringList &fil
     this->pause = false;
     this->finished = false;
     planned = false;
-    connect(fileSeeker, &AServiceFileSeeker::foundFile, findObjects, &AServiceFindObjects::findObjects);
-    //connect(findObjects, &AServiceFindObjects::foundScanObject, scanObjects, &AServiceScanObjects::scanScanObject);
-    connect(findObjects, &AServiceFindObjects::foundScanObject, this, &ScanTask::foundScanObject);
-    connect(findObjects, &AServiceFindObjects::cantBuildThis, this, &ScanTask::cantBuildThis);
-    connect(scanObjects, &AServiceScanObjects::infectedBy, this, &ScanTask::infectedBy);
-    connect(scanObjects, &AServiceScanObjects::uninfected, this, &ScanTask::uninfected);
+    QObject::connect(fileSeeker, &AServiceFileSeeker::foundFile, findObjects, &AServiceFindObjects::findObjects, Qt::ConnectionType::QueuedConnection);
+    QObject::connect(findObjects, &AServiceFindObjects::foundScanObject, scanObjects, &AServiceScanObjects::scanScanObject, Qt::ConnectionType::QueuedConnection);
+    QObject::connect(findObjects, &AServiceFindObjects::foundScanObject, this, &ScanTask::foundScanObject, Qt::ConnectionType::QueuedConnection);
+    QObject::connect(findObjects, &AServiceFindObjects::cantBuildThis, this, &ScanTask::cantBuildThis, Qt::ConnectionType::QueuedConnection);
+    QObject::connect(scanObjects, &AServiceScanObjects::infectedBy, this, &ScanTask::infectedBy, Qt::ConnectionType::QueuedConnection);
+    QObject::connect(scanObjects, &AServiceScanObjects::uninfected, this, &ScanTask::uninfected, Qt::ConnectionType::QueuedConnection);
     for (int i = 0; i < files.count(); ++i) {
         QFileInfo info(files.at(i));
         if (info.isDir())
@@ -70,7 +70,6 @@ void ScanTask::timeout() {
 void ScanTask::foundScanObject(ScanObject *scanObject) {
     leftCount++;
     emit sendMessage(new ScanLeftStatusMessage(taskIndex, leftCount, this));
-    scanObjects->scanScanObject(scanObject);
 }
 
 void ScanTask::cantBuildThis(const QString &filepath, const QString &reason) {

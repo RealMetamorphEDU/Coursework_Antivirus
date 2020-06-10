@@ -6,9 +6,9 @@ WatchTask::WatchTask(SignatureStorage *storage, QObject *parent) : QObject(paren
     this->findObjects = new AServiceFindObjects(scanObjects);
     this->storage = new ScanResultStorage(this);
     this->pause = false;
-    connect(findObjects, &AServiceFindObjects::foundScanObject, scanObjects, &AServiceScanObjects::scanScanObject);
-    connect(findObjects, &AServiceFindObjects::cantBuildThis, this, &WatchTask::cantBuildThis);
-    connect(scanObjects, &AServiceScanObjects::infectedBy, this, &WatchTask::infectedBy);
+    connect(findObjects, &AServiceFindObjects::foundScanObject, scanObjects, &AServiceScanObjects::scanScanObject, Qt::ConnectionType::QueuedConnection);
+    connect(findObjects, &AServiceFindObjects::cantBuildThis, this, &WatchTask::cantBuildThis, Qt::ConnectionType::QueuedConnection);
+    connect(scanObjects, &AServiceScanObjects::infectedBy, this, &WatchTask::infectedBy, Qt::ConnectionType::QueuedConnection);
     connect(fileWatchDog, &FileWatchDog::changeNotify, this, &WatchTask::changeNotify);
 }
 
