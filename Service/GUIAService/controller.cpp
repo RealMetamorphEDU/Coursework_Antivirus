@@ -9,7 +9,9 @@
 #include <QFileDialog>
 #include <QUrl>
 #include "objectstatusmodel.h"
-
+#include "watchingdirectoriesmodel.h"
+#include "watchingdirecotrieslist.h"
+#include "watchproperties.h"
 
 char SERVICE_NAME[]{"AService"};
 
@@ -20,6 +22,7 @@ Controller::Controller(QObject *parent) : QObject(parent) {
 	this->innerName = "AntivirusService";
 	this->pipe = new AServiceMessagePipe(innerName, this);
 	this->serviceController = new ServiceController(QString(SERVICE_NAME), this);
+	this->foundObjects = new ObjectStatusList(this);
 	if (!serviceController->init())
 		qDebug() << "Unexpected service init error";
 	if (this->pipe->isBreak()) {
@@ -33,11 +36,23 @@ Controller::Controller(QObject *parent) : QObject(parent) {
 	qmlRegisterType<ObjectStatusModel>("ScanStatus", 1, 0, "ObjectStatusModel");
 	qmlRegisterUncreatableType<ObjectStatusList>("ScanStatus", 1, 0, "ObjectStatusList",
 	                                             QStringLiteral("ObjectStatusList should not be created in QML"));
+	qmlRegisterType<WatchingDirectoriesModel>("ScanStatus", 1, 0, "WatchingDirectoriesModel");
+	qmlRegisterUncreatableType<WatchingDirectoriesList>("ScanStatus", 1, 0, "WatchingDirectoriesList",
+	                                                    QStringLiteral("WatchingDirectoriesList should not be created in QML"));
 
 	engine = new QQmlApplicationEngine(this);
 	scanStatusList = new ScanStatusList(this);
 	engine->rootContext()->setContextProperty("StatusList", scanStatusList);
 
+	watchingDirectories = new WatchingDirectoriesList(this);
+
+	//watchingDirectories->appendDir("hewwo");
+	//qRegisterMetaType<QStringList>();
+	engine->rootContext()->setContextProperty("DirectoriesList", watchingDirectories);
+	//watchingDirectories->setList(QStringList("hewwo uwu"));
+
+	watchProperties = new WatchProperties();
+	engine->rootContext()->setContextProperty("WatchProperties", watchProperties);
 
 	const QUrl url(QStringLiteral("qrc:/main.qml"));
 
@@ -61,6 +76,7 @@ Controller::Controller(QObject *parent) : QObject(parent) {
 		qDebug() << "Created mainStackView";
 	}
 
+	page2FirstLoad = true;
 }
 
 Controller::~Controller() {}
@@ -68,6 +84,22 @@ Controller::~Controller() {}
 void Controller::connectUpdate(bool connected) {
 	this->connected = connected;
 	qDebug() << "Connected";
+}
+
+
+void Controller::page1Worker() {
+
+	pageView = mainStackView->findChild<QObject*>("page1Form");
+	if (pageView) {
+		qDebug() << "Created page1Form";
+		connect(pageView, SIGNAL(chooseFileButtonClicked()), this, SLOT(onChooseFileButtonClicked()));
+		connect(pageView, SIGNAL(chooseFolderButtonClicked()), this, SLOT(onChooseFolderButtonClicked()));
+		connect(pageView, SIGNAL(objectInfoClicked(int)), this, SLOT(onObjectInfoClicked(int)));
+		connect(pageView, SIGNAL(pauseClicked(int)), this, SLOT(onPauseClicked(int)));
+		connect(pageView, SIGNAL(stopClicked(int)), this, SLOT(onStopClicked(int)));
+		connect(pageView, SIGNAL(continueClicked(int)), this, SLOT(onContinueClicked(int)));
+	} else
+		qDebug() << "page error";
 }
 
 void Controller::onChooseFolderButtonClicked() {
@@ -86,7 +118,6 @@ void Controller::onObjectInfoClicked(int taskID) {
 }
 
 
-
 void Controller::onChooseFileButtonClicked() {
 	QQmlComponent component(engine,
 	                        QUrl::fromLocalFile("FileDialogForm.qml"));
@@ -101,41 +132,76 @@ void Controller::onFileOpened(QString dir) {
 
 }
 
-void Controller::page1Worker() {
 
-	pageView = mainStackView->findChild<QObject*>("page1Form");
-	if (pageView) {
-		qDebug() << "Created page1Form";
-		connect(pageView, SIGNAL(chooseFileButtonClicked()), this,SLOT(onChooseFileButtonClicked()));
-		connect(pageView, SIGNAL(chooseFolderButtonClicked()), this,SLOT(onChooseFolderButtonClicked()));
-		connect(pageView, SIGNAL(objectInfoClicked(int)), this,SLOT(onObjectInfoClicked(int)));
-		connect(pageView, SIGNAL(pauseClicked(int)), this, SLOT(onPauseClicked(int)));
-		connect(pageView, SIGNAL(stopClicked(int)), this, SLOT(onStopClicked(int)));
-		connect(pageView, SIGNAL(continueClicked(int)), this, SLOT(onContinueClicked(int)));
-	} else
-		qDebug() << "page error";
-}
-
-void Controller::onPauseClicked(int taskIndex) { //TODO: добавить изменение кнопки при получении ответа
+void Controller::onPauseClicked(int taskIndex) {
+	//TODO: добавить изменение кнопки при получении ответа
 	pipe->sendMessage(new PauseScanMessage(taskIndex, true));
 }
+
 void Controller::onStopClicked(int taskIndex) {
 	pipe->sendMessage(new StopScanMessage(taskIndex));
 	scanStatusList->removeScanStatus(taskIndex);
-	
+
 }
+
 void Controller::onContinueClicked(int taskIndex) {
 	pipe->sendMessage(new PauseScanMessage(taskIndex, false));
 }
 
 void Controller::page2Worker() {
-
+	if (page2FirstLoad && connected) {
+		pipe->sendMessage(new GetMonitoredDirectoriesMessage());
+		page2FirstLoad = false;
+	}
 	pageView = mainStackView->findChild<QObject*>("page2Form");
 	if (pageView) {
+		connect(pageView, SIGNAL(switchClicked()), this, SLOT(onWatcherSwitchClicked()));
+		connect(pageView, SIGNAL(addDir()), this, SLOT(onAddDirClicked()));
+		connect(pageView, SIGNAL(remDir(QString)), this, SLOT(onRemDirClicked(QString)));
+		connect(pageView, SIGNAL(foundThreats()), this, SLOT(onFoundThreatsClicked()));
 		qDebug() << "Created page2Form";
 	} else
 		qDebug() << "page error";
 }
+
+void Controller::onAddDirClicked() {
+	QQmlComponent component(engine,
+	                        QUrl::fromLocalFile("FolderDialogForm.qml"));
+	QObject *object = component.create();
+	connect(object, SIGNAL(choseFile(QString)), this, SLOT(onDirOpened(QString)));
+}
+
+void Controller::onDirOpened(QString dirPath) {
+	qDebug() << dirPath;
+	QUrl url(dirPath);
+	pipe->sendMessage(new AddDirectoryToMonitorMessage(QString(url.toLocalFile())));
+}
+
+void Controller::onRemDirClicked(QString path) {
+	pipe->sendMessage(new RemoveDirectoryFromMonitorMessage(path, this));
+}
+
+void Controller::onWatcherSwitchClicked() {
+	watchProperties->setWatcherTurningOn(true);
+	//QObject* statusSwitch = pageView->findChild<QObject*>("stateSwitch");
+	watchProperties->setWatcherOn(!watchProperties->isWatcherOn());
+
+	if (watchProperties->isWatcherOn()) {
+		pipe->sendMessage(new StartDirectoryMonitoringMessage(this));
+		qDebug() << "Sent start dir monitor";
+	} else {
+		pipe->sendMessage(new StopDirectoryMonitoringMessage(this));
+		qDebug() << "Sent stop dir monitor";
+	}
+
+}
+
+void Controller::onFoundThreatsClicked() {
+	engine->rootContext()->setContextProperty("foundObjectsList", foundObjects);
+	QQmlComponent component(engine, QUrl::fromLocalFile("WatchInfoPage.qml"));
+	QObject *object = component.create();
+}
+
 
 void Controller::homeWorker() {
 
@@ -163,7 +229,6 @@ void Controller::onSwitchClicked() {
 }
 
 
-
 void Controller::onConnectionStatusChanged(bool status) {
 	QObject *statusSwitch = pageView->findChild<QObject*>("stateSwitch");
 	statusSwitch->setProperty("enabled", "true");
@@ -176,7 +241,7 @@ void Controller::receivedMessage(PipeMessage *message) {
 			auto status = scanStatusList->getStatus(msg->getTaskIndex());
 			qDebug() << "SCANSTATUS: before -> " << status.taskIndex;
 			if (!status.objectStatuses)
-				
+
 				status.objectStatuses = new ObjectStatusList;
 			scanStatusList->updateScanStatus(ScanStatus{
 				                                 msg->isScanning(), msg->isPause(), msg->getTaskIndex(),
@@ -204,7 +269,7 @@ void Controller::receivedMessage(PipeMessage *message) {
 				status.objectStatuses = new ObjectStatusList;
 				status.scanning = true;
 				status.pause = false;
-				
+
 			}
 			qDebug() << "LEFT: before -> " << status.taskIndex;
 			status.taskIndex = msg->getTaskIndex();
@@ -218,24 +283,51 @@ void Controller::receivedMessage(PipeMessage *message) {
 			scanStatusList->removeScanStatus(msg->getTaskIndex());
 		}
 		break;
-		case MessageType::addDirToMonitor:
-			break;
-		case MessageType::remDirFromMonitor:
-			break;
-		case MessageType::monitoredDirectories:
-			break;
-		case MessageType::startDirMonitor:
-			break;
-		case MessageType::stopDirMonitor:
-			break;
+		case MessageType::addDirToMonitor: {
+			auto *msg = dynamic_cast<AddDirectoryToMonitorMessage*>(message);
+			watchingDirectories->appendDir(msg->getPath());
+		}
+		break;
+		case MessageType::remDirFromMonitor: {
+			auto *msg = dynamic_cast<RemoveDirectoryFromMonitorMessage*>(message);
+			watchingDirectories->remDir(msg->getPath());
+		}
+
+		break;
+		case MessageType::monitoredDirectories: {
+			auto msg = dynamic_cast<MonitoredDirectoriesMessage*>(message);
+			watchingDirectories->setList(msg->getDirList());
+			watchProperties->setWatcherOn(!msg->getPaused());
+			watchProperties->setWatcherTurningOn(false);
+
+		}
+		break;
+		case MessageType::startDirMonitor: {
+			watchProperties->setWatcherTurningOn(false);
+			qDebug() << "service started monitoring";
+		}
+		break;
+		case MessageType::stopDirMonitor: {
+			watchProperties->setWatcherTurningOn(false);
+			qDebug() << "service stopped monitoring";
+		}
+		break;
 		case MessageType::objectStatus: {
 			// if infected foundcount++
+			qDebug() << "recieved object status";
 			auto *msg = dynamic_cast<ObjectStatusMessage*>(message);
-			auto currentStatus = scanStatusList->getStatus(msg->getTaskId());
-			currentStatus.objectStatuses->addObjectStatus(ObjectStatus{
-				                                              msg->isInfected(), msg->isBreak(), msg->getPath(),
-				                                              msg->getInfection()
-			                                              });
+			if (msg->getTaskId() != -1) {
+				auto currentStatus = scanStatusList->getStatus(msg->getTaskId());
+				currentStatus.objectStatuses->addObjectStatus(ObjectStatus{
+					                                              msg->isInfected(), msg->isBreak(), msg->getPath(),
+					                                              msg->getInfection()
+				                                              });
+			}
+			else
+				foundObjects->addObjectStatus(ObjectStatus{
+																  msg->isInfected(), msg->isBreak(), msg->getPath(),
+																  msg->getInfection()
+					});
 		}
 		break;
 		case MessageType::lostWatch:

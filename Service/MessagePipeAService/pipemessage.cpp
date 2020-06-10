@@ -71,8 +71,9 @@ PipeMessage* PipeMessage::parseByteArray(const QByteArray &array, QObject *paren
             return new GetMonitoredDirectoriesMessage(parent);
         case MessageType::monitoredDirectories: {
             QStringList dirList;
-            stream >> dirList;
-            return new MonitoredDirectoriesMessage(dirList, parent);
+            bool paused;
+            stream >> dirList >> paused;
+            return new MonitoredDirectoriesMessage(dirList, paused, parent);
         }
         case MessageType::startDirMonitor:
             return new StartDirectoryMonitoringMessage(parent);
@@ -360,20 +361,25 @@ QByteArray GetMonitoredDirectoriesMessage::toByteArray() {
     return array;
 }
 
-MonitoredDirectoriesMessage::MonitoredDirectoriesMessage(const QStringList &dirList,
+MonitoredDirectoriesMessage::MonitoredDirectoriesMessage(const QStringList &dirList, bool paused,
                                                          QObject *parent) : PipeMessage(parent) {
     this->dirList = dirList;
+    this->paused = paused;
 }
 
 QByteArray MonitoredDirectoriesMessage::toByteArray() {
     QByteArray array;
     QDataStream stream(&array, QIODevice::WriteOnly);
-    stream << getType() << dirList;
+    stream << getType() << dirList << paused;
     return array;
 }
 
 QStringList MonitoredDirectoriesMessage::getDirList() const {
     return dirList;
+}
+
+bool MonitoredDirectoriesMessage::getPaused() const {
+    return paused;
 }
 
 StartDirectoryMonitoringMessage::StartDirectoryMonitoringMessage(QObject *parent) : PipeMessage(parent) {}

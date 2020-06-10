@@ -167,6 +167,7 @@ void Watcher::watching() {
                             break;
                     }
                 } while (offset);
+                ZeroMemory(buffer, 1024 * sizeof(DWORD));
                 //Возобновляем наблюдение
                 if (!ReadDirectoryChangesW(dir, buffer, 1024 * sizeof(DWORD),TRUE,
                                            FILE_NOTIFY_CHANGE_FILE_NAME | FILE_NOTIFY_CHANGE_SIZE,

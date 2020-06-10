@@ -2,6 +2,7 @@ import QtQuick 2.12
 import QtQuick.Controls 2.5
 import QtQuick.Controls.Universal 2.12
 import QtQuick.Layouts 1.14
+import ScanStatus 1.0
 
 Page {
     id: page
@@ -9,6 +10,12 @@ Page {
     width: 800
     height: 600
     title: qsTr("Сканировать файлы...")
+
+    signal addDir()
+    signal switchClicked()
+    signal remDir(string path)
+    signal foundThreats()
+
     ColumnLayout{
         id: mainLayout
         anchors.top: parent.top
@@ -17,6 +24,7 @@ Page {
         anchors.leftMargin: 25
         width: page.width - 50
         spacing: 20
+
         ColumnLayout {
             id: columnLayout
             width: parent.width - 50
@@ -39,18 +47,25 @@ Page {
             }
             Switch {
                 id: stateSwitch
+                objectName: "stateSwitch"
+                checked: WatchProperties.watcherOn
+                enabled: !WatchProperties.watcherTurningOn
                 text: checked ? qsTr("вкл.") : qsTr("выкл.")
                 padding: 0
                 bottomPadding: 5
                 topPadding: 5
-            }
 
+                onClicked: {
+                    switchClicked()
+            }
+            }
             Button {
                 id: chooseButton
                 width: 195
                 text: qsTr("Добавить директорию для мониторинга...")
                 Layout.fillWidth: false
                 icon.source: "icons/folder.png"
+                onClicked: addDir()
             }
 
 
@@ -73,25 +88,28 @@ Page {
                 //                anchors.topMargin: 15
                 //spacing: 20
                 clip: true
-
-                model: ListModel{
-                    ListElement{
-                        dir: "C:\\Papka"
-                    }
-
-                    ListElement{
-                        dir: "C:\\EshoPapka"
-                    }
-
-                    ListElement{
-                        dir: "C:\\DrugayaPapka\\PapkaVPapke"
-                    }
-
-                    ListElement{
-                        dir: "C:\\Games\\Counter-strike"
-                    }
+                model: WatchingDirectoriesModel{
+                    list: DirectoriesList
                 }
 
+//                model: ListModel{
+//                    ListElement{
+//                        dir: "C:\\Papka"
+//                    }
+
+//                    ListElement{
+//                        dir: "C:\\EshoPapka"
+//                    }
+
+//                    ListElement{
+//                        dir: "C:\\DrugayaPapka\\PapkaVPapke"
+//                    }
+
+//                    ListElement{
+//                        dir: "C:\\Games\\Counter-strike"
+//                    }
+//                }
+                //model:
                 delegate: delegateComponent
             }
 
@@ -102,6 +120,7 @@ Page {
             width: 195
             text: qsTr("Найденные угрозы...")
             Layout.fillWidth: false
+            onClicked: foundThreats()
             //icon.source: "icons/folder.png"
         }
 
@@ -133,7 +152,7 @@ Page {
                         anchors.leftMargin: 10*/
                         anchors.top: parent.top
                         anchors.topMargin: parent.height/2 - height/2
-                        text: dir
+                        text: path
                         font.pointSize: 14
 
                     }
@@ -160,6 +179,7 @@ Page {
                     anchors.bottom: parent.bottom
                     anchors.bottomMargin: 10
                     icon.source: "icons/close.png"
+                    onClicked: remDir(path)
                 }
 
                 states:[

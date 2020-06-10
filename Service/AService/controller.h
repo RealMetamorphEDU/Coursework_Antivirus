@@ -10,6 +10,8 @@
 #include <Windows.h>
 #include <QHash>
 
+Q_DECLARE_METATYPE(QStringList)
+
 class Controller: public QObject {
 Q_OBJECT
     SERVICE_STATUS status{};            // 

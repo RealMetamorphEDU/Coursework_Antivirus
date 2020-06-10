@@ -2,27 +2,35 @@ import QtQuick 2.12
 import QtQuick.Controls 2.5
 import QtQuick.Controls.Universal 2.12
 import QtQuick.Layouts 1.14
+import QtQuick.Window 2.12
 
 import ScanStatus 1.0
-
-Page {
-    id: page
+Window{
+    visible: true
+    id: window
     width: 800
     height: 600
-    objectName: "homeForm"
+    maximumHeight: height
+    maximumWidth: width
 
-    title: qsTr("Главная")
+    minimumHeight: height
+    minimumWidth: width
+    Page {
+        id: page
+        width: parent.width
+        height: parent.height
+        title: qsTr("Найденные угрозы")
 
-//    ColumnLayout {
-//        id: columnLayout
-//        width: 550
-//        height: 0
-//        anchors.left: parent.left
-//        anchors.leftMargin: 25
-//        anchors.top: parent.top
-//        anchors.topMargin: 30
+        //    ColumnLayout {
+        //        id: columnLayout
+        //        width: 550
+        //        height: 0
+        //        anchors.left: parent.left
+        //        anchors.leftMargin: 25
+        //        anchors.top: parent.top
+        //        anchors.topMargin: 30
 
-//        spacing: 20
+        //        spacing: 20
 
         Label {
             id: pseudoLogo
@@ -48,45 +56,47 @@ Page {
             anchors.topMargin: 15
             spacing: 10
             clip: true
-            model: ListModel{
-                ListElement{
-                    fileName: "Minecraft.exe"
-                    infectionReason: "вы сейчас в него играете"
-                    infected: false
-                    brek: true
-                }
-                ListElement{
-                    fileName: "Photoshop CRACK 100% WORKS 100% NOT A VIRUS.exe"
-                    infectionReason: "virus"
-                    infected: true
-                    brek: false
-                }
-                ListElement{
-                    fileName: "Minecraft.exe"
-                    infectionReason: "вы сейчас в него играете"
-                    infected: false
-                    brek: true
-                }
-                ListElement{
-                    fileName: "Photoshop CRACK 100% WORKS 100% NOT A VIRUS.exe"
-                    infectionReason: "virus"
-                    infected: true
-                    brek: false
-                }
-                ListElement{
-                    fileName: "Minecraft.exe"
-                    infectionReason: "вы сейчас в него играете"
-                    infected: false
-                    brek: true
-                }
-                ListElement{
-                    fileName: "Photoshop CRACK 100% WORKS 100% NOT A VIRUS.exe"
-                    infectionReason: "virus"
-                    infected: true
-                    brek: false
-                }
+            //            model: ListModel{
+            //                ListElement{
+            //                    fileName: "Minecraft.exe"
+            //                    infectionReason: "вы сейчас в него играете"
+            //                    infected: false
+            //                    brek: true
+            //                }
+            //                ListElement{
+            //                    fileName: "Photoshop CRACK 100% WORKS 100% NOT A VIRUS.exe"
+            //                    infectionReason: "virus"
+            //                    infected: true
+            //                    brek: false
+            //                }
+            //                ListElement{
+            //                    fileName: "Minecraft.exe"
+            //                    infectionReason: "вы сейчас в него играете"
+            //                    infected: false
+            //                    brek: true
+            //                }
+            //                ListElement{
+            //                    fileName: "Photoshop CRACK 100% WORKS 100% NOT A VIRUS.exe"
+            //                    infectionReason: "virus"
+            //                    infected: true
+            //                    brek: false
+            //                }
+            //                ListElement{
+            //                    fileName: "Minecraft.exe"
+            //                    infectionReason: "вы сейчас в него играете"
+            //                    infected: false
+            //                    brek: true
+            //                }
+            //                ListElement{
+            //                    fileName: "Photoshop CRACK 100% WORKS 100% NOT A VIRUS.exe"
+            //                    infectionReason: "virus"
+            //                    infected: true
+            //                    brek: false
+            //                }
+            //            }
+            model: ObjectStatusModel{
+                statusList: foundObjectsList
             }
-
 
             delegate: delegateComponent
         }
@@ -100,6 +110,13 @@ Page {
                 anchors.leftMargin: 5
                 Layout.topMargin: 5
                 spacing: 10
+                function trunc(str){
+                    if (str.length > 70){
+                        return str.slice(0,32) + " ... " + str.slice(str.length-36,str.length)
+                    }
+                    return str;
+                }
+
                 Image {
                     id: fileIcon
                     source: "icons/file.png"
@@ -107,12 +124,12 @@ Page {
                     height: parent.height
                 }
                 Text{
-                    text: "Файл: " + fileName
+                    text: "Файл: " + trunc(path)
                     font.pointSize: 12
                     anchors.verticalCenter: fileIcon.verticalCenter
                 }
                 Text{
-                    text: infected ? "Заражен: " + infectionReason : (brek ? "ОШИБКА: " + infectionReason: "")
+                    text: infected ? "Заражен: " + infection : (brek ? "ОШИБКА: " + infection: "")
                     font.pointSize: 12
                     anchors.verticalCenter: fileIcon.verticalCenter
                     color: infected  ? "#ff4444" : "Orange"
@@ -126,4 +143,5 @@ Page {
 
 
 
+    }
 }

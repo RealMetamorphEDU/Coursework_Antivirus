@@ -20,7 +20,10 @@ SOURCES += \
     objectstatusmodel.cpp \
     scanstatuslist.cpp \
     scanstatusmodel.cpp \
-    servicecontroller.cpp
+    servicecontroller.cpp \
+    watchingdirecotrieslist.cpp \
+    watchingdirectoriesmodel.cpp \
+    watchproperties.cpp
 
 HEADERS += \
     controller.h \
@@ -28,7 +31,10 @@ HEADERS += \
     objectstatusmodel.h \
     scanstatuslist.h \
     scanstatusmodel.h \
-    servicecontroller.h
+    servicecontroller.h \
+    watchingdirecotrieslist.h \
+    watchingdirectoriesmodel.h \
+    watchproperties.h
 
 RESOURCES += \
     qml.qrc

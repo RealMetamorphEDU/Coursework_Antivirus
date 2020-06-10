@@ -196,7 +196,7 @@ void Controller::receivedMessage(PipeMessage *message) {
         break;
         case MessageType::getMonitoredDirectories: {
             if (connected) {
-                pipe->sendMessage(new MonitoredDirectoriesMessage(watcher->getPaths().toList(), this));
+                pipe->sendMessage(new MonitoredDirectoriesMessage(watcher->getPaths().toList(), watcher->getPause(), this));
             }
             logger->info("CONTROLLER", "Client asked directories from monitor.");
         }

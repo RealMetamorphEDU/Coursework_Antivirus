@@ -9,7 +9,7 @@ WatchTask::WatchTask(SignatureStorage *storage, QObject *parent) : QObject(paren
     connect(findObjects, &AServiceFindObjects::foundScanObject, scanObjects, &AServiceScanObjects::scanScanObject, Qt::ConnectionType::QueuedConnection);
     connect(findObjects, &AServiceFindObjects::cantBuildThis, this, &WatchTask::cantBuildThis, Qt::ConnectionType::QueuedConnection);
     connect(scanObjects, &AServiceScanObjects::infectedBy, this, &WatchTask::infectedBy, Qt::ConnectionType::QueuedConnection);
-    connect(fileWatchDog, &FileWatchDog::changeNotify, this, &WatchTask::changeNotify);
+    connect(fileWatchDog, &FileWatchDog::changeNotify, this, &WatchTask::changeNotify, Qt::ConnectionType::QueuedConnection);
 }
 
 bool WatchTask::addPath(const QString &path) {
@@ -53,6 +53,10 @@ void WatchTask::setPause(bool pause) {
         }
         pauseList.clear();
     }
+}
+
+bool WatchTask::getPause() const {
+    return pause;
 }
 
 const QVector<Result>& WatchTask::getResults() const {

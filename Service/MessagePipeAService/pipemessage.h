@@ -162,12 +162,14 @@ public:
 class ASERVICEMESSAGEPIPE_EXPORT MonitoredDirectoriesMessage: public PipeMessage {
 Q_OBJECT
     QStringList dirList;
+	bool paused;
 public:
-    explicit MonitoredDirectoriesMessage(const QStringList &dirList, QObject *parent = nullptr);
+    explicit MonitoredDirectoriesMessage(const QStringList& dirList, bool paused, QObject* parent = nullptr);
 
     MessageType getType() override;
     QByteArray toByteArray() override;
     QStringList getDirList() const;
+    bool getPaused() const;
 };
 
 class ASERVICEMESSAGEPIPE_EXPORT StartDirectoryMonitoringMessage: public PipeMessage {

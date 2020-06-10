@@ -23,6 +23,7 @@ public:
     const QVector<QString>& getPaths() const;
     bool removePath(const QString &path);
     void setPause(bool pause);
+    bool getPause() const;
     const QVector<Result>& getResults() const;
 private slots:
     void changeNotify(const QString &filepath, ChangeType type);
