@@ -27,6 +27,9 @@ public slots:
     void onChooseFileButtonClicked();
     void onChooseFolderButtonClicked();
     void onObjectInfoClicked(int taskID);
+    void onPauseClicked(int taskIndex);
+    void onStopClicked(int taskIndex);
+    void onContinueClicked(int taskIndex);
     void page1Worker();
     void page2Worker();
     void homeWorker();

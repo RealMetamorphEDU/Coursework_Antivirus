@@ -38,7 +38,7 @@ Window {
 
         Label {
             id: pseudoLogo
-            text: qsTr("Подробности о сканировании #"  + "taskID")
+            text: qsTr("Подробности о сканировании #"  + taskIndex)
             Layout.bottomMargin: 20
             font.kerning: true
             font.preferShaping: true
@@ -53,7 +53,8 @@ Window {
 
         Label {
             id: amountLabel
-            text: qsTr("Проверено файлов: " + listView.model.rowCount())
+            text: qsTr("Проверено файлов: " + listView.model.objectCount)
+
             font.pointSize: 16
             anchors.left: pseudoLogo.left
             anchors.top: pseudoLogo.bottom
@@ -68,24 +69,32 @@ Window {
             anchors.top: amountLabel.bottom
             anchors.topMargin: 20
         }
-
         ListView{
             id: listView
             width: parent.width - 50
             height: 360
-
+//            flickableDirection: Flickable.VerticalFlick
+//            boundsBehavior: Flickable.StopAtBounds
             anchors.left: checkedLabel.left
             anchors.top: checkedLabel.bottom
             anchors.topMargin: 15
             spacing: 10
             clip: true
             model: ObjectStatusModel{
-                statusList: ObjectList
+                statusList: objectList
             }
 
+            ScrollBar.vertical: ScrollBar{
+                width:20
+                anchors.right: parent.right
+                anchors.bottom: parent.bottom
+                height: parent.height
+                //policy: ScrollBar.AsNeeded
+            }
 
             delegate: delegateComponent
         }
+
 
         Component{
             id: delegateComponent
@@ -96,6 +105,13 @@ Window {
                 anchors.leftMargin: 5
                 Layout.topMargin: 5
                 spacing: 10
+                function trunc(str){
+                    if (str.length > 70){
+                        return str.slice(0,32) + " ... " + str.slice(str.length-36,str.length)
+                    }
+                    return str;
+                }
+
                 Image {
                     id: fileIcon
                     source: "icons/file.png"
@@ -103,7 +119,7 @@ Window {
                     height: parent.height
                 }
                 Text{
-                    text: "Файл: " + path
+                    text: "Файл: " + trunc(path)
                     font.pointSize: 12
                     anchors.verticalCenter: fileIcon.verticalCenter
                 }

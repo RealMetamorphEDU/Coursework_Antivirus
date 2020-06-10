@@ -52,6 +52,7 @@ void ObjectStatusModel::setList(ObjectStatusList* value) {
             });
         connect(list, &ObjectStatusList::insertedRow, this, [=]() {
             endInsertRows();
+            emit rowCountChanged();
             });
         endResetModel();
     }

@@ -78,11 +78,14 @@ void Controller::onChooseFolderButtonClicked() {
 }
 
 void Controller::onObjectInfoClicked(int taskID) {
-	engine->rootContext()->setContextProperty("ObjectList", scanStatusList->getStatus(taskID).objectStatuses);
+	engine->rootContext()->setContextProperty("objectList", scanStatusList->getStatus(taskID).objectStatuses);
+	engine->rootContext()->setContextProperty("taskIndex", taskID);
 	QQmlComponent component(engine,
 	                        QUrl::fromLocalFile("ScanInfoPage.qml"));
 	QObject *object = component.create();
 }
+
+
 
 void Controller::onChooseFileButtonClicked() {
 	QQmlComponent component(engine,
@@ -106,9 +109,23 @@ void Controller::page1Worker() {
 		connect(pageView, SIGNAL(chooseFileButtonClicked()), this,SLOT(onChooseFileButtonClicked()));
 		connect(pageView, SIGNAL(chooseFolderButtonClicked()), this,SLOT(onChooseFolderButtonClicked()));
 		connect(pageView, SIGNAL(objectInfoClicked(int)), this,SLOT(onObjectInfoClicked(int)));
-
+		connect(pageView, SIGNAL(pauseClicked(int)), this, SLOT(onPauseClicked(int)));
+		connect(pageView, SIGNAL(stopClicked(int)), this, SLOT(onStopClicked(int)));
+		connect(pageView, SIGNAL(continueClicked(int)), this, SLOT(onContinueClicked(int)));
 	} else
 		qDebug() << "page error";
+}
+
+void Controller::onPauseClicked(int taskIndex) { //TODO: добавить изменение кнопки при получении ответа
+	pipe->sendMessage(new PauseScanMessage(taskIndex, true));
+}
+void Controller::onStopClicked(int taskIndex) {
+	pipe->sendMessage(new StopScanMessage(taskIndex));
+	scanStatusList->removeScanStatus(taskIndex);
+	
+}
+void Controller::onContinueClicked(int taskIndex) {
+	pipe->sendMessage(new PauseScanMessage(taskIndex, false));
 }
 
 void Controller::page2Worker() {
@@ -145,6 +162,8 @@ void Controller::onSwitchClicked() {
 
 }
 
+
+
 void Controller::onConnectionStatusChanged(bool status) {
 	QObject *statusSwitch = pageView->findChild<QObject*>("stateSwitch");
 	statusSwitch->setProperty("enabled", "true");
@@ -155,7 +174,9 @@ void Controller::receivedMessage(PipeMessage *message) {
 		case MessageType::scanStatus: {
 			auto *msg = dynamic_cast<ScanStatusMessage*>(message);
 			auto status = scanStatusList->getStatus(msg->getTaskIndex());
+			qDebug() << "SCANSTATUS: before -> " << status.taskIndex;
 			if (!status.objectStatuses)
+				
 				status.objectStatuses = new ObjectStatusList;
 			scanStatusList->updateScanStatus(ScanStatus{
 				                                 msg->isScanning(), msg->isPause(), msg->getTaskIndex(),
@@ -163,6 +184,7 @@ void Controller::receivedMessage(PipeMessage *message) {
 				                                 msg->getObjLeft(), msg->getObjScanned(), status.foundCount,
 				                                 status.objectStatuses
 			                                 });
+			qDebug() << "SCANSTATUS: after -> " << status.taskIndex;
 		}
 		break;
 		case MessageType::scanPauseStatus: {
@@ -178,10 +200,16 @@ void Controller::receivedMessage(PipeMessage *message) {
 		case MessageType::scanLeftStatus: {
 			auto *msg = dynamic_cast<ScanLeftStatusMessage*>(message);
 			auto status = scanStatusList->getStatus(msg->getTaskIndex());
-			if (!status.objectStatuses)
+			if (!status.objectStatuses) {
 				status.objectStatuses = new ObjectStatusList;
+				status.scanning = true;
+				status.pause = false;
+				
+			}
+			qDebug() << "LEFT: before -> " << status.taskIndex;
 			status.taskIndex = msg->getTaskIndex();
 			status.objLeft = msg->getObjLeft();
+			qDebug() << "LEFT: after -> " << status.taskIndex;
 			scanStatusList->updateScanStatus(status);
 		}
 		break;

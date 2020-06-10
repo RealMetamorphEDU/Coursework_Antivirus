@@ -13,8 +13,8 @@ ScanTask::ScanTask(int taskID, SignatureStorage *storage, const QStringList &fil
                    QObject *parent) :
     QObject(parent) {
     this->fileSeeker = new AServiceFileSeeker(this);
-    this->scanObjects = new AServiceScanObjects(storage, fileSeeker);
-    this->findObjects = new AServiceFindObjects(scanObjects);
+    this->scanObjects = new AServiceScanObjects(storage, this);
+    this->findObjects = new AServiceFindObjects(this);
     this->storage = new ScanResultStorage(this);
     this->taskIndex = taskID;
     this->scannedCount = 0;
@@ -23,7 +23,7 @@ ScanTask::ScanTask(int taskID, SignatureStorage *storage, const QStringList &fil
     this->finished = false;
     planned = false;
     connect(fileSeeker, &AServiceFileSeeker::foundFile, findObjects, &AServiceFindObjects::findObjects);
-    connect(findObjects, &AServiceFindObjects::foundScanObject, scanObjects, &AServiceScanObjects::scanScanObject);
+    //connect(findObjects, &AServiceFindObjects::foundScanObject, scanObjects, &AServiceScanObjects::scanScanObject);
     connect(findObjects, &AServiceFindObjects::foundScanObject, this, &ScanTask::foundScanObject);
     connect(findObjects, &AServiceFindObjects::cantBuildThis, this, &ScanTask::cantBuildThis);
     connect(scanObjects, &AServiceScanObjects::infectedBy, this, &ScanTask::infectedBy);
@@ -35,6 +35,13 @@ ScanTask::ScanTask(int taskID, SignatureStorage *storage, const QStringList &fil
         else
             findObjects->findObjects(files.at(i));
     }
+}
+
+ScanTask::~ScanTask() {
+    delete findObjects;
+    delete scanObjects;
+    delete fileSeeker;
+    delete storage;
 }
 
 void ScanTask::setPause(bool pause) {
@@ -63,6 +70,7 @@ void ScanTask::timeout() {
 void ScanTask::foundScanObject(ScanObject *scanObject) {
     leftCount++;
     emit sendMessage(new ScanLeftStatusMessage(taskIndex, leftCount, this));
+    scanObjects->scanScanObject(scanObject);
 }
 
 void ScanTask::cantBuildThis(const QString &filepath, const QString &reason) {

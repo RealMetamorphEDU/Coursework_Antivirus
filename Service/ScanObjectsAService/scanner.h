@@ -18,7 +18,6 @@ Q_OBJECT
     bool waiting;
 public:
     explicit Scanner(HANDLE updateEvent, SignatureStorage *storage, SearchInstance *search, QObject *parent = nullptr);
-    ~Scanner();
     bool event(QEvent *event) override;
     bool isEmptyQueue() const;
 public slots:

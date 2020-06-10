@@ -16,11 +16,11 @@ Scanner::Scanner(HANDLE updateEvent, SignatureStorage *storage, SearchInstance *
     waiting = false;
 }
 
-Scanner::~Scanner() {
-    while (!queue.isEmpty()) {
-        queue.takeFirst()->deleteLater();
-    }
-}
+// Scanner::~Scanner() {
+//     while (!queue.isEmpty()) {
+//         queue.takeFirst()->deleteLater();
+//     }
+// }
 
 bool Scanner::event(QEvent *event) {
     switch (static_cast<events>(event->type())) {

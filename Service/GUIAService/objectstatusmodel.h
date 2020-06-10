@@ -8,6 +8,7 @@ class ObjectStatusModel : public QAbstractListModel
 {
     Q_OBJECT
         Q_PROPERTY(ObjectStatusList* statusList READ getList WRITE setList)
+		Q_PROPERTY(int objectCount READ rowCount NOTIFY rowCountChanged)
         ObjectStatusList* list{};
         enum {
         //taskIDRole,
@@ -24,6 +25,10 @@ public:
 
     ObjectStatusList* getList() const;
     void setList(ObjectStatusList* value);
+
+signals:
+    void rowCountChanged();
+	
 
 };
 

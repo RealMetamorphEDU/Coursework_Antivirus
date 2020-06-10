@@ -12,5 +12,5 @@ void RawObject::deleter(RawObject *rawObject) {
     if (rawObject == nullptr)
         return;
     if (!rawObject->alreadyDeleted)
-        delete rawObject;
+        rawObject->deleteLater();
 }
