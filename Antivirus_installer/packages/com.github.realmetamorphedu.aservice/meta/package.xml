@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Package>
+    <DisplayName>Курсовой антивирус</DisplayName>
+    <Description>В комплект входят: антивирус, приложение управления с графическим интерфейсом.</Description>
+    <Version>0.1.0</Version>
+    <ReleaseDate>2020-06-11</ReleaseDate>
+    <Licenses>
+        <License name="GNU GENERAL PUBLIC LICENSE v3" file="license.txt" />
+    </Licenses>
+    <Default>true</Default>
+    <Script>installscript.qs</Script>
+	<RequiresAdminRights>true</RequiresAdminRights>
+	<ForcedInstallation>true</ForcedInstallation>
+</Package>

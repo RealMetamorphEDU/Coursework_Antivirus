@@ -1,0 +1,2 @@
+set PATH=%PATH%;D:\Qt\Tools\QtInstallerFramework\3.2\bin
+binarycreator.exe --offline-only -c config/config.xml -p packages antivirus_installer.exe

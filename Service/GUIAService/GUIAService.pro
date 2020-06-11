@@ -54,3 +54,5 @@ else:win32:CONFIG(debug, debug|release): LIBS += -L$$OUT_PWD/../MessagePipeAServ
 
 INCLUDEPATH += $$PWD/../MessagePipeAService
 DEPENDPATH += $$PWD/../MessagePipeAService
+
+win32: LIBS += -lAdvAPI32

@@ -1,0 +1,15 @@
+<?xml version="1.0"?>
+<RCC>
+    <qresource prefix="/">
+        <file alias="qtquickcontrols2.conf">qtquickcontrols2.conf</file>
+        <file alias="icons/search.png">icons/search.png</file>
+        <file alias="icons/eye.png">icons/eye.png</file>
+        <file alias="icons/folder.png">icons/folder.png</file>
+        <file alias="icons/file.png">icons/file.png</file>
+        <file alias="icons/pause.png">icons/pause.png</file>
+        <file alias="icons/play-button.png">icons/play-button.png</file>
+        <file alias="icons/stop.png">icons/stop.png</file>
+        <file alias="icons/cross.png">icons/cross.png</file>
+        <file alias="icons/close.png">icons/close.png</file>
+    </qresource>
+</RCC>
