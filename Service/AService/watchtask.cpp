@@ -1,4 +1,5 @@
 #include "watchtask.h"
+#include <QTimer>
 
 WatchTask::WatchTask(SignatureStorage *storage, QObject *parent) : QObject(parent) {
     this->fileWatchDog = new FileWatchDog(this);
@@ -81,6 +82,7 @@ void WatchTask::changeNotify(const QString &filepath, ChangeType type) {
 void WatchTask::infectedBy(const QString &filename, const QString &signatureName) {
     emit sendMessage(new ObjectStatusMessage(-1, true, false, filename, signatureName, this));
     storage->addResult({filename, signatureName, true, false});
+    QTimer::singleShot(1000, findObjects, SLOT(updateEvents()));
 }
 
 void WatchTask::cantBuildThis(const QString &filepath, const QString &reason) {

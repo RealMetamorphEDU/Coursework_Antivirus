@@ -9,25 +9,31 @@ void ScanTask::planStopCheck() {
     }
 }
 
-ScanTask::ScanTask(int taskID, SignatureStorage *storage, const QStringList &files,
+ScanTask::ScanTask(int taskIndex, SignatureStorage *storage, const QStringList &files,
                    QObject *parent) :
     QObject(parent) {
     this->fileSeeker = new AServiceFileSeeker(this);
-    this->scanObjects = new AServiceScanObjects(storage, this);
-    this->findObjects = new AServiceFindObjects(this);
+    this->scanObjects = new AServiceScanObjects(storage, fileSeeker);
+    this->findObjects = new AServiceFindObjects(scanObjects);
     this->storage = new ScanResultStorage(this);
-    this->taskIndex = taskID;
+    this->taskIndex = taskIndex;
     this->scannedCount = 0;
     this->leftCount = 0;
     this->pause = false;
     this->finished = false;
     planned = false;
-    QObject::connect(fileSeeker, &AServiceFileSeeker::foundFile, findObjects, &AServiceFindObjects::findObjects, Qt::ConnectionType::QueuedConnection);
-    QObject::connect(findObjects, &AServiceFindObjects::foundScanObject, scanObjects, &AServiceScanObjects::scanScanObject, Qt::ConnectionType::QueuedConnection);
-    QObject::connect(findObjects, &AServiceFindObjects::foundScanObject, this, &ScanTask::foundScanObject, Qt::ConnectionType::QueuedConnection);
-    QObject::connect(findObjects, &AServiceFindObjects::cantBuildThis, this, &ScanTask::cantBuildThis, Qt::ConnectionType::QueuedConnection);
-    QObject::connect(scanObjects, &AServiceScanObjects::infectedBy, this, &ScanTask::infectedBy, Qt::ConnectionType::QueuedConnection);
-    QObject::connect(scanObjects, &AServiceScanObjects::uninfected, this, &ScanTask::uninfected, Qt::ConnectionType::QueuedConnection);
+    connect(fileSeeker, &AServiceFileSeeker::foundFile, findObjects, &AServiceFindObjects::findObjects,
+            Qt::ConnectionType::QueuedConnection);
+    connect(findObjects, &AServiceFindObjects::foundScanObject, scanObjects, &AServiceScanObjects::scanScanObject,
+            Qt::ConnectionType::QueuedConnection);
+    connect(findObjects, &AServiceFindObjects::foundScanObject, this, &ScanTask::foundScanObject,
+            Qt::ConnectionType::QueuedConnection);
+    connect(findObjects, &AServiceFindObjects::cantBuildThis, this, &ScanTask::cantBuildThis,
+            Qt::ConnectionType::QueuedConnection);
+    connect(scanObjects, &AServiceScanObjects::infectedBy, this, &ScanTask::infectedBy,
+            Qt::ConnectionType::QueuedConnection);
+    connect(scanObjects, &AServiceScanObjects::uninfected, this, &ScanTask::uninfected,
+            Qt::ConnectionType::QueuedConnection);
     for (int i = 0; i < files.count(); ++i) {
         QFileInfo info(files.at(i));
         if (info.isDir())
@@ -35,13 +41,6 @@ ScanTask::ScanTask(int taskID, SignatureStorage *storage, const QStringList &fil
         else
             findObjects->findObjects(files.at(i));
     }
-}
-
-ScanTask::~ScanTask() {
-    delete findObjects;
-    delete scanObjects;
-    delete fileSeeker;
-    delete storage;
 }
 
 void ScanTask::setPause(bool pause) {
@@ -61,9 +60,11 @@ const QVector<Result>& ScanTask::getResults() const {
 
 void ScanTask::timeout() {
     planned = false;
-    if (fileSeeker->isEmptyQueue() && findObjects->isEmptyQueue() && scanObjects->isEmptyQueue() && leftCount == 0) {
+    if (!finished && fileSeeker->isEmptyQueue() && findObjects->isEmptyQueue() && scanObjects->isEmptyQueue() &&
+        leftCount == 0) {
         emit sendMessage(new ScanStatusMessage(false, false, taskIndex, "", 0, scannedCount, this));
         finished = true;
+        fileSeeker->deleteLater();
     }
 }
 

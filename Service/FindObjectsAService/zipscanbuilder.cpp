@@ -3,16 +3,20 @@
 #include "ZipArchive.h"
 #include <fstream>
 #include "binaryscanobject.h"
+#include <QFileInfo>
 
 ZipScanBuilder::ZipScanBuilder(QObject *parent) : AbstractScanBuilder(parent) {}
 
 bool ZipScanBuilder::canBuildThis(std::shared_ptr<RawObject> &rawObject) {
-    std::istream *stream = rawObject->getInputStream();
-    if (stream == nullptr)
-        return false;
-    ZipArchive::Ptr archive = ZipArchive::Create(stream, false);
-    if (archive->GetEntriesCount() > 0)
-        return true;
+    QString ext = QFileInfo(rawObject->getFullName()).suffix();
+    if (ext == "zip" || ext == "doc" || ext == "docx") {
+        std::istream *stream = rawObject->getInputStream();
+        if (stream == nullptr)
+            return false;
+        ZipArchive::Ptr archive = ZipArchive::Create(stream, false);
+        if (archive->GetEntriesCount() > 0)
+            return true;
+    }
     return false;
 }
 

@@ -24,9 +24,8 @@ Q_OBJECT
 
     void planStopCheck();
 public:
-    explicit ScanTask(int taskID, SignatureStorage *storage, const QStringList &files,
+    explicit ScanTask(int taskIndex, SignatureStorage *storage, const QStringList &files,
                       QObject *parent = nullptr);
-    ~ScanTask();
     void setPause(bool pause);
     const QVector<Result>& getResults() const;
 private slots:
