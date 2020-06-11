@@ -19,5 +19,6 @@
         <file>FolderDialogForm.qml</file>
         <file>ScanInfoPage.qml</file>
         <file>WatchInfoPage.qml</file>
+        <file>aboutForm.qml</file>
     </qresource>
 </RCC>

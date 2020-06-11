@@ -106,7 +106,7 @@ void Controller::page1Worker() {
 
 void Controller::onChooseFolderButtonClicked() {
 	QQmlComponent component(engine,
-	                        QUrl::fromLocalFile("FolderDialogForm.qml"));
+	                        QUrl("qrc:/FolderDialogForm.qml"));
 	QObject *object = component.create();
 	connect(object, SIGNAL(choseFile(QString)), this,SLOT(onFileOpened(QString)));
 }
@@ -115,14 +115,14 @@ void Controller::onObjectInfoClicked(int taskID) {
 	engine->rootContext()->setContextProperty("objectList", scanStatusList->getStatus(taskID).objectStatuses);
 	engine->rootContext()->setContextProperty("taskIndex", taskID);
 	QQmlComponent component(engine,
-	                        QUrl::fromLocalFile("ScanInfoPage.qml"));
+	                        QUrl("qrc:/ScanInfoPage.qml"));
 	QObject *object = component.create();
 }
 
 
 void Controller::onChooseFileButtonClicked() {
 	QQmlComponent component(engine,
-	                        QUrl::fromLocalFile("FileDialogForm.qml"));
+	                        QUrl("qrc:/FileDialogForm.qml"));
 	QObject *object = component.create();
 	connect(object, SIGNAL(choseFile(QString)), this, SLOT(onFileOpened(QString)));
 }
@@ -169,7 +169,7 @@ void Controller::page2Worker() {
 
 void Controller::onAddDirClicked() {
 	QQmlComponent component(engine,
-	                        QUrl::fromLocalFile("FolderDialogForm.qml"));
+	                        QUrl("qrc:/FolderDialogForm.qml"));
 	QObject *object = component.create();
 	connect(object, SIGNAL(choseFile(QString)), this, SLOT(onDirOpened(QString)));
 }
@@ -201,7 +201,7 @@ void Controller::onWatcherSwitchClicked() {
 
 void Controller::onFoundThreatsClicked() {
 	engine->rootContext()->setContextProperty("foundObjectsList", foundObjects);
-	QQmlComponent component(engine, QUrl::fromLocalFile("WatchInfoPage.qml"));
+	QQmlComponent component(engine, QUrl("qrc:/WatchInfoPage.qml"));
 	QObject *object = component.create();
 }
 

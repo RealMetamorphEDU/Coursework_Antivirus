@@ -12,7 +12,7 @@ ApplicationWindow {
     signal homeCreated()
     maximumHeight: height
     maximumWidth: width
-
+    property int pagePointerWidth: 5
     minimumHeight: height
     minimumWidth: width
     title: qsTr("Stack")
@@ -62,6 +62,7 @@ ApplicationWindow {
         anchors.bottom: parent.bottom
         //anchors.fill: parent
     }
+
     ToolSeparator {
         id: toolSeparator
         opacity: 0.3
@@ -100,14 +101,23 @@ ApplicationWindow {
             objectName: "mainDelegate"
             text: qsTr("Главная")
             width: parent.width
-            enabled: column.pageid !== 0
+            
             onClicked: {
+            if (column.pageid !== 0){
 //              stackView.pop()
                 column.pageid = 0
                 stackView.replace("HomeForm.qml")
                 gc()
                 window.homeCreated();
-                highlighted: true
+                highlighted: true}
+            }
+            Rectangle {
+                width: pagePointerWidth
+                height: parent.height
+                visible: column.pageid == 0
+                color: "#A11D33"
+                anchors.right: parent.right
+                anchors.verticalCenter: parent.verticalCenter
             }
         }
         ItemDelegate {
@@ -115,17 +125,26 @@ ApplicationWindow {
             objectName: "scanDelegate"
             text: qsTr("Сканирование файлов")
             width: parent.width
-            enabled: column.pageid !== 1
             onClicked: {
+               if (column.pageid !== 1){
+
                 column.pageid = 1
 //                stackView.pop()
+                
                 stackView.replace("Page1Form.qml")
                 gc()
-                window.page1Created();
+                window.page1Created();}
             }
 
 
-
+            Rectangle {
+                width: pagePointerWidth
+                visible: column.pageid == 1
+                height: parent.height
+                color: "#A11D33"
+                anchors.right: parent.right
+                anchors.verticalCenter: parent.verticalCenter
+            }
 
         }
         ItemDelegate {
@@ -133,17 +152,51 @@ ApplicationWindow {
             objectName: "monitorDelegate"
             text: qsTr("Файловый монитор")
             width: parent.width
-            enabled: column.pageid !== 2
+
             onClicked: {
+            if (column.pageid !== 2){
 //                stackView.pop()
                 column.pageid = 2
                 stackView.replace("Page2Form.qml")
                 gc()
                 window.page2Created();
+            }}
+            Rectangle {
+                width: pagePointerWidth
+                visible: column.pageid == 2
+                height: parent.height
+                color: "#A11D33"
+                anchors.right: parent.right
+                anchors.verticalCenter: parent.verticalCenter
             }
         }
-    }
 
+
+
+    }
+    ItemDelegate {
+        id: aboutDelegate
+        objectName: "aboutDelegate"
+        text: qsTr("О программе")
+        width: column.width
+        anchors.bottom: column.bottom
+        onClicked: {
+        if (column.pageid !== 4){
+//                stackView.pop()
+            column.pageid = 4
+            stackView.replace("aboutForm.qml")
+            gc()
+            window.page2Created();
+        }}
+        Rectangle {
+            width: pagePointerWidth
+            visible: column.pageid == 4
+            height: parent.height
+            color: "#A11D33"
+            anchors.right: parent.right
+            anchors.verticalCenter: parent.verticalCenter
+        }
+    }
 
 }
 
