@@ -287,9 +287,10 @@ void Controller::receivedMessage(PipeMessage *message) {
 		}
 		break;
 		case MessageType::addDirToMonitor: {
-			auto *msg = dynamic_cast<AddDirectoryToMonitorMessage*>(message);
+			auto* msg = dynamic_cast<AddDirectoryToMonitorMessage*>(message);
 			watchingDirectories->appendDir(msg->getPath());
-		}
+			}
+
 		break;
 		case MessageType::remDirFromMonitor: {
 			auto *msg = dynamic_cast<RemoveDirectoryFromMonitorMessage*>(message);
@@ -336,8 +337,12 @@ void Controller::receivedMessage(PipeMessage *message) {
 				                              });
 		}
 		break;
-		case MessageType::lostWatch:
-			break;
+		
+		case MessageType::lostWatch: {
+			auto *msg = dynamic_cast<LostWatchMessage*>(message);
+			watchingDirectories->updateLostWatch(watchingDirectories->getIndex(msg->getPath()), true);
+		}
+		break;
 		case MessageType::resultList:
 			break;
 		case MessageType::indexesList:

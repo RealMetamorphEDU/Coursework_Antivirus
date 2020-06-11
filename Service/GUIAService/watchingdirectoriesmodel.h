@@ -11,8 +11,10 @@ Q_OBJECT
     Q_PROPERTY(WatchingDirectoriesList* list READ getList WRITE setList)
 
     WatchingDirectoriesList *list;
-
-	int pathRole = Qt::UserRole;
+	enum {
+		pathRole = Qt::UserRole,
+		lostWatchRole
+	};
 public:
 	explicit WatchingDirectoriesModel(QObject *parent = nullptr);
 	int rowCount(const QModelIndex &parent = QModelIndex()) const override;

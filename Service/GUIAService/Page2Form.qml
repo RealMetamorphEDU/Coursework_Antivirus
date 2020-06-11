@@ -15,7 +15,12 @@ Page {
     signal switchClicked()
     signal remDir(string path)
     signal foundThreats()
-
+                function trunc(str){
+                if (str.length > 50){
+                    return str.slice(0,25) + " ... " + str.slice(str.length-20,str.length)
+                }
+                return str;
+            }
     ColumnLayout{
         id: mainLayout
         anchors.top: parent.top
@@ -125,6 +130,7 @@ Page {
         }
 
         Component{
+
             id: delegateComponent
             ItemDelegate{
                 id: itemDelegate
@@ -152,10 +158,17 @@ Page {
                         anchors.leftMargin: 10*/
                         anchors.top: parent.top
                         anchors.topMargin: parent.height/2 - height/2
-                        text: path
+                        text: trunc(path)
                         font.pointSize: 14
 
                     }
+                    Text{
+                    text: lostWatch ? "Ошибка" : ""
+                    font.pointSize: 12
+                    anchors.verticalCenter: dirName.verticalCenter
+                    color: "#ff4444"
+
+                }
                 }
 
 //                Button {

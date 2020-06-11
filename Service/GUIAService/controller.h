@@ -32,7 +32,6 @@ class Controller: public QObject {
 	bool serviceStatus;
 	quint64 totalthreats;
 
-
 	bool page2FirstLoad;
 public:
 

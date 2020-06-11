@@ -180,9 +180,7 @@ void Controller::receivedMessage(PipeMessage *message) {
                     pipe->sendMessage(new AddDirectoryToMonitorMessage(add->getPath(), this));
                 logger->info("CONTROLLER", "Directory added to monitor successfully.");
             } else {
-                if (connected)
-                    pipe->sendMessage(new RemoveDirectoryFromMonitorMessage(add->getPath(), this));
-                logger->warning("CONTROLLER", "Directory addition to monitor failed.");
+                logger->warning("CONTROLLER", "Directory addition to monitor failed."); //removed RemoveDirectory
             }
         }
         break;

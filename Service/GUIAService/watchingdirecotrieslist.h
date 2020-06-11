@@ -3,24 +3,26 @@
 
 #include <QObject>
 
-class WatchingDirectoriesList : public QObject
-{
+class WatchingDirectoriesList : public QObject {
     Q_OBJECT
-
-        QStringList list;
+        QVector<bool> lostWatch;
+		QStringList list;
 public:
-    explicit WatchingDirectoriesList(QObject *parent = nullptr);
+    bool getLostWatch(int index);
+    void updateLostWatch(int index, bool state);
+    explicit WatchingDirectoriesList(QObject* parent = nullptr);
     void appendDir(QString dir);
     void remDir(int index);
     void remDir(QString val);
     QString getRow(int index);
+    int getIndex(QString dir);
     int getCount();
 
 
     void setList(const QStringList& charses);
-	
+
 signals:
-	
+    void changedRow(int row);
     void beginInsertRow(int row);
     void beginRemoveRow(int row);
     void beginResetList();
