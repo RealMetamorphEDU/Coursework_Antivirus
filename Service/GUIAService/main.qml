@@ -81,7 +81,7 @@ ApplicationWindow {
         height: 600
         anchors.left: parent.left
         anchors.bottom: parent.bottom
-
+        property int pageid: 0
 //        ItemDelegate {
 //            id: antDelegate
 //            text: qsTr("")
@@ -100,9 +100,10 @@ ApplicationWindow {
             objectName: "mainDelegate"
             text: qsTr("Главная")
             width: parent.width
-            enabled: !stackView.processing
+            enabled: column.pageid !== 0
             onClicked: {
 //              stackView.pop()
+                column.pageid = 0
                 stackView.replace("HomeForm.qml")
                 gc()
                 window.homeCreated();
@@ -114,8 +115,9 @@ ApplicationWindow {
             objectName: "scanDelegate"
             text: qsTr("Сканирование файлов")
             width: parent.width
-            enabled: !stackView.processing
+            enabled: column.pageid !== 1
             onClicked: {
+                column.pageid = 1
 //                stackView.pop()
                 stackView.replace("Page1Form.qml")
                 gc()
@@ -131,9 +133,10 @@ ApplicationWindow {
             objectName: "monitorDelegate"
             text: qsTr("Файловый монитор")
             width: parent.width
-            enabled: !stackView.processing
+            enabled: column.pageid !== 2
             onClicked: {
 //                stackView.pop()
+                column.pageid = 2
                 stackView.replace("Page2Form.qml")
                 gc()
                 window.page2Created();
