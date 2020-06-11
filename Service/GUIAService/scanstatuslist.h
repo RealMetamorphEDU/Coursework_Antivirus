@@ -25,7 +25,6 @@ public:
 bool getState(int taskIndex);
 void updateState(int taskIndex,bool state);
 explicit ScanStatusList(QObject *parent = nullptr);
-
     void updateScanStatus(const ScanStatus &status);
     void removeScanStatus(int taskIndex);
     ScanStatus getStatus(int taskIndex) const;

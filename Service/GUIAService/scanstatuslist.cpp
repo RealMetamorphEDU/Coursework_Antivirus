@@ -10,6 +10,7 @@ void ScanStatusList::updateState(int taskIndex, bool state) {
 }
 ScanStatusList::ScanStatusList(QObject *parent) : QObject(parent) {}
 
+
 void ScanStatusList::updateScanStatus(const ScanStatus &status) {
 	int index = keys.count();
 	bool signal = false;

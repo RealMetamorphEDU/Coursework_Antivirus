@@ -16,6 +16,7 @@
 char SERVICE_NAME[]{"AService"};
 
 Controller::Controller(QObject *parent) : QObject(parent) {
+	
 	this->pageView = nullptr;
 	this->serviceStatus = false;
 	this->connected = false;
@@ -204,6 +205,11 @@ void Controller::onFoundThreatsClicked() {
 	QObject *object = component.create();
 }
 
+void Controller::restockScanStatusList() {
+
+	pipe->sendMessage(new GetIndexes(this));
+}
+
 
 void Controller::homeWorker() {
 
@@ -211,6 +217,8 @@ void Controller::homeWorker() {
 	if (pageView) {
 		QObject *statusSwitch = pageView->findChild<QObject*>("stateSwitch");
 		statusSwitch->setProperty("checked", serviceController->serviceStatus ? "true" : "false");
+		if (serviceController->serviceStatus)
+			restockScanStatusList();
 		connect(pageView, SIGNAL(switchClicked()), this,SLOT(onSwitchClicked()));
 		qDebug() << "Created homeForm";
 	} else
@@ -234,6 +242,7 @@ void Controller::onSwitchClicked() {
 void Controller::onConnectionStatusChanged(bool status) {
 	QObject *statusSwitch = pageView->findChild<QObject*>("stateSwitch");
 	statusSwitch->setProperty("enabled", "true");
+
 }
 
 void Controller::receivedMessage(PipeMessage *message) {
@@ -287,9 +296,9 @@ void Controller::receivedMessage(PipeMessage *message) {
 		}
 		break;
 		case MessageType::addDirToMonitor: {
-			auto* msg = dynamic_cast<AddDirectoryToMonitorMessage*>(message);
+			auto *msg = dynamic_cast<AddDirectoryToMonitorMessage*>(message);
 			watchingDirectories->appendDir(msg->getPath());
-			}
+		}
 
 		break;
 		case MessageType::remDirFromMonitor: {
@@ -337,16 +346,44 @@ void Controller::receivedMessage(PipeMessage *message) {
 				                              });
 		}
 		break;
-		
+
 		case MessageType::lostWatch: {
 			auto *msg = dynamic_cast<LostWatchMessage*>(message);
 			watchingDirectories->updateLostWatch(watchingDirectories->getIndex(msg->getPath()), true);
 		}
 		break;
-		case MessageType::resultList:
-			break;
-		case MessageType::indexesList:
-			break;
+		case MessageType::indexesList: {
+			auto *msg = dynamic_cast<IndexesList*>(message);
+			statusIndexes = msg->getIndexes();
+			for (int index: statusIndexes) {
+				pipe->sendMessage(new GetResultList(index, this));
+			}
+		}
+		break;
+		case MessageType::resultList: {
+			auto *msg = dynamic_cast<ResultList*>(message);
+			auto index = msg->getTaskID();
+			if (scanStatusList->getStatus(index).taskIndex < 0) {
+				auto results = msg->getResults();
+				ObjectStatusList* objectStatuses = new ObjectStatusList();
+				int infectedcount = 0;
+				for (Result result: results) {
+					if (result.infected)
+						infectedcount++;
+					objectStatuses->addObjectStatus(ObjectStatus{
+						                               result.infected, result.brek, result.objectName,
+						                               result.infectionReason
+					                               });
+				}
+				scanStatusList->updateScanStatus(ScanStatus{
+					                                 false, true, index,
+					                                 "",
+					                                 0, results.count(), infectedcount,
+					                                 objectStatuses
+				                                 });
+			}
+		}
+		break;
 		default: ;
 	}
 	message->deleteLater();

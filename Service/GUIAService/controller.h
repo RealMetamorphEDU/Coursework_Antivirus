@@ -31,7 +31,7 @@ class Controller: public QObject {
 	bool connected;
 	bool serviceStatus;
 	quint64 totalthreats;
-
+	QVector<int> statusIndexes;
 	bool page2FirstLoad;
 public:
 
@@ -52,7 +52,8 @@ public slots:
 	void onRemDirClicked(QString);
 	void onWatcherSwitchClicked();
 	void onFoundThreatsClicked();
-	
+
+	void restockScanStatusList();
 	void homeWorker();
 	void onSwitchClicked();
 	void connectUpdate(bool connected);
