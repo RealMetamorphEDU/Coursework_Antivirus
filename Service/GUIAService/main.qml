@@ -15,7 +15,7 @@ ApplicationWindow {
     property int pagePointerWidth: 5
     minimumHeight: height
     minimumWidth: width
-    title: qsTr("Stack")
+    title: qsTr("Антивирус")
 
 //    header: ToolBar {
 //        contentHeight: toolButton.implicitHeight
