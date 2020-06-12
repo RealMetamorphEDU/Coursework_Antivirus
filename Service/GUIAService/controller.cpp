@@ -144,6 +144,7 @@ void Controller::onPauseClicked(int taskIndex) {
 }
 
 void Controller::onStopClicked(int taskIndex) {
+	onPauseClicked(taskIndex);
 	pipe->sendMessage(new StopScanMessage(taskIndex));
 	scanStatusList->removeScanStatus(taskIndex);
 	deletingTaskIndex = taskIndex;
