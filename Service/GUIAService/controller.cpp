@@ -16,7 +16,7 @@
 char SERVICE_NAME[]{"AService"};
 
 Controller::Controller(QObject *parent) : QObject(parent) {
-
+	this->deletingTaskIndex = -10;
 	this->pageView = nullptr;
 	this->serviceStatus = false;
 	this->connected = false;
@@ -138,17 +138,22 @@ void Controller::onFileOpened(QString dir) {
 void Controller::onPauseClicked(int taskIndex) {
 	//TODO: добавить изменение кнопки при получении ответа
 	pipe->sendMessage(new PauseScanMessage(taskIndex, true));
-	scanStatusList->updateState(taskIndex, false);
+	auto currentStatus = scanStatusList->getStatus(taskIndex);
+	currentStatus.state = false;
+	scanStatusList->updateScanStatus(currentStatus);
 }
 
 void Controller::onStopClicked(int taskIndex) {
 	pipe->sendMessage(new StopScanMessage(taskIndex));
 	scanStatusList->removeScanStatus(taskIndex);
+	deletingTaskIndex = taskIndex;
 }
 
 void Controller::onContinueClicked(int taskIndex) {
 	pipe->sendMessage(new PauseScanMessage(taskIndex, false));
-	scanStatusList->updateState(taskIndex, false);
+	auto currentStatus = scanStatusList->getStatus(taskIndex);
+	currentStatus.state = false;
+	scanStatusList->updateScanStatus(currentStatus);
 }
 
 void Controller::page2Worker() {
@@ -252,13 +257,14 @@ void Controller::receivedMessage(PipeMessage *message) {
 			auto *msg = dynamic_cast<ScanStatusMessage*>(message);
 			auto status = scanStatusList->getStatus(msg->getTaskIndex());
 			qDebug() << "SCANSTATUS: before -> " << status.taskIndex;
+			auto state = status.scanning ? status.state : true;
 			if (!status.objectStatuses)
 
 				status.objectStatuses = new ObjectStatusList;
 			scanStatusList->updateScanStatus(ScanStatus{
 				                                 msg->isScanning(), msg->isPause(), msg->getTaskIndex(),
 				                                 msg->getCurObject(),
-				                                 msg->getObjLeft(), msg->getObjScanned(), status.foundCount,
+				                                 msg->getObjLeft(), msg->getObjScanned(), status.foundCount,state,
 				                                 status.objectStatuses
 			                                 });
 			qDebug() << "SCANSTATUS: after -> " << status.taskIndex;
@@ -271,8 +277,8 @@ void Controller::receivedMessage(PipeMessage *message) {
 				status.objectStatuses = new ObjectStatusList;
 			status.taskIndex = msg->getTaskIndex();
 			status.pause = msg->isPause();
+			status.state = true;
 			scanStatusList->updateScanStatus(status);
-			scanStatusList->updateState(status.taskIndex, true);
 		}
 		break;
 		case MessageType::scanLeftStatus: {
@@ -330,7 +336,7 @@ void Controller::receivedMessage(PipeMessage *message) {
 			// if infected foundcount++
 			qDebug() << "recieved object status";
 			auto *msg = dynamic_cast<ObjectStatusMessage*>(message);
-			if (msg->getTaskId() != -1) {
+			if (msg->getTaskId() != -1 && msg->getTaskId() != deletingTaskIndex) {
 				auto currentStatus = scanStatusList->getStatus(msg->getTaskId());
 				if (msg->isInfected()) {
 					currentStatus.foundCount++;
@@ -379,7 +385,7 @@ void Controller::receivedMessage(PipeMessage *message) {
 				scanStatusList->updateScanStatus(ScanStatus{
 					                                 false, true, index,
 					                                 "",
-					                                 0, results.count(), infectedcount,
+					                                 0, results.count(), infectedcount,true,
 					                                 objectStatuses
 				                                 });
 			}

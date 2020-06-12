@@ -30,7 +30,7 @@ QVariant ScanStatusModel::data(const QModelIndex &index, int role) const {
         case foundCountRole:
             return QVariant(scanStatus.foundCount);
     	case enabledStateRole:
-            return QVariant(list->getState(scanStatus.taskIndex));
+            return QVariant(scanStatus.state);
 
     }
     return QVariant();

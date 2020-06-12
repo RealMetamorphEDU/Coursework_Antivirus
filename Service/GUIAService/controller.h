@@ -33,6 +33,7 @@ class Controller: public QObject {
 	quint64 totalthreats;
 	QVector<int> statusIndexes;
 	bool page2FirstLoad;
+	bool deletingTaskIndex;
 public:
 
 	explicit Controller(QObject *parent = nullptr);

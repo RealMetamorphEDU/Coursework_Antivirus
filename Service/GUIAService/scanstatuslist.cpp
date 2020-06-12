@@ -1,13 +1,6 @@
 #include "scanstatuslist.h"
 
 
-bool ScanStatusList::getState(int taskIndex) {
-	return states.value(taskIndex, false);
-}
-void ScanStatusList::updateState(int taskIndex, bool state) {
-	states.replace(keys.indexOf(taskIndex), state);
-	emit changedRow(keys.indexOf(taskIndex));
-}
 ScanStatusList::ScanStatusList(QObject *parent) : QObject(parent) {}
 
 
@@ -23,7 +16,6 @@ void ScanStatusList::updateScanStatus(const ScanStatus &status) {
 	statuses.insert(status.taskIndex, status);
 	keys = statuses.keys().toVector();
 	std::sort(keys.begin(), keys.end());
-	states.insert(keys.indexOf(status.taskIndex), true);
 	if (signal) {
 		emit insertedRow();
 	} else {
@@ -37,7 +29,6 @@ void ScanStatusList::removeScanStatus(int taskIndex) {
 		
 		delete statuses.value(taskIndex).objectStatuses; // deconstructed ObjectStatusList
 		statuses.remove(taskIndex);
-		states.remove(keys.indexOf(taskIndex));
 		keys = statuses.keys().toVector();
 		std::sort(keys.begin(), keys.end());
 		emit removedRow();
@@ -45,7 +36,7 @@ void ScanStatusList::removeScanStatus(int taskIndex) {
 }
 
 ScanStatus ScanStatusList::getStatus(int taskIndex) const {
-	return statuses.value(taskIndex, {false,false, -1, "", 0, 0, 0, nullptr});
+	return statuses.value(taskIndex, {false,false, -1, "", 0, 0, 0,true, nullptr});
 }
 
 ScanStatus ScanStatusList::getRow(int row) const {
