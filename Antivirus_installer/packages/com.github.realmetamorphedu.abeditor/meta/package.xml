@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Package>
+    <DisplayName>Редактор баз вирусов</DisplayName>
+    <Description>В комплект входят: редактор баз вирусов с графическим интерфейсом.</Description>
+    <Version>0.1.0</Version>
+    <ReleaseDate>2020-06-11</ReleaseDate>
+    <Default>false</Default>
+	<Script>installscript.qs</Script>
+</Package>

@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Installer>
+    <Name>Курсовой антивирус</Name>
+    <Version>0.1.0</Version>
+    <Title>Курсовой антивирус</Title>
+    <Publisher>Тимчук Андрей, Рыбаков Даниил, Жмакин Евгений</Publisher>
+	<StartMenuDir>Курсовой антивирус</StartMenuDir>
+    <TargetDir>@ApplicationsDirX64@/CourseworkAntivirus</TargetDir>
+	<AllowSpaceInPath>true</AllowSpaceInPath>
+</Installer>

@@ -94,7 +94,7 @@ bool ServiceController::start() {
 			return false;
 		}
 
-		if (!StartService(
+		if (!StartServiceA(
 		                  service, // handle to service
 		                  0,       // number of arguments
 		                  NULL))   // no arguments
