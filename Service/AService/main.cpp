@@ -106,6 +106,7 @@ void srvInstall() {
 }
 
 void srvUninstall() {
+	
     // Get a handle to the SCM database. 
     SC_HANDLE scManager = OpenSCManagerA(nullptr, nullptr,
                                          SC_MANAGER_CREATE_SERVICE | SC_MANAGER_ENUMERATE_SERVICE |
@@ -113,7 +114,15 @@ void srvUninstall() {
 
     // Open service
     SC_HANDLE service = OpenServiceA(scManager, SERVICE_NAME, SERVICE_ALL_ACCESS);
-
+    LPSERVICE_STATUS contrRet = new SERVICE_STATUS;
+    if (!ControlService(
+        service,
+        SERVICE_CONTROL_STOP,
+        contrRet)) {
+        std::cerr << "Error deleting the service" << std::endl;
+        CloseServiceHandle(service);
+        CloseServiceHandle(scManager);
+    }
     // Delete service
     bool status = DeleteService(service);
     if (status)

@@ -2,8 +2,8 @@
 <Package>
     <DisplayName>Курсовой антивирус</DisplayName>
     <Description>В комплект входят: антивирус, приложение управления с графическим интерфейсом.</Description>
-    <Version>0.1.0</Version>
-    <ReleaseDate>2020-06-11</ReleaseDate>
+    <Version>0.1.1</Version>
+    <ReleaseDate>2020-06-12</ReleaseDate>
     <Licenses>
         <License name="GNU GENERAL PUBLIC LICENSE v3" file="license.txt" />
     </Licenses>

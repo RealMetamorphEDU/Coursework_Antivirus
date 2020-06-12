@@ -54,3 +54,8 @@ else:win32:CONFIG(debug, debug|release): LIBS += -L$$OUT_PWD/../../Loader/ABReco
 
 INCLUDEPATH += $$PWD/../../Loader/ABRecordTokenizer
 DEPENDPATH += $$PWD/../../Loader/ABRecordTokenizer
+
+CONFIG -= embed_manifest_exe
+win32 {
+    RC_FILE = ABEditor.rc
+}

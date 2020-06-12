@@ -1,0 +1,4 @@
+#include <windows.h>
+
+ID_ICON	ICON	DISCARDABLE	"app.ico"
+1 24 ABEditor.exe.manifest

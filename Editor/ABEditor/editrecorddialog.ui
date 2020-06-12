@@ -22,7 +22,7 @@
      <x>10</x>
      <y>10</y>
      <width>551</width>
-     <height>171</height>
+     <height>172</height>
     </rect>
    </property>
    <layout class="QFormLayout" name="formLayout">
@@ -173,7 +173,7 @@
        <enum>QAbstractSpinBox::NoButtons</enum>
       </property>
       <property name="maximum">
-       <number>1000</number>
+       <number>2147483647</number>
       </property>
      </widget>
     </item>
