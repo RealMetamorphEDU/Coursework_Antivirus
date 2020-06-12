@@ -154,7 +154,6 @@ bool ServiceController::stop() {
 		                    service,
 		                    SERVICE_CONTROL_STOP,
 		                    contrRet)) {
-			auto kek = GetLastError();
 			CloseServiceHandle(service);
 			CloseServiceHandle(scManager);
 			working = false;
